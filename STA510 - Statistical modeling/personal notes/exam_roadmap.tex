@@ -1,0 +1,245 @@
+\documentclass[11pt]{article}
+
+\usepackage[a4paper,margin=2.2cm]{geometry}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{hyperref}
+\usepackage{amsmath}
+
+\definecolor{prihigh}{RGB}{200,40,40}
+\definecolor{primed}{RGB}{200,120,20}
+\definecolor{prilow}{RGB}{170,150,20}
+\definecolor{prilowest}{RGB}{40,140,60}
+
+\titleformat{\section}{\Large\bfseries}{\thesection}{0.5em}{}
+\titleformat{\subsection}{\large\bfseries}{\thesubsection}{0.5em}{}
+
+\title{\textbf{STA510 -- Exam Roadmap}}
+\author{Statistical Modeling and Simulation}
+\date{}
+
+\begin{document}
+\maketitle
+
+\noindent Based on an analysis of 6 past exams (h22, v23, h23, h24, v26, h25) and the
+course material (Lecture Notes, Exercises, R-examples). Topics are ranked by priority,
+based on how often they appear across the exams.
+
+\medskip
+\noindent \textbf{Material legend:} LN = Lecture Notes, Ex = Exercises, R = R-examples
+
+\bigskip
+\hrule
+\bigskip
+
+\section*{\textcolor{prihigh}{Highest priority (appears in almost every exam)}}
+
+\subsection*{1. Continuous random variables: pdf, cdf, moments}
+\begin{itemize}[leftmargin=*]
+  \item Verify that $f(x)$ is a proper density (integral equals 1, find the normalizing constant $c$)
+  \item Compute $E(X)$, $\mathrm{Var}(X)$, $E(g(X))$ for transformations $g$
+  \item Derive the cdf $F(x)$ from the pdf and use it to compute probabilities $P(X>a)$, $P(a<X<b)$
+  \item Material: LN \texttt{chap2\_part1}, \texttt{chap2\_part2}, Ex \texttt{exercise\_set0/1}
+\end{itemize}
+
+\subsection*{2. Simulation: inverse transform method}
+\begin{itemize}[leftmargin=*]
+  \item Derive $F^{-1}(u)$ analytically
+  \item Write the algorithm in words (not just code!): 1) simulate $U\sim \mathrm{Unif}(0,1)$, 2) $X = F^{-1}(U)$
+  \item \textbf{Recurring trap}: given R code with several ``candidate'' functions, identify
+  which one correctly implements $F^{-1}(U)$ (watch out for sign errors, wrong \texttt{runif}
+  interval, or an incorrect formula) --- this appeared in h22, h23, h24, v23
+  \item Typical distributions: custom pdf, Weibull, Pareto, Exponential
+  \item Material: LN \texttt{chap3\_part1}, Ex \texttt{exercise\_set1}
+\end{itemize}
+
+\subsection*{3. Accept-Reject (AR) method}
+\begin{itemize}[leftmargin=*]
+  \item Choose a proposal $g(x)$ and find the envelope constant $c = \max f(x)/g(x)$
+  \item Write the algorithm (pseudocode): propose $X\sim g$, accept with probability $f(X)/(c\,g(X))$
+  \item Compare the efficiency of different proposals (which $c$ is smaller $\Rightarrow$ fewer rejections)
+  \item Recognize whether an R implementation is correct or buggy (constant denominator vs.
+  proposal density mix-up --- a classic error in h22 problem 1e)
+  \item Material: LN \texttt{chap3\_part2}, Ex \texttt{exercise\_set1}, R
+  \texttt{acceptance-rejection\_examples.R}, \texttt{AR-example.R}
+\end{itemize}
+
+\subsection*{4. Monte Carlo methods for integrals}
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Crude MC}: write $I$ as $E[g(X)]$ with respect to a known density; the
+  estimator is the average of $g(X_i)$
+  \item \textbf{Generalized MC} (non-standard domain, e.g. improper integrals): choose the
+  right auxiliary distribution (Exponential, Gamma, Uniform, Normal, Laplace, \dots)
+  \item \textbf{Importance sampling}: choose a proposal, understand when it works well
+  (proposal tails heavier than the integrand) vs. when it fails
+  \item \textbf{Antithetic variables}: build the estimator with $U$ and $1-U$ (or $-X$ and
+  $X$), understand when it reduces variance (monotone function) and when it does not
+  \item Standard error of the MC estimator: $\mathrm{sd}(g(X))/\sqrt{n}$
+  \item Material: LN \texttt{chap4\_part1}, \texttt{chap4\_part2}, Ex \texttt{exercise\_set2}, R
+  \texttt{MC\_integration\_examples.R}, \texttt{Variance\_reduction.R}, \texttt{importance\_sampling.R}
+\end{itemize}
+
+\subsection*{5. Bootstrap}
+\begin{itemize}[leftmargin=*]
+  \item Non-parametric bootstrap: resample with replacement from the observed data
+  \item Estimate bias, standard error (SE), and MSE of an estimator
+  \item Bias-corrected estimate
+  \item Bootstrap confidence intervals: \textbf{normal} (using the bootstrap SE),
+  \textbf{percentile}, \textbf{basic} --- know all three formulas and the differences between them
+  \item Material: LN \texttt{chap6\_part1}, \texttt{chap6\_part2}, Ex \texttt{exercise\_set3}, R
+  \texttt{bootstrap\_examples.R}
+\end{itemize}
+
+\subsection*{6. MCMC -- Metropolis-Hastings}
+\begin{itemize}[leftmargin=*]
+  \item Recognize the algorithm type from R code:
+  \begin{itemize}
+    \item \textbf{Independence sampler} (proposal does not depend on the current state,
+    uses importance-sampling-like weights \texttt{wt.old}/\texttt{wt.star})
+    \item \textbf{Random walk MH} (proposal = current state + symmetric noise, e.g.
+    \texttt{rnorm(mean=x[t-1])})
+  \end{itemize}
+  \item Write the acceptance probability $\alpha = \min(1, \text{target}(x^*)/\text{target}(x_{t-1}))$
+  \item Target/stationary distribution: recognize it from the code
+  \item Log-scale proposal ($\log(\theta^*) = \log(\theta_{t-1}) + \varepsilon$) --- watch out for
+  the Jacobian term in the acceptance probability
+  \item Independent Gamma proposal centered on the MLE
+  \item Diagnostics: trace plot, \textbf{acceptance rate} (too low/too high is a problem),
+  \textbf{effective sample size (ESS)}, burn-in, thinning, comparing chains with different
+  step sizes
+  \item Material: LN \texttt{chap11\_part1/2/3}, R \texttt{mcmc\_1.R}, \texttt{mcmc\_2.R},
+  \texttt{mcmc\_3.R}
+\end{itemize}
+
+\subsection*{7. Bayesian statistics}
+\begin{itemize}[leftmargin=*]
+  \item Build the likelihood function $L(\theta)$ from iid data
+  \item Derive the \textbf{posterior kernel} $\propto$ likelihood $\times$ prior (on the log scale!)
+  \item Classic conjugate priors: Gamma-Exponential, Gamma-Poisson
+  \item Find the mean/variance of the prior and of the posterior when it is in standard form
+  \item Non-conjugate cases $\Rightarrow$ need MCMC (RWMH or Gibbs) to sample from the posterior
+  \item \textbf{Gibbs sampler}: derive the full conditionals (e.g. Normal-Normal-LogNormal
+  model for $\mu$ and $\sigma^2$), describe the algorithm
+  \item Material: LN \texttt{bayes.pdf}, \texttt{chap12.pdf}, Ex \texttt{exercise\_set5/6}
+\end{itemize}
+
+\section*{\textcolor{primed}{High priority (appears in several exams)}}
+
+\subsection*{8. Poisson processes}
+\begin{itemize}[leftmargin=*]
+  \item Homogeneous Poisson process: distribution of $N(t)$, inter-arrival times
+  $\sim \mathrm{Exponential}(\lambda)$
+  \item Time of the $k$-th event $\sim \mathrm{Gamma}(k,\lambda)$
+  \item \textbf{Non-homogeneous} Poisson process: time-varying intensity $\lambda(t)$
+  \begin{itemize}
+    \item Interpretation of $\lambda(t)$
+    \item Simulation via \textbf{thinning} (accept-reject on arrival times of a homogeneous
+    Poisson process with rate $\lambda_{\max}$)
+  \end{itemize}
+  \item Conditional probability computations (e.g. $P(N(0.1)=0 \mid N(1)=8)$)
+  \item Material: LN \texttt{chap8.pdf}, Ex \texttt{exercise\_set4}, R \texttt{rain.R}
+\end{itemize}
+
+\subsection*{9. Maximum likelihood estimation (MLE)}
+\begin{itemize}[leftmargin=*]
+  \item Build $L(\theta)$ and the log-likelihood from an iid sample
+  \item Derive the MLE analytically (derivative $=0$)
+  \item Check whether it is unbiased, compute its variance
+  \item Determine the required sample size $n$ for a given precision (margin of error at a
+  given confidence level)
+  \item Material: LN \texttt{chap6\_part1}, Ex \texttt{exercise\_set3}
+\end{itemize}
+
+\subsection*{10. Kernel Density Estimation (KDE) vs.\ histogram}
+\begin{itemize}[leftmargin=*]
+  \item Pros/cons of histogram vs.\ KDE, what they have in common
+  \item Effect of the bandwidth (small $\Rightarrow$ overfitting/noise, large $\Rightarrow$ oversmoothing)
+  \item Automatic bin-width rules (e.g.\ Scott's rule) --- when they are appropriate
+  \item Material: LN \texttt{chap6\_part2}, R \texttt{KDE.R}
+\end{itemize}
+
+\subsection*{11. Reliability systems and lifetime distributions}
+\begin{itemize}[leftmargin=*]
+  \item Series/parallel systems: $S=\min(X_1,\dots,X_n)$ or $\max(X_1,\dots,X_n)$
+  \item Relationship between Exponential and Weibull (special case)
+  \item Simulate the lifetime of a system by combining component distributions
+  \item Material: R \texttt{robot\_system.R}, \texttt{production\_profile.R}
+\end{itemize}
+
+\section*{\textcolor{prilow}{Medium priority (recurring but less central themes)}}
+
+\subsection*{12. Central Limit Theorem \& confidence intervals}
+\begin{itemize}[leftmargin=*]
+  \item Approximate distribution of $\bar X$ for large $n$
+  \item Construct a 95\% CI for a mean/function of the mean
+  \item \textbf{Classic trap}: given many candidate CI expressions in R, identify the correct
+  one (right estimator paired with the right standard error) --- appeared in h22
+\end{itemize}
+
+\subsection*{13. Simulating multivariate/correlated random variables}
+\begin{itemize}[leftmargin=*]
+  \item Simulating from the multivariate normal: \textbf{Cholesky} decomposition
+  \item Comparing methods: Cholesky (direct/iid) vs.\ Gibbs sampler vs.\ random walk MH for
+  generating the same target distribution --- understand pros/cons (efficiency,
+  autocorrelation, iid vs.\ chain)
+  \item Material: R \texttt{bivariate\_normal.R}, \texttt{multivariate\_normal\_example.R}
+\end{itemize}
+
+\subsection*{14. Markov chains and stochastic processes}
+\begin{itemize}[leftmargin=*]
+  \item Simple random walk: is it a Markov process? Why?
+  \item State space, stationary distribution (does it exist, and why/why not)
+  \item Mean and variance of a random walk over time
+  \item Material: LN \texttt{markov\_proc.pdf}, R \texttt{Markov.R}
+\end{itemize}
+
+\subsection*{15. Simulation via composition/transformation of known distributions}
+\begin{itemize}[leftmargin=*]
+  \item Generate Lognormal from Normal (exponential transformation)
+  \item Generate $\chi^2$ from Normal (sum of squares)
+  \item Linear combinations of simulated random variables (e.g. $Z = aX+bY$) and MC
+  estimation of $E(Z)$, $P(Z<c)$
+  \item Material: R \texttt{sums\_mixtures\_examples.R}, \texttt{inverse\_transform\_examples\_poiss.R}
+\end{itemize}
+
+\section*{\textcolor{prilowest}{Low priority (appeared once, but useful for understanding the concepts)}}
+
+\begin{itemize}[leftmargin=*]
+  \item Estimating $\pi$ with a Monte Carlo method (Buffon/circle) --- a good ``easy'' example
+  of an MC estimator
+  \item Bootstrap with several interval types compared together (normal/basic/percentile) on
+  the same data set
+  \item Generalized MC/importance sampling for multi-dimensional integrals over infinite domains
+\end{itemize}
+
+\bigskip
+\noindent General reference material: LN \texttt{intro.pdf}, \texttt{Rintro.pdf}, formula
+sheets in \texttt{formula\_sheet\textbackslash tablesformulas.pdf} and
+\texttt{tablesformulas\_2.pdf} (check whether allowed at the exam --- verify the current
+rules; in some exams a handwritten A4 note sheet is allowed instead of formula sheets).
+
+\bigskip
+\hrule
+\bigskip
+
+\section*{How to use this roadmap}
+\begin{enumerate}[leftmargin=*]
+  \item For each \textcolor{prihigh}{high-priority} topic, redo \textbf{at least 2 exercises
+  from past exams} (\texttt{old exams\textbackslash}) without looking at the solution, then
+  check against \texttt{..\_solution.pdf}.
+  \item Write out algorithms in pseudocode by hand (not just mentally): many exam questions
+  explicitly ask for ``words and formulas, not code''.
+  \item For ``which of these R functions is correct/incorrect'' questions (recurring!):
+  practice reading R code quickly and checking integration limits, parameters of
+  \texttt{runif}/\texttt{rnorm}/\texttt{rgamma}, and consistency between the mathematical
+  formula and the code.
+  \item For MCMC, practice instantly recognizing: independence sampler vs.\ random walk MH
+  vs.\ Gibbs, and evaluating chain quality from trace plot + acceptance rate + ESS.
+  \item Review relationships between distributions
+  (Exponential$\leftrightarrow$Weibull$\leftrightarrow$Gamma,
+  Normal$\leftrightarrow$Lognormal$\leftrightarrow\chi^2$), since they are constantly
+  exploited to simplify simulation.
+\end{enumerate}
+
+\end{document}

@@ -1,0 +1,196 @@
+<title>Maximum Likelihood — STA510 Notes</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;0,600;0,700;1,500&family=STIX+Two+Text:ital,wght@0,400;0,500;0,600;1,400;1,500&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="style.css">
+
+<div class="shell">
+  <div class="crumb">
+    <a href="exam_roadmap.html">STA510 Roadmap</a><span class="sep">›</span><span>Ch. 2 · Foundations</span>
+  </div>
+
+  <header class="note-header">
+    <div class="eyebrow"><span class="dot"></span> STA510 · Study note</div>
+    <h1><span class="num">3</span>Maximum likelihood estimation (MLE)</h1>
+    <p class="dek">Four mechanical steps, every time: write the likelihood, take the log, differentiate and set
+      to zero, check it's a maximum.</p>
+    <div class="examtags"><span class="lab">Tested in:</span>
+      <span class="examtag">v25</span><span class="examtag">h25</span></div>
+  </header>
+
+  <details class="mobile-toc">
+    <summary>Jump to a topic ▾</summary>
+    <nav>
+      <ul class="toc-list">
+        <li><a href="topic-continuous-rv.html">1. Continuous r.v.'s</a></li>
+        <li><a href="topic-inverse-transform.html">4. Inverse transform</a></li>
+        <li><a href="topic-accept-reject.html">5. Accept‑Reject</a></li>
+        <li><a href="topic-monte-carlo-integration.html">11. Monte Carlo integrals</a></li>
+        <li><a href="topic-bootstrap.html">12. Bootstrap</a></li>
+        <li><a href="exam_roadmap.html">← Back to roadmap index</a></li>
+      </ul>
+    </nav>
+  </details>
+
+  <div class="layout">
+    <nav class="toc" aria-label="Table of contents">
+      <h2>Study order</h2>
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 2 — Foundations</div>
+        <ul class="toc-list">
+          <li><a href="topic-continuous-rv.html">1. Continuous r.v.'s</a></li>
+          <li><a href="topic-clt-ci.html">2. CLT &amp; CIs</a></li>
+          <li><span class="current">3. MLE</span></li>
+        </ul>
+      </div>
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 3 — Simulation basics</div>
+        <ul class="toc-list">
+          <li><a href="topic-inverse-transform.html">4. Inverse transform</a></li>
+          <li><a href="topic-accept-reject.html">5. Accept‑Reject</a></li>
+          <li><a href="topic-multivariate-sim.html">6. Multivariate sim.</a></li>
+          <li><a href="topic-composition-methods.html">7. Composition methods</a></li>
+        </ul>
+      </div>
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 4 — Processes &amp; applications</div>
+        <ul class="toc-list">
+          <li><a href="topic-poisson-processes.html">8. Poisson processes</a></li>
+          <li><a href="topic-markov-chains.html">9. Markov chains</a></li>
+          <li><a href="topic-reliability.html">10. Reliability systems</a></li>
+        </ul>
+      </div>
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 6 — MC &amp; resampling</div>
+        <ul class="toc-list">
+          <li><a href="topic-monte-carlo-integration.html">11. Monte Carlo integrals</a></li>
+          <li><a href="topic-bootstrap.html">12. Bootstrap</a></li>
+          <li><a href="topic-kde.html">13. KDE vs. histogram</a></li>
+        </ul>
+      </div>
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 11–12 — MCMC &amp; Bayesian</div>
+        <ul class="toc-list">
+          <li><a href="topic-mcmc.html">14. MCMC — M‑H</a></li>
+          <li><a href="topic-bayesian.html">15. Bayesian stats</a></li>
+        </ul>
+      </div>
+      <div class="toc-tier">
+        <ul class="toc-list"><li><a href="exam_roadmap.html">← Back to roadmap index</a></li></ul>
+      </div>
+    </nav>
+
+    <main>
+    <article class="note">
+
+      <section>
+        <h2><span class="num">3.1</span>Idea and algorithm</h2>
+        <p>Given iid data <span class="m">x₁,…,x<sub>n</sub></span> from a density <span class="m">f(x;θ)</span>,
+          pick the <span class="m">θ</span> that makes the observed data most likely.</p>
+        <ol class="algo">
+          <li>Write the likelihood <span class="m">L(θ) = ∏<sub>i=1</sub><sup>n</sup> f(x<sub>i</sub>;θ)</span>.</li>
+          <li>Take the log: <span class="m">l(θ) = ln L(θ) = Σ ln f(x<sub>i</sub>;θ)</span> (sums are easier to
+            differentiate than products).</li>
+          <li>Differentiate and solve <span class="m">l′(θ) = 0</span> for <span class="m">θ̂</span>.</li>
+          <li>Confirm a maximum: <span class="m">l″(θ̂) &lt; 0</span>.</li>
+        </ol>
+      </section>
+
+      <section>
+        <h2><span class="num">3.2</span>Worked example — Exponential(λ)</h2>
+        <div class="formula left">
+          <span class="m">L(λ) = λⁿ e<sup>−λΣx<sub>i</sub></sup></span> &nbsp;⇒&nbsp; <span class="m">l(λ) = n ln λ − λΣx<sub>i</sub></span><br><br>
+          <span class="m">l′(λ) = n/λ − Σx<sub>i</sub> = 0</span> &nbsp;⇒&nbsp; <span class="m">λ̂ = n/Σx<sub>i</sub> = 1/<span class="ov">X</span></span><br><br>
+          <span class="m">l″(λ) = −n/λ² &lt; 0</span> ✓ maximum
+        </div>
+      </section>
+
+      <section>
+        <h2><span class="num">3.3</span>Worked example — Rayleigh distribution (real data)</h2>
+        <p>Wave heights are often modelled by the Rayleigh density <span class="m">f(x)=(x/θ²)e<sup>−x²/(2θ²)</sup></span>,
+          <span class="m">x&gt;0</span> — a special case of Weibull. For 20 measured wave heights:</p>
+        <div class="formula left">
+          <span class="m">L(θ) = <span class="frac"><span class="num">∏x<sub>i</sub></span><span class="den">θ<sup>2n</sup></span></span>e<sup>−Σx<sub>i</sub>²/(2θ²)</sup></span>
+          &nbsp;⇒&nbsp; <span class="m">l(θ) = const − 2n ln θ − <span class="frac"><span class="num">1</span><span class="den">2θ²</span></span>Σx<sub>i</sub>²</span><br><br>
+          <span class="m">l′(θ) = −2n/θ + Σx<sub>i</sub>²/θ³ = 0</span> &nbsp;⇒&nbsp;
+          <span class="m">θ̂ = √(<span class="frac"><span class="num">1</span><span class="den">2n</span></span>Σx<sub>i</sub>²)</span>
+        </div>
+        <p>For the 20 measurements <span class="m">3.5, 2.0, 3.3, 1.8, 1.6, 1.5, 2.0, 0.8, 2.2, 1.1, 1.8, 1.1, 1.9,
+          4.0, 2.5, 1.9, 1.5, 3.5, 1.2, 5.3</span>, this gives <span class="m">θ̂ ≈ 1.76</span>. Compare to the
+          <b>moment estimator</b> <span class="m">θ̂₂ = <span class="ov">X</span>√(2/π) ≈ 1.78</span> (using
+          <span class="m">E(X)=θ√(π/2)</span>) — MLE is generally preferred, but bootstrap (see the
+          <a href="topic-bootstrap.html">Bootstrap page</a>) lets you actually check which performs better by
+          simulation.</p>
+      </section>
+
+      <section>
+        <h2><span class="num">3.4</span>Worked example — MLE is not automatically the best estimator (<span class="m">v25</span>)</h2>
+        <p><span class="m">X∼Pareto(a,b)</span>, <span class="m">a</span> known. MLE:
+          <span class="m">b̂ = n / Σln(X<sub>i</sub>/a)</span>. Given (without re-deriving):
+          <span class="m">E(b̂)=nb/(n−1)</span> and <span class="m">E(b̂²)=n²b²/[(n−1)(n−2)]</span> — so
+          <span class="m">b̂</span> is <b>biased</b> (overestimates <span class="m">b</span>, though the bias
+          <span class="m">→0</span> as <span class="m">n→∞</span>):</p>
+        <div class="formula left">
+          <span class="m">Var(b̂) = n²b²/[(n−1)²(n−2)]</span> &nbsp;⇒&nbsp;
+          <span class="m">MSE(b̂) = Var(b̂)+bias² = b²(n+2)/[(n−1)(n−2)]</span>
+        </div>
+        <p>An alternative estimator <span class="m">b* = (n−1)/Σln(X<sub>i</sub>/a) = <span class="frac"><span class="num">n−1</span><span class="den">n</span></span>b̂</span>
+          rescales away the bias exactly:</p>
+        <div class="formula left">
+          <span class="m">E(b*) = <span class="frac"><span class="num">n−1</span><span class="den">n</span></span>·<span class="frac"><span class="num">nb</span><span class="den">n−1</span></span> = b</span> &nbsp;(unbiased!) &nbsp;⇒&nbsp;
+          <span class="m">MSE(b*) = Var(b*) = b²/(n−2)</span>
+        </div>
+        <p>Comparing: <span class="m">MSE(b̂)=b²(n+2)/[(n−1)(n−2)]</span> vs. <span class="m">MSE(b*)=b²(n−1)/[(n−1)(n−2)]</span> —
+          since <span class="m">n+2 &gt; n−1</span> for every <span class="m">n</span>, <b>b* has strictly smaller MSE
+          than the raw MLE, always</b>. A one-line bias correction (multiply by <span class="m">(n−1)/n</span>)
+          strictly improves on the MLE here — direct proof that "MLE" and "best estimator" are not synonyms (echoing
+          the Rayleigh MLE-vs-moment comparison in §3.3).</p>
+      </section>
+
+      <section>
+        <h2><span class="num">3.5</span>Properties: bias, variance, MSE</h2>
+        <div class="formula left">
+          <span class="m">bias(θ̂) = E(θ̂) − θ</span> &nbsp;·&nbsp;
+          <span class="m">MSE(θ̂) = Var(θ̂) + bias(θ̂)²</span>
+        </div>
+        <p>An MLE is not automatically unbiased (the Rayleigh <span class="m">θ̂</span> above is <em>not</em>
+          exactly unbiased for finite <span class="m">n</span>) — check by simulation if it matters, or use the
+          bootstrap to estimate the bias directly from data.</p>
+      </section>
+
+      <section>
+        <h2><span class="num">3.6</span>Sample size for a target precision (<span class="m">h25</span>)</h2>
+        <p>Same CLT-based logic as the <a href="topic-clt-ci.html">CLT &amp; CIs page</a>: if
+          <span class="m">θ̂</span> is approximately normal with known/estimated variance, solve for
+          <span class="m">n</span> so that the margin of error is below a target <span class="m">e</span>:</p>
+        <div class="formula">
+          <span class="m">n &gt; z²<sub>α/2</sub>·Var<sub>1</sub>(θ̂)/e²</span> &nbsp;(where <span class="m">Var₁</span> is the per-observation contribution to <span class="m">Var(θ̂)</span>)
+        </div>
+        <p><b>Worked (h25):</b> rainfall <span class="m">X∼Exponential(β)</span>, MLE <span class="m">β̂=<span class="ov">X</span></span>
+          with <span class="m">Var(β̂)=β²/n</span> (from §3.2's Exponential MLE). How many measurements for a 95%
+          margin of at most 1mm, using the pilot estimate <span class="m">β̂=9.29</span>?</p>
+        <div class="formula">
+          <span class="m">1.96·β̂/√n ≤ 1</span> &nbsp;⇒&nbsp; <span class="m">n ≥ (1.96×9.29)² ≈ 331.5</span> &nbsp;⇒&nbsp; <span class="m">n=332</span>
+        </div>
+      </section>
+
+      <section>
+        <h2><span class="num">3.7</span>Common exam pitfalls</h2>
+        <ul>
+          <li>Always take the log before differentiating — differentiating the raw likelihood directly is far more
+            error-prone with products.</li>
+          <li>Don't skip the second-derivative check — some exam densities have a stationary point that is a
+            minimum or saddle, not a maximum.</li>
+          <li>Watch the support of the parameter — e.g. <span class="m">θ&gt;0</span> — when solving
+            <span class="m">l′(θ)=0</span>, discard any root outside the valid range.</li>
+        </ul>
+        <p class="material"><span class="lab">Material:</span> LN <code>chap2_part2</code> <code>chap8.pdf</code> · Ex <code>exercise_set3</code> · R <code>bootstrap_examples.R</code></p>
+      </section>
+
+    </article>
+
+      <nav class="pager">
+        <a href="topic-clt-ci.html"><span class="lab">Previous</span>← CLT &amp; CIs</a>
+        <a class="next" href="topic-inverse-transform.html"><span class="lab">Next</span>Inverse transform →</a>
+      </nav>
+    </main>
+  </div>
+</div>

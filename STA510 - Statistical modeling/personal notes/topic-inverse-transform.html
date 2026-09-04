@@ -1,0 +1,207 @@
+<title>Inverse Transform — STA510 Notes</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;0,600;0,700;1,500&family=STIX+Two+Text:ital,wght@0,400;0,500;0,600;1,400;1,500&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="style.css">
+
+<div class="shell">
+  <div class="crumb">
+    <a href="exam_roadmap.html">STA510 Roadmap</a><span class="sep">›</span><span>Ch. 3 · Simulation basics</span>
+  </div>
+
+  <header class="note-header">
+    <div class="eyebrow"><span class="dot"></span> STA510 · Study note</div>
+    <h1><span class="num">2</span>Simulation: inverse transform method</h1>
+    <p class="dek">Derive <span class="m">F⁻¹(u)</span>, describe the algorithm in words, then — every single
+      exam — decide which of several candidate R functions actually implements it correctly.</p>
+  </header>
+
+  <details class="mobile-toc">
+    <summary>Jump to a topic ▾</summary>
+    <nav>
+      <ul class="toc-list">
+        <li><a href="topic-continuous-rv.html">1. Continuous r.v.'s</a></li>
+        <li><a href="topic-inverse-transform.html">4. Inverse transform</a></li>
+        <li><a href="topic-accept-reject.html">5. Accept‑Reject</a></li>
+        <li><a href="topic-monte-carlo-integration.html">11. Monte Carlo integrals</a></li>
+        <li><a href="topic-bootstrap.html">12. Bootstrap</a></li>
+        <li><a href="exam_roadmap.html">← Back to roadmap index</a></li>
+      </ul>
+    </nav>
+  </details>
+
+  <div class="layout">
+    <nav class="toc" aria-label="Table of contents">
+      <h2>Study order</h2>
+
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 2 — Foundations</div>
+        <ul class="toc-list">
+          <li><a href="topic-continuous-rv.html">1. Continuous r.v.'s</a></li>
+          <li><a href="topic-clt-ci.html">2. CLT &amp; CIs</a></li>
+          <li><a href="topic-mle.html">3. MLE</a></li>
+        </ul>
+      </div>
+
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 3 — Simulation basics</div>
+        <ul class="toc-list">
+          <li><span class="current">4. Inverse transform</span></li>
+          <li><a href="topic-accept-reject.html">5. Accept‑Reject</a></li>
+          <li><a href="topic-multivariate-sim.html">6. Multivariate sim.</a></li>
+          <li><a href="topic-composition-methods.html">7. Composition methods</a></li>
+        </ul>
+      </div>
+
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 4 — Processes &amp; applications</div>
+        <ul class="toc-list">
+          <li><a href="topic-poisson-processes.html">8. Poisson processes</a></li>
+          <li><a href="topic-markov-chains.html">9. Markov chains</a></li>
+          <li><a href="topic-reliability.html">10. Reliability systems</a></li>
+        </ul>
+      </div>
+
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 6 — MC &amp; resampling</div>
+        <ul class="toc-list">
+          <li><a href="topic-monte-carlo-integration.html">11. Monte Carlo integrals</a></li>
+          <li><a href="topic-bootstrap.html">12. Bootstrap</a></li>
+          <li><a href="topic-kde.html">13. KDE vs. histogram</a></li>
+        </ul>
+      </div>
+
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 11–12 — MCMC &amp; Bayesian</div>
+        <ul class="toc-list">
+          <li><a href="topic-mcmc.html">14. MCMC — M‑H</a></li>
+          <li><a href="topic-bayesian.html">15. Bayesian stats</a></li>
+        </ul>
+      </div>
+
+      <div class="toc-tier">
+        <ul class="toc-list"><li><a href="exam_roadmap.html">← Back to roadmap index</a></li></ul>
+      </div>
+    </nav>
+
+    <main>
+    <article class="note">
+
+    <section>
+      <h2><span class="num">2.1</span>The theorem and why it works</h2>
+      <div class="formula">
+        If <span class="m">X</span> has cdf <span class="m">F</span>, then <span class="m">U = F(X) ∼ Uniform[0,1]</span>.
+      </div>
+      <p>Turning this around: draw <span class="m">U ∼ Uniform[0,1]</span> and set <span class="m">X = F⁻¹(U)</span>.
+        Proof that this gives the right distribution:</p>
+      <div class="formula">
+        <span class="m">P(X ≤ x) = P(F⁻¹(U) ≤ x) = P(U ≤ F(x)) = F(x)</span>
+      </div>
+      <div class="callout"><b>Useful symmetry —</b> since <span class="m">U ∼ Uniform[0,1]</span> implies
+        <span class="m">1−U ∼ Uniform[0,1]</span> too, <span class="m">F⁻¹(U)</span> and <span class="m">F⁻¹(1−U)</span>
+        are equally valid simulators of <span class="m">X</span> — both are "correct answers" on an exam even though
+        they look different. This is exactly why the exponential inverse is sometimes written
+        <span class="m">−λ⁻¹ln(U)</span> and sometimes <span class="m">−λ⁻¹ln(1−U)</span>.</div>
+    </section>
+
+    <section>
+      <h2><span class="num">2.2</span>Algorithm</h2>
+      <ol class="algo">
+        <li>Derive <span class="m">F(x)</span> from <span class="m">f(x)</span>, then solve <span class="m">F(x)=u</span> for <span class="m">x</span> to get <span class="m">F⁻¹(u)</span>.</li>
+        <li>Generate <span class="m">u ∼ Uniform[0,1]</span> (in R: <code>runif(1)</code>, or <code>runif(n)</code> for a whole vector).</li>
+        <li>Return <span class="m">x = F⁻¹(u)</span>.</li>
+      </ol>
+      <p><b>Discrete version:</b> with possible values <span class="m">x₁&lt;x₂&lt;…</span>, generate <span class="m">u</span>
+        and return <span class="m">X=x<sub>i</sub></span> where <span class="m">F(x<sub>i−1</sub>) &lt; u ≤ F(x<sub>i</sub>)</span>.
+        In R never hand-roll this — use <code>sample(x, size=n, replace=TRUE, prob=probs)</code>.</p>
+      <div class="callout trap"><b>When it's impossible —</b> if <span class="m">F(x)=u</span> can't be solved in closed
+        form for <span class="m">x</span> (a transcendental equation), inverse transform is off the table and you fall
+        back to <a href="topic-accept-reject.html">Accept–Reject</a>. <b>v26</b> tests exactly this: for
+        <span class="m">f(x)=(1+sin x)/(π+2)</span> on <span class="m">[0,π]</span>,
+        <span class="m">F(x)=(x−cos x+1)/(π+2)</span> — setting this equal to <span class="m">u</span> leaves
+        <span class="m">x</span> tangled up with <span class="m">cos x</span>, with no algebraic way to isolate it.</div>
+    </section>
+
+    <section>
+      <h2><span class="num">2.3</span>Worked example — exponential</h2>
+      <div class="formula left">
+        <span class="m">f(x)=λe<sup>−λx</sup>, x&gt;0</span> ⇒ <span class="m">F(x)=1−e<sup>−λx</sup></span><br><br>
+        Solve <span class="m">1−e<sup>−λX</sup>=U</span>: &nbsp; <span class="m">X = −λ⁻¹ ln(1−U)</span> &nbsp;(equivalently <span class="m">−λ⁻¹ ln(U)</span>, see the symmetry note above)
+      </div>
+    </section>
+
+    <section>
+      <h2><span class="num">2.4</span>Every past-exam derivation, at a glance</h2>
+      <div style="overflow-x:auto;">
+      <table class="examtable">
+        <tr><th>Exam</th><th>Distribution</th><th>F⁻¹(u)</th></tr>
+        <tr><td>h22</td><td><span class="m">f(x)=(1/4C)e<sup>x/4</sup></span>, C=e−1, 0≤x≤4</td><td><span class="m">X = 4·ln(1+CU)</span></td></tr>
+        <tr><td>v23</td><td><span class="m">f(x)=3√x/16</span>, 0≤x≤4</td><td><span class="m">X = 4U<sup>2/3</sup></span></td></tr>
+        <tr><td>h23</td><td>Weibull(α,β): <span class="m">F(x)=1−e<sup>−αx<sup>β</sup></sup></span></td><td><span class="m">X = [−ln(1−U)/α]<sup>1/β</sup></span></td></tr>
+        <tr><td>h24</td><td>Pareto(a,b): <span class="m">F(x)=1−(a/x)<sup>b</sup></span></td><td><span class="m">X = a/(1−U)<sup>1/b</sup></span> (or <span class="m">a/U<sup>1/b</sup></span> by symmetry)</td></tr>
+        <tr><td>v25</td><td>Ψ(α,β): <span class="m">F(x)=x<sup>α</sup>/β<sup>α</sup></span></td><td><span class="m">X = β·U<sup>1/α</sup></span></td></tr>
+        <tr><td>h25</td><td>Exponential(β): <span class="m">F(x)=1−e<sup>−x/β</sup></span></td><td><span class="m">X = −β·ln(U)</span></td></tr>
+        <tr><td>v26</td><td><span class="m">f(x)=(1+sin x)/(π+2)</span>, 0≤x≤π</td><td>— no closed form; use AR instead</td></tr>
+      </table>
+      </div>
+    </section>
+
+    <section>
+      <h2><span class="num">2.5</span>Spot-the-bug — <span class="m">v23</span>, f(x)=3√x/16 on [0,4]</h2>
+      <p>True inverse: <span class="m">F⁻¹(u) = 4u<sup>2/3</sup></span>. Four candidate R functions — which one is correct?</p>
+      <pre class="rcode"><code>p1.inv.1 <- function(n){ (3/16)*sqrt(runif(n)) }
+p1.inv.2 <- function(n){ 4*runif(n,max=4)^(2/3) }
+p1.inv.3 <- function(n){ 4*runif(n)^(2/3) }
+p1.inv.4 <- function(n){ (1/8)*runif(n)^(3/2) }</code></pre>
+      <div class="callout example"><b>Answer — only <code>p1.inv.3</code> is correct.</b>
+        <p><code>p1.inv.1</code> reuses the density's own constants instead of the derived inverse — a different
+        formula entirely. <code>p1.inv.2</code> draws <span class="m">U</span> from <code>runif(n, max=4)</code>, i.e.
+        <span class="m">Uniform(0,4)</span> instead of <span class="m">Uniform(0,1)</span> — wrong support for
+        <span class="m">U</span> even though the exponent and outer constant match. <code>p1.inv.4</code> has both the
+        wrong exponent (<span class="m">3/2</span> instead of <span class="m">2/3</span>) and the wrong constant.
+        <code>p1.inv.3</code> is <span class="m">4·runif(n)^(2/3)</span>, exactly <span class="m">4U<sup>2/3</sup></span>.</p>
+      </div>
+    </section>
+
+    <section>
+      <h2><span class="num">2.6</span>Spot-the-bug — <span class="m">h24</span>, Pareto(a=4, b=2)</h2>
+      <p>True inverse: <span class="m">F⁻¹(u) = 4/(1−u)<sup>1/2</sup> = 4/√(1−u)</span>. Four candidates:</p>
+      <pre class="rcode"><code>r.pareto1 <- function(n){ 4/sqrt(runif(n,2,4)) }
+r.pareto2 <- function(n){ 4/sqrt(runif(n)) }
+r.pareto3 <- function(n){ 4/sqrt(1-runif(n)) }
+r.pareto4 <- function(n){ 2/(1-runif(n)^(1/4)) }</code></pre>
+      <div class="callout example"><b>Answer — <code>r.pareto2</code> AND <code>r.pareto3</code> are both correct</b>
+        (this is the "two right answers" trap — don't reflexively pick just one).
+        <p><code>r.pareto3</code> matches the derivation literally: <span class="m">4/√(1−U)</span>.
+        <code>r.pareto2</code> uses <span class="m">4/√U</span> — since <span class="m">U</span> and
+        <span class="m">1−U</span> share the same <span class="m">Uniform[0,1]</span> distribution, this is the same
+        symmetry trick as in §2.1 and produces draws from the identical distribution. <code>r.pareto1</code> draws
+        <span class="m">U</span> from <span class="m">Uniform(2,4)</span> — wrong support. <code>r.pareto4</code> has
+        the wrong constant (2 instead of 4) <em>and</em> the wrong exponent (<span class="m">1/4</span> instead of
+        <span class="m">1/2</span>) — wrong on two counts at once.</p>
+      </div>
+    </section>
+
+    <section>
+      <h2><span class="num">2.7</span>Common exam pitfalls</h2>
+      <ul>
+        <li>Given several candidate R snippets, check <b>three things independently</b>: the constant out front, the
+          exponent, and the <code>runif</code> interval — a snippet can get two of three right and still be wrong.</li>
+        <li>Remember the <span class="m">U</span> vs <span class="m">1−U</span> symmetry before declaring a variant
+          "wrong" — it may just be the equivalent form.</li>
+        <li>When asked to "describe the algorithm in words, not code" (a recurring exact phrasing), write the three
+          numbered steps above — don't just paste R.</li>
+        <li>Always double-check the support of <span class="m">X</span> after inverting — e.g. Pareto needs
+          <span class="m">X&gt;a</span>, which <span class="m">a/(1−U)^{1/b}</span> automatically satisfies since
+          <span class="m">(1−U)^{1/b}∈(0,1)</span>.</li>
+      </ul>
+      <p class="material"><span class="lab">Material:</span> LN <code>chap3_part1</code> · Ex <code>exercise_set1</code></p>
+    </section>
+
+    </article>
+
+      <nav class="pager">
+        <a href="topic-mle.html"><span class="lab">Previous</span>← MLE</a>
+        <a class="next" href="topic-accept-reject.html"><span class="lab">Next</span>Accept–Reject method →</a>
+      </nav>
+    </main>
+  </div>
+</div>

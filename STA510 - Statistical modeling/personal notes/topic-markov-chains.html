@@ -1,0 +1,175 @@
+<title>Markov Chains — STA510 Notes</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;0,600;0,700;1,500&family=STIX+Two+Text:ital,wght@0,400;0,500;0,600;1,400;1,500&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="style.css">
+
+<div class="shell">
+  <div class="crumb">
+    <a href="exam_roadmap.html">STA510 Roadmap</a><span class="sep">›</span><span>Ch. 4 · Processes &amp; applications</span>
+  </div>
+
+  <header class="note-header">
+    <div class="eyebrow"><span class="dot"></span> STA510 · Study note</div>
+    <h1><span class="num">9</span>Markov chains &amp; stochastic processes</h1>
+    <p class="dek">One test decides everything: does tomorrow's distribution depend on the past only through
+      today? Then work out whether the process settles into a fixed distribution, or drifts forever.</p>
+    <div class="examtags"><span class="lab">Tested in:</span> <span class="examtag">v26</span></div>
+  </header>
+
+  <details class="mobile-toc">
+    <summary>Jump to a topic ▾</summary>
+    <nav>
+      <ul class="toc-list">
+        <li><a href="topic-continuous-rv.html">1. Continuous r.v.'s</a></li>
+        <li><a href="topic-inverse-transform.html">4. Inverse transform</a></li>
+        <li><a href="topic-accept-reject.html">5. Accept‑Reject</a></li>
+        <li><a href="topic-monte-carlo-integration.html">11. Monte Carlo integrals</a></li>
+        <li><a href="topic-bootstrap.html">12. Bootstrap</a></li>
+        <li><a href="exam_roadmap.html">← Back to roadmap index</a></li>
+      </ul>
+    </nav>
+  </details>
+
+  <div class="layout">
+    <nav class="toc" aria-label="Table of contents">
+      <h2>Study order</h2>
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 2 — Foundations</div>
+        <ul class="toc-list">
+          <li><a href="topic-continuous-rv.html">1. Continuous r.v.'s</a></li>
+          <li><a href="topic-clt-ci.html">2. CLT &amp; CIs</a></li>
+          <li><a href="topic-mle.html">3. MLE</a></li>
+        </ul>
+      </div>
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 3 — Simulation basics</div>
+        <ul class="toc-list">
+          <li><a href="topic-inverse-transform.html">4. Inverse transform</a></li>
+          <li><a href="topic-accept-reject.html">5. Accept‑Reject</a></li>
+          <li><a href="topic-multivariate-sim.html">6. Multivariate sim.</a></li>
+          <li><a href="topic-composition-methods.html">7. Composition methods</a></li>
+        </ul>
+      </div>
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 4 — Processes &amp; applications</div>
+        <ul class="toc-list">
+          <li><a href="topic-poisson-processes.html">8. Poisson processes</a></li>
+          <li><span class="current">9. Markov chains</span></li>
+          <li><a href="topic-reliability.html">10. Reliability systems</a></li>
+        </ul>
+      </div>
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 6 — MC &amp; resampling</div>
+        <ul class="toc-list">
+          <li><a href="topic-monte-carlo-integration.html">11. Monte Carlo integrals</a></li>
+          <li><a href="topic-bootstrap.html">12. Bootstrap</a></li>
+          <li><a href="topic-kde.html">13. KDE vs. histogram</a></li>
+        </ul>
+      </div>
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 11–12 — MCMC &amp; Bayesian</div>
+        <ul class="toc-list">
+          <li><a href="topic-mcmc.html">14. MCMC — M‑H</a></li>
+          <li><a href="topic-bayesian.html">15. Bayesian stats</a></li>
+        </ul>
+      </div>
+      <div class="toc-tier">
+        <ul class="toc-list"><li><a href="exam_roadmap.html">← Back to roadmap index</a></li></ul>
+      </div>
+    </nav>
+
+    <main>
+    <article class="note">
+
+      <section>
+        <h2><span class="num">9.1</span>The Markov property</h2>
+        <div class="formula">
+          <span class="m">P(X<sub>n+1</sub>∈A ∣ X<sub>n</sub>=c, X<sub>n−1</sub>=a₁,…) = P(X<sub>n+1</sub>∈A ∣ X<sub>n</sub>=c)</span>
+        </div>
+        <p>Tomorrow's distribution depends on the past only through today. A chain is fully described by its
+          <b>transition distribution</b> <span class="m">Q(x)</span>: <span class="m">X<sub>n+1</sub>∣X<sub>n</sub> ∼ Q(X<sub>n</sub>)</span>.</p>
+        <div class="formula left">
+          <b>Markov:</b> <span class="m">X<sub>n+1</sub>=aX<sub>n</sub>+ε<sub>n+1</sub></span>, <span class="m">ε<sub>n+1</sub></span> iid — depends only on <span class="m">X<sub>n</sub></span><br>
+          <b>Not Markov:</b> <span class="m">X<sub>n+1</sub>=aX<sub>n</sub>+bX<sub>n−1</sub>+ε<sub>n+1</sub></span> — depends on <span class="m">X<sub>n−1</sub></span> too
+        </div>
+        <p>Simulating any Markov chain, once you know <span class="m">Q</span>, is three lines: fix
+          <span class="m">X₁</span>, then repeatedly draw <span class="m">X<sub>n+1</sub>∼Q(X<sub>n</sub>)</span>.</p>
+      </section>
+
+      <section>
+        <h2><span class="num">9.2</span>Stationarity</h2>
+        <p>A chain is (weakly) <b>stationary</b> if the distribution of <span class="m">X<sub>n</sub>∣X₁=a</span>
+          converges to a fixed distribution <span class="m">π</span> as <span class="m">n→∞</span>, for every
+          starting value <span class="m">a</span>. <span class="m">π</span> is the <b>stationary distribution</b>.</p>
+      </section>
+
+      <section>
+        <h2><span class="num">9.3</span>Worked example — random walk (not stationary)</h2>
+        <p><span class="m">X₁=a</span>, <span class="m">X<sub>n+1</sub>=X<sub>n</sub>+ξ<sub>n+1</sub></span>,
+          <span class="m">ξ</span> iid with <span class="m">P(ξ=+1)=p</span>, <span class="m">P(ξ=−1)=1−p</span>
+          (<b>v26</b> asks exactly this, with a symmetric-vs-asymmetric follow-up). Since
+          <span class="m">X<sub>n</sub>=a+Σ<sub>i=2</sub><sup>n</sup>ξ<sub>i</sub></span> is a sum of
+          <span class="m">n−1</span> iid terms:</p>
+        <div class="formula left">
+          <span class="m">E(ξ)=2p−1</span>, &nbsp;<span class="m">Var(ξ)=1−(2p−1)²=4p(1−p)</span><br><br>
+          <span class="m">E(X<sub>n</sub>) = a + (n−1)(2p−1)</span>, &nbsp;<span class="m">Var(X<sub>n</sub>) = (n−1)·4p(1−p)</span>
+        </div>
+        <p>Two cases, both non-stationary: if <span class="m">p=0.5</span> (symmetric), the mean stays at
+          <span class="m">a</span> but <span class="m">Var(X<sub>n</sub>)=n−1 → ∞</span>. If <span class="m">p≠0.5</span>
+          (asymmetric/drift), the mean itself diverges to <span class="m">±∞</span> as well. Either way there is no
+          fixed limiting distribution — a random walk is the standard example of a Markov chain that is
+          <em>not</em> stationary.</p>
+        <div class="callout">Is it Markov? Yes — <span class="m">X<sub>n+1</sub></span> depends on the past only
+          through <span class="m">X<sub>n</sub></span> (the increment <span class="m">ξ<sub>n+1</sub></span> is
+          independent of history). State space: all integers reachable from <span class="m">a</span> with the same
+          parity pattern as <span class="m">n</span>.</div>
+      </section>
+
+      <section>
+        <h2><span class="num">9.4</span>Worked example — Gaussian AR(1) (stationary)</h2>
+        <p><span class="m">X<sub>n+1</sub> = γ + φX<sub>n</sub> + ε<sub>n+1</sub></span>, <span class="m">ε</span> iid
+          <span class="m">N(0,σ²)</span>. If <span class="m">|φ|&lt;1</span>:</p>
+        <div class="formula">
+          <span class="m">X<sub>n</sub>∣X₁=a → N<big>(</big><span class="frac"><span class="num">γ</span><span class="den">1−φ</span></span>, <span class="frac"><span class="num">σ²</span><span class="den">1−φ²</span></span><big>)</big></span> as <span class="m">n→∞</span>
+        </div>
+        <p>Contrast with §9.3: the extra "pull back toward the mean" term <span class="m">φX<sub>n</sub></span>
+          (with <span class="m">|φ|&lt;1</span>) keeps the variance from exploding — this is exactly why AR(1) is the
+          standard building block for stationary Markov chains, and exactly the proposal mechanism behind
+          random-walk Metropolis-Hastings on the <a href="topic-mcmc.html">MCMC page</a>.</p>
+      </section>
+
+      <section>
+        <h2><span class="num">9.5</span>Why stationarity matters (preview of MCMC)</h2>
+        <div class="formula">
+          <span class="m"><span class="frac"><span class="num">1</span><span class="den">T</span></span>Σ<sub>n=1</sub><sup>T</sup> g(X<sub>n</sub>) → ∫g(x)π(x)dx</span> &nbsp;(a law of large numbers for stationary chains)
+        </div>
+        <div class="callout trap"><b>But</b> <span class="m">Var(T⁻¹Σg(X<sub>n</sub>)) ≠ T⁻¹Var(g(X<sub>n</sub>))</span> —
+          the <span class="m">X<sub>n</sub></span>'s are correlated, so you can't just divide by <span class="m">T</span>
+          the way you would for iid samples. This is precisely why <a href="topic-mcmc.html">MCMC</a> needs the
+          Effective Sample Size (ESS) instead of the raw chain length when building a CI for
+          <span class="m">E(θ)</span>.</div>
+      </section>
+
+      <section>
+        <h2><span class="num">9.6</span>Common exam pitfalls</h2>
+        <ul>
+          <li>"Is it Markov?" always has a one-line justification: identify exactly what
+            <span class="m">X<sub>n+1</sub></span> depends on, and check whether that's only
+            <span class="m">X<sub>n</sub></span>.</li>
+          <li>Stationarity is about the <em>limiting</em> distribution — a chain can be Markov without ever
+            settling down (random walk).</li>
+          <li>When asked for <span class="m">E(X<sub>n</sub>)</span>/<span class="m">Var(X<sub>n</sub>)</span>
+            analytically, write <span class="m">X<sub>n</sub></span> as a sum of the initial value plus iid
+            increments first — the linear-combination rules then apply directly.</li>
+        </ul>
+        <p class="material"><span class="lab">Material:</span> LN <code>markov_proc.pdf</code> <code>chap4_part1</code> · R <code>Markov.R</code> <code>AR1sim.R</code></p>
+      </section>
+
+    </article>
+
+      <nav class="pager">
+        <a href="topic-poisson-processes.html"><span class="lab">Previous</span>← Poisson processes</a>
+        <a class="next" href="topic-reliability.html"><span class="lab">Next</span>Reliability systems →</a>
+      </nav>
+    </main>
+  </div>
+</div>

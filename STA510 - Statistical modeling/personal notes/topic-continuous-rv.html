@@ -1,0 +1,223 @@
+<title>Continuous R.V.'s — STA510 Notes</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;0,600;0,700;1,500&family=STIX+Two+Text:ital,wght@0,400;0,500;0,600;1,400;1,500&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="style.css">
+
+<div class="shell">
+  <div class="crumb">
+    <a href="exam_roadmap.html">STA510 Roadmap</a><span class="sep">›</span><span>Ch. 2 · Foundations</span>
+  </div>
+
+  <header class="note-header">
+    <div class="eyebrow"><span class="dot"></span> STA510 · Study note</div>
+    <h1><span class="num">1</span>Continuous random variables: pdf, cdf, moments</h1>
+    <p class="dek">The toolkit every later topic builds on: proper densities, the cdf, and expectation/variance —
+      including the shortcut <span class="m">Var(X) = E(X²) − E(X)²</span> that shows up constantly.</p>
+  </header>
+
+  <details class="mobile-toc">
+    <summary>Jump to a topic ▾</summary>
+    <nav>
+      <ul class="toc-list">
+        <li><a href="topic-continuous-rv.html">1. Continuous r.v.'s</a></li>
+        <li><a href="topic-inverse-transform.html">4. Inverse transform</a></li>
+        <li><a href="topic-accept-reject.html">5. Accept‑Reject</a></li>
+        <li><a href="topic-monte-carlo-integration.html">11. Monte Carlo integrals</a></li>
+        <li><a href="topic-bootstrap.html">12. Bootstrap</a></li>
+        <li><a href="exam_roadmap.html">← Back to roadmap index</a></li>
+      </ul>
+    </nav>
+  </details>
+
+  <div class="layout">
+    <nav class="toc" aria-label="Table of contents">
+      <h2>Study order</h2>
+
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 2 — Foundations</div>
+        <ul class="toc-list">
+          <li><span class="current">1. Continuous r.v.'s</span></li>
+          <li><a href="topic-clt-ci.html">2. CLT &amp; CIs</a></li>
+          <li><a href="topic-mle.html">3. MLE</a></li>
+        </ul>
+      </div>
+
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 3 — Simulation basics</div>
+        <ul class="toc-list">
+          <li><a href="topic-inverse-transform.html">4. Inverse transform</a></li>
+          <li><a href="topic-accept-reject.html">5. Accept‑Reject</a></li>
+          <li><a href="topic-multivariate-sim.html">6. Multivariate sim.</a></li>
+          <li><a href="topic-composition-methods.html">7. Composition methods</a></li>
+        </ul>
+      </div>
+
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 4 — Processes &amp; applications</div>
+        <ul class="toc-list">
+          <li><a href="topic-poisson-processes.html">8. Poisson processes</a></li>
+          <li><a href="topic-markov-chains.html">9. Markov chains</a></li>
+          <li><a href="topic-reliability.html">10. Reliability systems</a></li>
+        </ul>
+      </div>
+
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 6 — MC &amp; resampling</div>
+        <ul class="toc-list">
+          <li><a href="topic-monte-carlo-integration.html">11. Monte Carlo integrals</a></li>
+          <li><a href="topic-bootstrap.html">12. Bootstrap</a></li>
+          <li><a href="topic-kde.html">13. KDE vs. histogram</a></li>
+        </ul>
+      </div>
+
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 11–12 — MCMC &amp; Bayesian</div>
+        <ul class="toc-list">
+          <li><a href="topic-mcmc.html">14. MCMC — M‑H</a></li>
+          <li><a href="topic-bayesian.html">15. Bayesian stats</a></li>
+        </ul>
+      </div>
+
+      <div class="toc-tier">
+        <ul class="toc-list"><li><a href="exam_roadmap.html">← Back to roadmap index</a></li></ul>
+      </div>
+    </nav>
+
+    <main>
+    <article class="note">
+
+    <section>
+      <div class="examtags"><span class="lab">Tested in almost every exam:</span>
+        <span class="examtag">h22</span><span class="examtag">v23</span><span class="examtag">h23</span>
+        <span class="examtag">v24</span><span class="examtag">h24</span><span class="examtag">v25</span>
+        <span class="examtag">v26</span></div>
+    </section>
+
+    <section>
+      <h2><span class="num">1.1</span>Probability density function (pdf)</h2>
+      <p><span class="m">f(x)</span> is the pdf of a continuous r.v. <span class="m">X</span> if and only if:</p>
+      <div class="formula left">
+        1. <span class="m">f(x) ≥ 0</span> for all <span class="m">x</span><br>
+        2. <span class="frac"><span class="num">∞</span><span class="den">−∞</span></span> is shorthand — properly:
+        <span class="m">∫<sub>−∞</sub><sup>∞</sup> f(x) dx = 1</span><br>
+        3. <span class="m">P(a &lt; X &lt; b) = ∫<sub>a</sub><sup>b</sup> f(x) dx</span>
+      </div>
+      <p>Unlike the discrete case, <span class="m">P(X = a) = 0</span> always for continuous <span class="m">X</span> —
+        so <span class="m">P(X ≤ a) = P(X &lt; a)</span>, and it never matters whether an inequality in a probability
+        statement is strict.</p>
+      <div class="callout trap"><b>Exam step 1 —</b> whenever a density contains an unknown constant <span class="m">c</span>,
+        the very first thing to do is solve <span class="m">∫ f(x) dx = 1</span> for <span class="m">c</span>. This is
+        almost always graded as its own step, so never skip writing it out even if the value is "obvious".</div>
+    </section>
+
+    <section>
+      <h2><span class="num">1.2</span>Cumulative distribution function (cdf)</h2>
+      <div class="formula">
+        <span class="m">F(x) = P(X ≤ x) = ∫<sub>−∞</sub><sup>x</sup> f(t) dt</span> &nbsp;&nbsp;⇔&nbsp;&nbsp;
+        <span class="m">F′(x) = f(x)</span>
+      </div>
+      <p>Once you have <span class="m">F</span>, every interval probability is just a subtraction — no new
+        integration needed:</p>
+      <div class="formula left">
+        <span class="m">P(a &lt; X &lt; b) = F(b) − F(a)</span> &nbsp;·&nbsp;
+        <span class="m">P(X &gt; a) = 1 − F(a)</span>
+      </div>
+      <p>This matters for speed under exam conditions: derive <span class="m">F(x)</span> once, then answer several
+        sub-questions from it instead of re-integrating <span class="m">f</span> each time.</p>
+    </section>
+
+    <section>
+      <h2><span class="num">1.3</span>Expectation and variance</h2>
+      <div class="formula left">
+        <span class="m">E(X) = ∫<sub>−∞</sub><sup>∞</sup> x f(x) dx</span>&nbsp;&nbsp;(often written <span class="m">μ</span>)<br><br>
+        <span class="m">E(g(X)) = ∫<sub>−∞</sub><sup>∞</sup> g(x) f(x) dx</span>&nbsp;&nbsp;— for <em>any</em> function <span class="m">g</span>, e.g. <span class="m">g(X)=X²</span>, <span class="m">1/X</span>, <span class="m">e<sup>X</sup></span>...<br><br>
+        <span class="m">Var(X) = E[(X−μ)²] = E(X²) − E(X)²</span> &nbsp;&nbsp;(the second form is almost always faster)<br><br>
+        <span class="m">SD(X) = √Var(X)</span>
+      </div>
+      <div class="callout"><b>Rule of thumb —</b> about 95% of the distribution's mass typically falls in
+        <span class="m">[μ − 2σ, μ + 2σ]</span>. Handy for sanity-checking an answer, not a substitute for the exact
+        calculation.</div>
+    </section>
+
+    <section>
+      <h2><span class="num">1.4</span>Worked example (full exam-style walkthrough)</h2>
+      <p>Let <span class="m">X</span> have density <span class="m">f(x) = c·x²</span> for <span class="m">0 ≤ x ≤ 3</span>
+        (and 0 otherwise). Find <span class="m">c</span>, <span class="m">E(X)</span>, <span class="m">Var(X)</span>,
+        <span class="m">F(x)</span>, and <span class="m">P(1 &lt; X &lt; 2)</span>.</p>
+
+      <p><b>Step 1 — normalizing constant.</b></p>
+      <div class="formula">
+        <span class="m">∫<sub>0</sub><sup>3</sup> c x² dx = c·<span class="frac"><span class="num">x³</span><span class="den">3</span></span>│<sub>0</sub><sup>3</sup> = c·9 = 1</span>
+        &nbsp;⇒&nbsp; <span class="m">c = 1/9</span>
+      </div>
+
+      <p><b>Step 2 — expectation and variance.</b></p>
+      <div class="formula left">
+        <span class="m">E(X) = ∫<sub>0</sub><sup>3</sup> x·<span class="frac"><span class="num">1</span><span class="den">9</span></span>x² dx = <span class="frac"><span class="num">1</span><span class="den">9</span></span>·<span class="frac"><span class="num">x⁴</span><span class="den">4</span></span>│<sub>0</sub><sup>3</sup> = <span class="frac"><span class="num">81</span><span class="den">36</span></span> = 2.25</span><br><br>
+        <span class="m">E(X²) = ∫<sub>0</sub><sup>3</sup> x²·<span class="frac"><span class="num">1</span><span class="den">9</span></span>x² dx = <span class="frac"><span class="num">1</span><span class="den">9</span></span>·<span class="frac"><span class="num">x⁵</span><span class="den">5</span></span>│<sub>0</sub><sup>3</sup> = <span class="frac"><span class="num">243</span><span class="den">45</span></span> = 5.4</span><br><br>
+        <span class="m">Var(X) = 5.4 − 2.25² = 5.4 − 5.0625 = 0.3375</span>
+      </div>
+
+      <p><b>Step 3 — cdf.</b></p>
+      <div class="formula">
+        <span class="m">F(x) = ∫<sub>0</sub><sup>x</sup> <span class="frac"><span class="num">1</span><span class="den">9</span></span>t² dt = <span class="frac"><span class="num">x³</span><span class="den">27</span></span></span>, &nbsp; <span class="m">0 ≤ x ≤ 3</span>
+      </div>
+
+      <p><b>Step 4 — interval probability, reusing <span class="m">F</span>.</b></p>
+      <div class="formula">
+        <span class="m">P(1&lt;X&lt;2) = F(2) − F(1) = <span class="frac"><span class="num">8</span><span class="den">27</span></span> − <span class="frac"><span class="num">1</span><span class="den">27</span></span> = <span class="frac"><span class="num">7</span><span class="den">27</span></span> ≈ 0.259</span>
+      </div>
+
+      <div class="callout example"><b>Bonus — transformation.</b> With the same <span class="m">f</span>,
+        <span class="m">E(1/X) = ∫<sub>0</sub><sup>3</sup> (1/x)·(1/9)x² dx = (1/9)∫<sub>0</sub><sup>3</sup> x dx = (1/9)(9/2) = 0.5</span>.
+        This is the pattern for any "find <span class="m">E(g(X))</span>" sub-question: plug <span class="m">g(x)</span>
+        straight into the definition, integrate over the support, done.</div>
+    </section>
+
+    <section>
+      <h2><span class="num">1.5</span>Every past-exam variant, at a glance</h2>
+      <p>Same four steps every time — find the constant, get <span class="m">E(X)</span>/<span class="m">Var(X)</span>,
+        derive <span class="m">F(x)</span>, use it for a probability. Only the density changes:</p>
+      <div style="overflow-x:auto;">
+      <table class="examtable">
+        <tr><th>Exam</th><th>Density</th><th>Asked</th></tr>
+        <tr><td>h22</td><td><span class="m">f(x)=(1/4C)e<sup>x/4</sup></span>, 0≤x≤4</td><td>find C=e−1; E(X)=4/C; F(x); P(X&gt;1), P(1&lt;X&lt;2)</td></tr>
+        <tr><td>v23</td><td><span class="m">f(x)=3√x/16</span>, 0≤x≤4</td><td>verify pdf; E(X); E(√X), Var(√X); F(x)=x<sup>3/2</sup>/8</td></tr>
+        <tr><td>h23</td><td><span class="m">f(x)=cx(1−x)</span>, 0≤x≤1</td><td>c=6; E(X), Var(X); F(x)=x²(3−2x); P(X&gt;0.5), P(0.1&lt;X&lt;0.5)</td></tr>
+        <tr><td>v24</td><td><span class="m">f(x)=k(x−2)²</span>, 0≤x≤2</td><td>k=3/8; P(X≤1); E(X); then E of a linear combo <span class="m">Y=(X₁+X₂−2)/4</span></td></tr>
+        <tr><td>h24</td><td>Pareto: <span class="m">f(x)=b·a<sup>b</sup>/x<sup>b+1</sup></span>, a&lt;x</td><td>verify pdf; F(x)=1−(a/x)<sup>b</sup>; with a=4,b=2: P(X&lt;6), P(10&lt;X&lt;15)</td></tr>
+        <tr><td>v25</td><td><span class="m">f(x)=c·x(1−x)³</span>, 0≤x≤1</td><td>c=20; E(X); E(3X+2)</td></tr>
+        <tr><td>v25</td><td>Ψ(α,β): <span class="m">f(x)=(α/β<sup>α</sup>)x<sup>α−1</sup></span>, 0&lt;x&lt;β</td><td>F(x)=x<sup>α</sup>/β<sup>α</sup>; with α=3,β=5: P(X&lt;2), P(2&lt;X&lt;4)</td></tr>
+        <tr><td>v26</td><td><span class="m">f(x)=(1+sin x)/(π+2)</span>, 0≤x≤π</td><td>verify pdf (feeds into an inverse-transform / AR question — see those pages)</td></tr>
+      </table>
+      </div>
+      <div class="callout"><b>How to drill this —</b> pick any row, cover the "Asked" column, and redo all four steps from
+        scratch on paper. If you can do h22's exponential-type density and h24's Pareto in under 10 minutes each, you're
+        in good shape — the algebra difficulty is deliberately similar every year.</div>
+    </section>
+
+    <section>
+      <h2><span class="num">1.6</span>Common exam pitfalls</h2>
+      <ul>
+        <li>Forgetting the support: a piecewise density (0 outside <span class="m">[a,b]</span>) means every
+          integral's limits are <span class="m">a</span> to <span class="m">b</span>, not <span class="m">−∞</span> to
+          <span class="m">∞</span> — writing the wrong limits is the single most common lost point here.</li>
+        <li>Using <span class="m">Var(X)=E[(X−μ)²]</span> directly when <span class="m">E(X²)−E(X)²</span> is faster
+          and less error-prone (fewer terms to expand).</li>
+        <li>Mixing up <span class="m">f</span> and <span class="m">F</span> in a sub-question — re-read whether it asks
+          for the density or the cumulative probability.</li>
+        <li>For a density with several pieces, integrate <em>each piece over its own range</em> when computing
+          <span class="m">F(x)</span> for an <span class="m">x</span> beyond the first piece — a classic source of
+          off-by-a-term errors.</li>
+      </ul>
+      <p class="material"><span class="lab">Material:</span> LN <code>chap2_part1</code> <code>chap2_part2</code> · Ex <code>exercise_set0</code> <code>exercise_set1</code></p>
+    </section>
+
+    </article>
+
+      <nav class="pager">
+        <a href="exam_roadmap.html"><span class="lab">Back to</span>Roadmap index</a>
+        <a class="next" href="topic-clt-ci.html"><span class="lab">Next</span>CLT &amp; confidence intervals →</a>
+      </nav>
+    </main>
+  </div>
+</div>

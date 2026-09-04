@@ -1,0 +1,227 @@
+<title>CLT & Confidence Intervals — STA510 Notes</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;0,600;0,700;1,500&family=STIX+Two+Text:ital,wght@0,400;0,500;0,600;1,400;1,500&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="style.css">
+
+<div class="shell">
+  <div class="crumb">
+    <a href="exam_roadmap.html">STA510 Roadmap</a><span class="sep">›</span><span>Ch. 2 · Foundations</span>
+  </div>
+
+  <header class="note-header">
+    <div class="eyebrow"><span class="dot"></span> STA510 · Study note</div>
+    <h1><span class="num">2</span>Central Limit Theorem &amp; confidence intervals</h1>
+    <p class="dek">Why averages of <em>anything</em> end up looking Normal, and the one formula — the CLT
+      ratio — that generates every confidence interval and sample-size calculation in this course.</p>
+    <div class="examtags"><span class="lab">Tested in:</span>
+      <span class="examtag">h22</span><span class="examtag">v23</span><span class="examtag">v25</span></div>
+  </header>
+
+  <details class="mobile-toc">
+    <summary>Jump to a topic ▾</summary>
+    <nav>
+      <ul class="toc-list">
+        <li><a href="topic-continuous-rv.html">1. Continuous r.v.'s</a></li>
+        <li><a href="topic-inverse-transform.html">4. Inverse transform</a></li>
+        <li><a href="topic-accept-reject.html">5. Accept‑Reject</a></li>
+        <li><a href="topic-monte-carlo-integration.html">11. Monte Carlo integrals</a></li>
+        <li><a href="topic-bootstrap.html">12. Bootstrap</a></li>
+        <li><a href="exam_roadmap.html">← Back to roadmap index</a></li>
+      </ul>
+    </nav>
+  </details>
+
+  <div class="layout">
+    <nav class="toc" aria-label="Table of contents">
+      <h2>Study order</h2>
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 2 — Foundations</div>
+        <ul class="toc-list">
+          <li><a href="topic-continuous-rv.html">1. Continuous r.v.'s</a></li>
+          <li><span class="current">2. CLT &amp; CIs</span></li>
+          <li><a href="topic-mle.html">3. MLE</a></li>
+        </ul>
+      </div>
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 3 — Simulation basics</div>
+        <ul class="toc-list">
+          <li><a href="topic-inverse-transform.html">4. Inverse transform</a></li>
+          <li><a href="topic-accept-reject.html">5. Accept‑Reject</a></li>
+          <li><a href="topic-multivariate-sim.html">6. Multivariate sim.</a></li>
+          <li><a href="topic-composition-methods.html">7. Composition methods</a></li>
+        </ul>
+      </div>
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 4 — Processes &amp; applications</div>
+        <ul class="toc-list">
+          <li><a href="topic-poisson-processes.html">8. Poisson processes</a></li>
+          <li><a href="topic-markov-chains.html">9. Markov chains</a></li>
+          <li><a href="topic-reliability.html">10. Reliability systems</a></li>
+        </ul>
+      </div>
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 6 — MC &amp; resampling</div>
+        <ul class="toc-list">
+          <li><a href="topic-monte-carlo-integration.html">11. Monte Carlo integrals</a></li>
+          <li><a href="topic-bootstrap.html">12. Bootstrap</a></li>
+          <li><a href="topic-kde.html">13. KDE vs. histogram</a></li>
+        </ul>
+      </div>
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 11–12 — MCMC &amp; Bayesian</div>
+        <ul class="toc-list">
+          <li><a href="topic-mcmc.html">14. MCMC — M‑H</a></li>
+          <li><a href="topic-bayesian.html">15. Bayesian stats</a></li>
+        </ul>
+      </div>
+      <div class="toc-tier">
+        <ul class="toc-list"><li><a href="exam_roadmap.html">← Back to roadmap index</a></li></ul>
+      </div>
+    </nav>
+
+    <main>
+    <article class="note">
+
+      <section>
+        <h2><span class="num">2.1</span>Laws of large numbers (why simulation works at all)</h2>
+        <p>For iid <span class="m">X₁,…,X<sub>n</sub></span> with <span class="m">E(X)=μ</span>:</p>
+        <div class="formula">
+          <span class="m"><span class="ov">X</span><sub>n</sub> → μ</span> as <span class="m">n→∞</span> (weak: in probability; strong: almost surely)
+        </div>
+        <p>This is the one-line justification for every Monte Carlo estimator in the course: an average of
+          simulated draws converges to the true expectation.</p>
+      </section>
+
+      <section>
+        <h2><span class="num">2.2</span>The Central Limit Theorem</h2>
+        <p>For iid <span class="m">X₁,…,X<sub>n</sub></span> from <em>any</em> distribution with mean
+          <span class="m">μ</span> and variance <span class="m">σ²</span>:</p>
+        <div class="formula">
+          <span class="m">Z = <span class="frac"><span class="num"><span class="ov">X</span> − μ</span><span class="den">σ/√n</span></span> ≈ N(0,1)</span>
+          &nbsp;&nbsp;⇔&nbsp;&nbsp;
+          <span class="m">Z = <span class="frac"><span class="num">ΣX<sub>i</sub> − nμ</span><span class="den">√(nσ²)</span></span> ≈ N(0,1)</span>
+        </div>
+        <p>Same statement whether you're standardizing an average or a sum — pick whichever matches the question.
+          Rule of thumb: the approximation is generally fine once <span class="m">n≥30</span>.</p>
+        <div class="callout"><b>The one formula behind every CI in this course:</b>
+          <span class="m">Z = (θ̂ − E(θ̂))/SD(θ̂) ≈ N(0,1)</span> for <em>any</em> estimator that is itself an
+          average (a sample mean, a Monte Carlo estimator, a relative frequency, …). Everything below is this same
+          formula rearranged.</div>
+      </section>
+
+      <section>
+        <h2><span class="num">2.3</span>Confidence interval for a mean</h2>
+        <div class="formula">
+          <span class="m"><span class="ov">X</span> ± z<sub>α/2</sub>·σ/√n</span>
+        </div>
+        <p>with <span class="m">σ</span> replaced by the sample sd <span class="m">s</span> when unknown (as is
+          almost always the case in this course).</p>
+      </section>
+
+      <section>
+        <h2><span class="num">2.4</span>Sample size for a target precision</h2>
+        <p>Rearranging the CI so the margin of error is at most <span class="m">e</span>:</p>
+        <div class="formula">
+          <span class="m">z<sub>α/2</sub>·σ/√n &lt; e</span> &nbsp;⇒&nbsp; <span class="m">n &gt; z²<sub>α/2</sub>σ²/e²</span>
+          &nbsp;&nbsp;(95%: <span class="m">n &gt; 4σ²/e²</span>, since <span class="m">z<sub>0.025</sub>≈1.96≈2</span>)
+        </div>
+        <p>Since <span class="m">σ</span> is usually unknown ahead of time: run a moderate pilot simulation/sample
+          to estimate it, then plug the estimate into the formula for the real run.</p>
+      </section>
+
+      <section>
+        <h2><span class="num">2.5</span>Estimating a probability specifically</h2>
+        <p>A relative frequency <span class="m">p̂ = (#successes)/n</span> is itself an average of 0/1 indicators, so
+          everything above applies with <span class="m">Var(p̂) = p(1−p)/n</span>:</p>
+        <div class="formula">
+          <span class="m">CI: p̂ ± z<sub>α/2</sub>√(p̂(1−p̂)/n)</span> &nbsp;·&nbsp;
+          <span class="m">n &gt; z²<sub>α/2</sub>p(1−p)/e²</span>
+        </div>
+        <p>Since <span class="m">p(1−p) ≤ 0.25</span> always, a universal (conservative) bound at 95% confidence is:</p>
+        <div class="formula">
+          <span class="m">n &gt; 1/e²</span> &nbsp;(95%, using <span class="m">p(1−p)=0.25</span> and <span class="m">z≈2</span>)
+        </div>
+        <div class="callout trap"><b>Don't confuse the <em>sd of individual draws</em> with the <em>sd of the estimator</em>.</b>
+          If a question asks for <span class="m">n</span> such that <span class="m">SD(p̂) &lt; e</span> directly (no
+          <span class="m">z</span> involved), solve <span class="m">√(p(1−p)/n) &lt; e</span> — don't add a
+          <span class="m">z</span>-multiplier unless the question is about a CI margin. See the worked contrast on
+          the <a href="topic-monte-carlo-integration.html">Monte Carlo integrals page</a>.</div>
+      </section>
+
+      <section>
+        <h2><span class="num">2.6</span>Spot-the-bug — matching point estimate to standard error (<span class="m">h22</span>)</h2>
+        <p>Target <span class="m">θ=E(√X)</span>. Three candidate point estimates and six candidate 95% CIs:</p>
+        <pre class="rcode"><code>point.1 <- mean(sqrt(x))          # mean of the transformed variable
+point.2 <- sqrt(mean(x))          # sqrt of the mean  -- NOT the same thing!
+point.3 <- mean(sqrt(x>0))        # sqrt(x>0) is just (x>0) as 0/1 -- degenerate
+
+CI.1 <- point.1 + c(-1,1)*1.96*sd(x)/sqrt(n)          # wrong sd
+CI.2 <- point.1 + c(-1,1)*1.96*sd(sqrt(x))/sqrt(n)    # matches!
+CI.3 <- point.2 + c(-1,1)*1.96*sd(x)                  # missing /sqrt(n)
+CI.4 <- point.2 + c(-1,1)*1.96*sqrt(sd(x))/sqrt(n)    # nonsense sqrt(sd(x))
+CI.5 <- point.3 + c(-1,1)*1.96*sd(sqrt(x))             # missing /sqrt(n)
+CI.6 <- point.3 + c(-1,1)*1.96*sd(sqrt(x))/n           # /n instead of /sqrt(n)</code></pre>
+        <div class="callout example"><b>point.1 is the unbiased estimator</b> — it's literally the sample mean of
+          <span class="m">√X</span>, which is exactly <span class="m">θ=E(√X)</span>. <code>point.2</code> estimates
+          <span class="m">√E(X)</span> instead (biased for <span class="m">θ</span> by Jensen's inequality, since
+          <span class="m">√·</span> is concave). <code>point.3</code> is degenerate — since <span class="m">X&gt;0</span>
+          always on its support, it just estimates <span class="m">P(X&gt;0)=1</span>.
+          <b>Only CI.2 is valid</b>: it's the only one pairing the correct point estimate
+          (<code>point.1</code>) with the correctly-transformed standard error
+          (<code>sd(sqrt(x))/sqrt(n)</code>) — every other CI either uses the wrong variable's sd, forgets to
+          divide by <span class="m">√n</span>, or divides by <span class="m">n</span> instead.</div>
+        <div class="callout trap">The general lesson: whenever a question estimates <span class="m">E(g(X))</span>
+          for some transformation <span class="m">g</span>, the standard error must come from
+          <span class="m">sd(g(X))</span>, never from <span class="m">sd(X)</span> — the two are only equal when
+          <span class="m">g</span> is the identity.</div>
+      </section>
+
+      <section>
+        <h2><span class="num">2.7</span>Worked example — sum of dice</h2>
+        <p>Throw a fair die 50 times; what's <span class="m">P(sum &gt; 200)</span>? Each throw
+          <span class="m">X<sub>i</sub></span> has <span class="m">E(X<sub>i</sub>)=3.5</span>,
+          <span class="m">Var(X<sub>i</sub>)=35/12≈2.917</span> (discrete uniform on 1–6). With
+          <span class="m">n=50</span>, CLT applies to <span class="m">Y=ΣX<sub>i</sub></span>:</p>
+        <div class="formula">
+          <span class="m">E(Y)=50(3.5)=175</span>, &nbsp;<span class="m">SD(Y)=√(50×2.917)≈12.07</span><br>
+          <span class="m">P(Y&gt;200) = P(Z &gt; (200−175)/12.07) = P(Z&gt;2.07) ≈ 0.019</span>
+        </div>
+      </section>
+
+      <section>
+        <h2><span class="num">2.8</span>Worked example — sample size for a simulation (robot system)</h2>
+        <p>Reusing the robot-system lifetime from the <a href="topic-reliability.html">Reliability page</a>: a pilot
+          run of 1000 simulations gives <span class="m">s≈4</span> (months). How many simulations are needed to
+          estimate the mean lifetime to within <span class="m">e=1</span> month, and to within one day
+          (<span class="m">e=1/31</span> month), both at 95%?</p>
+        <div class="formula left">
+          One month: <span class="m">n &gt; 4s²/1² = 4(16) = 64</span> (rounds up in practice to a few thousand once
+          simulation is this cheap)<br><br>
+          One day: <span class="m">n &gt; 4s²/(1/31)² = 4(16)(961) ≈ 61{,}500</span>
+        </div>
+        <p>Tightening the precision by a factor of 31 costs roughly <span class="m">31²≈961</span> times more
+          simulations — the <span class="m">1/√n</span> wall, made concrete.</p>
+      </section>
+
+      <section>
+        <h2><span class="num">2.9</span>Common exam pitfalls</h2>
+        <ul>
+          <li>When several candidate CI expressions are given in R, check that the point estimate and the standard
+            error <em>in the numerator and denominator actually match</em> — see the full <b>h22</b> bug-spotting
+            walkthrough in §2.6.</li>
+          <li>Know both directions of the CLT (average form and sum form) — a question may hand you per-item mean
+            and variance and ask about the total.</li>
+          <li>Sample-size formulas always come from <em>solving the CI margin for n</em> — don't memorize the final
+            formula blindly, re-derive it if unsure which constant goes where.</li>
+        </ul>
+        <p class="material"><span class="lab">Material:</span> LN <code>chap2_part2</code> · R <code>throw_of_dice.R</code> <code>robot_system.R</code></p>
+      </section>
+
+    </article>
+
+      <nav class="pager">
+        <a href="topic-continuous-rv.html"><span class="lab">Previous</span>← Continuous r.v.'s</a>
+        <a class="next" href="topic-mle.html"><span class="lab">Next</span>MLE →</a>
+      </nav>
+    </main>
+  </div>
+</div>

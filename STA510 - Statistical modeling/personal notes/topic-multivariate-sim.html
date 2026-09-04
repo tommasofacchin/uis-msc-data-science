@@ -1,0 +1,182 @@
+<title>Multivariate Simulation — STA510 Notes</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;0,600;0,700;1,500&family=STIX+Two+Text:ital,wght@0,400;0,500;0,600;1,400;1,500&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="style.css">
+
+<div class="shell">
+  <div class="crumb">
+    <a href="exam_roadmap.html">STA510 Roadmap</a><span class="sep">›</span><span>Ch. 3 · Simulation basics</span>
+  </div>
+
+  <header class="note-header">
+    <div class="eyebrow"><span class="dot"></span> STA510 · Study note</div>
+    <h1><span class="num">6</span>Simulating multivariate / correlated variables</h1>
+    <p class="dek">Turn correlated draws into a linear transform of independent ones — the Cholesky trick — then
+      know when a Markov-chain alternative (Gibbs, RWMH) is competitive instead.</p>
+    <div class="examtags"><span class="lab">Tested in:</span>
+      <span class="examtag">v23</span><span class="examtag">v24</span></div>
+  </header>
+
+  <details class="mobile-toc">
+    <summary>Jump to a topic ▾</summary>
+    <nav>
+      <ul class="toc-list">
+        <li><a href="topic-continuous-rv.html">1. Continuous r.v.'s</a></li>
+        <li><a href="topic-inverse-transform.html">4. Inverse transform</a></li>
+        <li><a href="topic-accept-reject.html">5. Accept‑Reject</a></li>
+        <li><a href="topic-monte-carlo-integration.html">11. Monte Carlo integrals</a></li>
+        <li><a href="topic-bootstrap.html">12. Bootstrap</a></li>
+        <li><a href="exam_roadmap.html">← Back to roadmap index</a></li>
+      </ul>
+    </nav>
+  </details>
+
+  <div class="layout">
+    <nav class="toc" aria-label="Table of contents">
+      <h2>Study order</h2>
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 2 — Foundations</div>
+        <ul class="toc-list">
+          <li><a href="topic-continuous-rv.html">1. Continuous r.v.'s</a></li>
+          <li><a href="topic-clt-ci.html">2. CLT &amp; CIs</a></li>
+          <li><a href="topic-mle.html">3. MLE</a></li>
+        </ul>
+      </div>
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 3 — Simulation basics</div>
+        <ul class="toc-list">
+          <li><a href="topic-inverse-transform.html">4. Inverse transform</a></li>
+          <li><a href="topic-accept-reject.html">5. Accept‑Reject</a></li>
+          <li><span class="current">6. Multivariate sim.</span></li>
+          <li><a href="topic-composition-methods.html">7. Composition methods</a></li>
+        </ul>
+      </div>
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 4 — Processes &amp; applications</div>
+        <ul class="toc-list">
+          <li><a href="topic-poisson-processes.html">8. Poisson processes</a></li>
+          <li><a href="topic-markov-chains.html">9. Markov chains</a></li>
+          <li><a href="topic-reliability.html">10. Reliability systems</a></li>
+        </ul>
+      </div>
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 6 — MC &amp; resampling</div>
+        <ul class="toc-list">
+          <li><a href="topic-monte-carlo-integration.html">11. Monte Carlo integrals</a></li>
+          <li><a href="topic-bootstrap.html">12. Bootstrap</a></li>
+          <li><a href="topic-kde.html">13. KDE vs. histogram</a></li>
+        </ul>
+      </div>
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 11–12 — MCMC &amp; Bayesian</div>
+        <ul class="toc-list">
+          <li><a href="topic-mcmc.html">14. MCMC — M‑H</a></li>
+          <li><a href="topic-bayesian.html">15. Bayesian stats</a></li>
+        </ul>
+      </div>
+      <div class="toc-tier">
+        <ul class="toc-list"><li><a href="exam_roadmap.html">← Back to roadmap index</a></li></ul>
+      </div>
+    </nav>
+
+    <main>
+    <article class="note">
+
+      <section>
+        <h2><span class="num">6.1</span>Multivariate normal — setup</h2>
+        <div class="formula">
+          <span class="m">f(x) = <span class="frac"><span class="num">1</span><span class="den">(2π)<sup>d/2</sup>|Σ|<sup>1/2</sup></span></span> exp{−0.5(x−μ)ᵗΣ⁻¹(x−μ)}</span>, &nbsp; <span class="m">X∼N<sub>d</sub>(μ,Σ)</span>
+        </div>
+        <p>with <span class="m">μ<sub>i</sub>=E(X<sub>i</sub>)</span>, <span class="m">σ<sub>ii</sub>=Var(X<sub>i</sub>)</span>,
+          <span class="m">σ<sub>ij</sub>=Cov(X<sub>i</sub>,X<sub>j</sub>)</span>. Build <span class="m">Σ</span> from
+          correlations via <span class="m">σ<sub>ij</sub>=ρ<sub>ij</sub>σ<sub>i</sub>σ<sub>j</sub></span>.</p>
+      </section>
+
+      <section>
+        <h2><span class="num">6.2</span>Algorithm — Cholesky decomposition</h2>
+        <p>The standard MVN <span class="m">Z∼N<sub>d</sub>(0,I)</span> is trivial: just <span class="m">d</span> iid
+          <span class="m">N(0,1)</span> draws. For a linear transform <span class="m">CZ+b ∼ N<sub>d</sub>(b,CCᵗ)</span>,
+          so pick <span class="m">C</span> with <span class="m">CCᵗ=Σ</span> (its Cholesky factor):</p>
+        <ol class="algo">
+          <li>Find <span class="m">C</span> such that <span class="m">CCᵗ=Σ</span> (Cholesky, or spectral/SVD).</li>
+          <li>Generate <span class="m">z=(z₁,…,z<sub>d</sub>)</span>, iid <span class="m">N(0,1)</span>.</li>
+          <li>Return <span class="m">x = Cz + μ</span>.</li>
+        </ol>
+        <p>In R: <code>mvtnorm::rmvnorm(n, mean, sigma)</code> implements exactly this (with a choice of
+          decomposition).</p>
+      </section>
+
+      <section>
+        <h2><span class="num">6.3</span>Worked example — 3-asset portfolio</h2>
+        <p><span class="m">X₁∼N(8,100)</span>, <span class="m">X₂∼N(4,16)</span>, <span class="m">X₃∼N(1.05,0.25)</span>,
+          with <span class="m">ρ₁₂=−0.6</span>, <span class="m">ρ₁₃=0.3</span>, <span class="m">ρ₂₃=−0.4</span>. Build
+          <span class="m">Σ</span> via <span class="m">σ<sub>ij</sub>=ρ<sub>ij</sub>σ<sub>i</sub>σ<sub>j</sub></span>:</p>
+        <div class="formula">
+          <span class="m">σ₁₂ = −0.6(10)(4) = −24</span>, &nbsp;<span class="m">σ₁₃ = 0.3(10)(0.5) = 1.5</span>, &nbsp;<span class="m">σ₂₃ = −0.4(4)(0.5) = −0.8</span>
+        </div>
+        <div class="formula">
+          <span class="m">Σ = <span style="display:inline-block;vertical-align:middle;">
+            <table style="border-collapse:collapse;"><tr><td style="padding:2px 8px;">100</td><td style="padding:2px 8px;">−24</td><td style="padding:2px 8px;">1.5</td></tr>
+            <tr><td style="padding:2px 8px;">−24</td><td style="padding:2px 8px;">16</td><td style="padding:2px 8px;">−0.8</td></tr>
+            <tr><td style="padding:2px 8px;">1.5</td><td style="padding:2px 8px;">−0.8</td><td style="padding:2px 8px;">0.25</td></tr></table></span></span>
+        </div>
+        <p>Simulate <span class="m">n</span> draws of <span class="m">(X₁,X₂,X₃)</span> via Cholesky, then estimate
+          any quantity of a portfolio <span class="m">Y=aX₁+bX₂+cX₃</span> (its probability of a loss, a quantile,
+          …) by the same crude Monte Carlo averaging as in the <a href="topic-monte-carlo-integration.html">MC
+          integrals page</a>.</p>
+      </section>
+
+      <section>
+        <h2><span class="num">6.4</span>Alternatives: Gibbs and random-walk M-H</h2>
+        <p>Cholesky gives <b>exact, independent</b> draws — always prefer it when the target really is
+          multivariate normal (or built from one). When it isn't, two Markov-chain alternatives from the
+          <a href="topic-mcmc.html">MCMC page</a> can simulate the same joint distribution, at a cost:</p>
+        <ul>
+          <li><b>Gibbs sampler</b> — cycles through univariate conditionals; exact draws from each conditional, but
+            successive draws of the <em>vector</em> are correlated (not iid).</li>
+          <li><b>Random-walk M-H</b> — proposes the whole vector at once; simplest to set up for an arbitrary
+            target, but least efficient (lowest effective sample size per iteration) of the three.</li>
+        </ul>
+        <div class="callout"><b>Efficiency ranking for a genuinely multivariate-normal target:</b> Cholesky (iid,
+          no autocorrelation) &gt; Gibbs (correlated, but each step exact) &gt; RWMH (correlated <em>and</em>
+          each step only approximate/rejected sometimes). The gap matters most when you need the tails or a rare
+          joint event precisely.</div>
+        <p><b>v23</b> asks you to recognize all three from R code, for a bivariate <span class="m">N(0,Σ)</span>
+          target with <span class="m">Σ=[[1,0.9],[0.9,1]]</span>:</p>
+        <pre class="rcode"><code># (a) Gibbs -- each line samples one coordinate from its exact conditional
+x1 <- rnorm(1, mean=rho*x2, sd=sqrt(1-rho^2))
+x2 <- rnorm(1, mean=rho*x1, sd=sqrt(1-rho^2))
+
+# (b) Random-walk M-H -- proposes the whole vector, accepts via a density ratio
+x.prop <- x[,i-1] + rnorm(2)
+alpha  <- min(1, mvtnorm::dmvnorm(x.prop,...) / mvtnorm::dmvnorm(x[,i-1],...))
+
+# (c) Cholesky -- exact, iid draws, no accept/reject at all
+L      <- t(chol(Sigma))
+x[,i]  <- L %*% rnorm(2)</code></pre>
+        <p>Asked which to prefer: Cholesky — it's exact and produces iid draws directly, with no tuning and no
+          wasted proposals, whenever (as here) the target is already known to be multivariate normal.</p>
+      </section>
+
+      <section>
+        <h2><span class="num">6.5</span>Common exam pitfalls</h2>
+        <ul>
+          <li>Building <span class="m">Σ</span> from correlations: multiply by <em>both</em> standard deviations,
+            not variances — a very common slip.</li>
+          <li><span class="m">Σ</span> must be symmetric positive semi-definite — if a computed
+            <span class="m">Σ</span> fails Cholesky in R, double check the correlation values are consistent
+            (e.g. can't all three pairwise correlations be simultaneously extreme).</li>
+          <li>When asked to "compare simulation methods", answer in terms of <b>independence of draws</b> and
+            <b>computational cost per effective sample</b>, not just "which is faster to code".</li>
+        </ul>
+        <p class="material"><span class="lab">Material:</span> LN <code>chap3_part2</code> · R <code>bivariate_normal.R</code> <code>multivariate_normal_example.R</code></p>
+      </section>
+
+    </article>
+
+      <nav class="pager">
+        <a href="topic-accept-reject.html"><span class="lab">Previous</span>← Accept–Reject method</a>
+        <a class="next" href="topic-composition-methods.html"><span class="lab">Next</span>Composition methods →</a>
+      </nav>
+    </main>
+  </div>
+</div>

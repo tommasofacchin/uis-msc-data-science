@@ -1,0 +1,152 @@
+<title>Composition & Transformation — STA510 Notes</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;0,600;0,700;1,500&family=STIX+Two+Text:ital,wght@0,400;0,500;0,600;1,400;1,500&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="style.css">
+
+<div class="shell">
+  <div class="crumb">
+    <a href="exam_roadmap.html">STA510 Roadmap</a><span class="sep">›</span><span>Ch. 3 · Simulation basics</span>
+  </div>
+
+  <header class="note-header">
+    <div class="eyebrow"><span class="dot"></span> STA510 · Study note</div>
+    <h1><span class="num">7</span>Simulation via composition / transformation</h1>
+    <p class="dek">Two different ideas that both go by "combining distributions" — sums/transformations of the
+      <em>same</em> draw, versus mixtures where each draw comes from <em>one</em> of several sub-populations.
+      Keep them apart.</p>
+    <div class="examtags"><span class="lab">Tested in:</span>
+      <span class="examtag">v24</span><span class="examtag">h24</span></div>
+  </header>
+
+  <details class="mobile-toc">
+    <summary>Jump to a topic ▾</summary>
+    <nav>
+      <ul class="toc-list">
+        <li><a href="topic-continuous-rv.html">1. Continuous r.v.'s</a></li>
+        <li><a href="topic-inverse-transform.html">4. Inverse transform</a></li>
+        <li><a href="topic-accept-reject.html">5. Accept‑Reject</a></li>
+        <li><a href="topic-monte-carlo-integration.html">11. Monte Carlo integrals</a></li>
+        <li><a href="topic-bootstrap.html">12. Bootstrap</a></li>
+        <li><a href="exam_roadmap.html">← Back to roadmap index</a></li>
+      </ul>
+    </nav>
+  </details>
+
+  <div class="layout">
+    <nav class="toc" aria-label="Table of contents">
+      <h2>Study order</h2>
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 2 — Foundations</div>
+        <ul class="toc-list">
+          <li><a href="topic-continuous-rv.html">1. Continuous r.v.'s</a></li>
+          <li><a href="topic-clt-ci.html">2. CLT &amp; CIs</a></li>
+          <li><a href="topic-mle.html">3. MLE</a></li>
+        </ul>
+      </div>
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 3 — Simulation basics</div>
+        <ul class="toc-list">
+          <li><a href="topic-inverse-transform.html">4. Inverse transform</a></li>
+          <li><a href="topic-accept-reject.html">5. Accept‑Reject</a></li>
+          <li><a href="topic-multivariate-sim.html">6. Multivariate sim.</a></li>
+          <li><span class="current">7. Composition methods</span></li>
+        </ul>
+      </div>
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 4 — Processes &amp; applications</div>
+        <ul class="toc-list">
+          <li><a href="topic-poisson-processes.html">8. Poisson processes</a></li>
+          <li><a href="topic-markov-chains.html">9. Markov chains</a></li>
+          <li><a href="topic-reliability.html">10. Reliability systems</a></li>
+        </ul>
+      </div>
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 6 — MC &amp; resampling</div>
+        <ul class="toc-list">
+          <li><a href="topic-monte-carlo-integration.html">11. Monte Carlo integrals</a></li>
+          <li><a href="topic-bootstrap.html">12. Bootstrap</a></li>
+          <li><a href="topic-kde.html">13. KDE vs. histogram</a></li>
+        </ul>
+      </div>
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 11–12 — MCMC &amp; Bayesian</div>
+        <ul class="toc-list">
+          <li><a href="topic-mcmc.html">14. MCMC — M‑H</a></li>
+          <li><a href="topic-bayesian.html">15. Bayesian stats</a></li>
+        </ul>
+      </div>
+      <div class="toc-tier">
+        <ul class="toc-list"><li><a href="exam_roadmap.html">← Back to roadmap index</a></li></ul>
+      </div>
+    </nav>
+
+    <main>
+    <article class="note">
+
+      <section>
+        <h2><span class="num">7.1</span>Sums and linear combinations</h2>
+        <p>Simulating <span class="m">Y = a₁X₁ + a₂X₂ + … + a<sub>m</sub>X<sub>m</sub></span> is just: simulate each
+          <span class="m">X<sub>i</sub></span> independently, then combine — no new theory needed, just the
+          expectation/variance rules from linear combinations.</p>
+        <div class="callout example"><b>Worked example.</b> <span class="m">Y=10X₁+25X₂+100X₃</span>,
+          <span class="m">X₁∼N(20,100)</span>, <span class="m">X₂∼Gamma(3,2)</span>, <span class="m">X₃∼Beta(2,2)</span>,
+          independent. Simulate <span class="m">n</span> triples, form <span class="m">Y<sub>i</sub></span>, then read
+          off <span class="ov">Y</span>, <span class="m">s²(Y)</span>, and any probability
+          (<span class="m">P(Y&gt;200)</span>, etc.) as sample proportions/statistics — exactly the "simulate then
+          summarize" pattern from the <a href="topic-monte-carlo-integration.html">MC integrals page</a> §4.7.</div>
+      </section>
+
+      <section>
+        <h2><span class="num">7.2</span>Classic distribution relationships</h2>
+        <div class="formula left">
+          <b>Lognormal</b> from Normal: <span class="m">X=e<sup>Z</sup></span>, <span class="m">Z∼N(μ,σ²)</span>
+          ⇒ <span class="m">X∼Lognormal(μ,σ²)</span><br><br>
+          <b>χ²</b> from Normal: <span class="m">Σ<sub>i=1</sub><sup>k</sup> Z<sub>i</sub>² ∼ χ²<sub>k</sub></span>, <span class="m">Z<sub>i</sub></span> iid <span class="m">N(0,1)</span><br><br>
+          <b>Exponential</b> is Gamma with shape 1 (already the theme of every Poisson/reliability example)
+        </div>
+        <p>These relationships are exploited constantly to simplify a simulation: instead of deriving
+          <span class="m">F⁻¹</span> for an awkward density, recognize it's a known transform of something you
+          already know how to draw.</p>
+      </section>
+
+      <section>
+        <h2><span class="num">7.3</span>Mixtures — a different idea entirely</h2>
+        <p>A mixture describes a population made of several <b>sub-populations</b>, each observation coming from
+          exactly <em>one</em> of them:</p>
+        <div class="formula">
+          <span class="m">f<sub>X</sub>(x) = p₁f<sub>X₁</sub>(x) + p₂f<sub>X₂</sub>(x) + … + p<sub>m</sub>f<sub>X<sub>m</sub></sub>(x)</span>
+        </div>
+        <p>To simulate: first draw <em>which</em> component (a discrete draw with probabilities
+          <span class="m">p₁,…,p<sub>m</sub></span>), then draw from that component's distribution.</p>
+        <div class="callout example"><b>Example.</b> Adult height in Norway: women
+          <span class="m">X₁∼N(168, 6.0²)</span>, men <span class="m">X₂∼N(180, 6.5²)</span>. Overall height is a
+          50/50 mixture of the two normals — <em>not</em> the sum, and not itself normal (it's bimodal-ish if the
+          means are far enough apart).</div>
+        <div class="callout trap"><b>Sum vs mixture — the recurring confusion.</b> A <em>sum</em>
+          <span class="m">aX+bY</span> combines both variables in every single draw. A <em>mixture</em> uses only
+          <b>one</b> component per draw, chosen at random. They produce very different shapes even from the same
+          ingredients — always check which one a question actually describes before writing simulation code.</div>
+      </section>
+
+      <section>
+        <h2><span class="num">7.4</span>Common exam pitfalls</h2>
+        <ul>
+          <li>For a linear combination, remember the covariance term matters if the
+            <span class="m">X<sub>i</sub></span>'s are <em>not</em> independent (see the
+            <a href="topic-multivariate-sim.html">Multivariate simulation page</a>).</li>
+          <li>For a mixture, the weights <span class="m">p<sub>i</sub></span> must sum to 1 — and simulating "the
+            average of the components" is wrong; you must draw the component label first.</li>
+          <li>Recognize when a question is secretly asking for a known transform (Lognormal, χ²) rather than a
+            fresh inverse-transform/AR derivation.</li>
+        </ul>
+        <p class="material"><span class="lab">Material:</span> LN <code>chap3_part2</code> · R <code>sums_mixtures_examples.R</code></p>
+      </section>
+
+    </article>
+
+      <nav class="pager">
+        <a href="topic-multivariate-sim.html"><span class="lab">Previous</span>← Multivariate simulation</a>
+        <a class="next" href="topic-poisson-processes.html"><span class="lab">Next</span>Poisson processes →</a>
+      </nav>
+    </main>
+  </div>
+</div>

@@ -1,0 +1,270 @@
+<title>Bootstrap — STA510 Notes</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;0,600;0,700;1,500&family=STIX+Two+Text:ital,wght@0,400;0,500;0,600;1,400;1,500&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="style.css">
+
+<div class="shell">
+  <div class="crumb">
+    <a href="exam_roadmap.html">STA510 Roadmap</a><span class="sep">›</span><span>Ch. 6 · Monte Carlo &amp; resampling</span>
+  </div>
+
+  <header class="note-header">
+    <div class="eyebrow"><span class="dot"></span> STA510 · Study note</div>
+    <h1><span class="num">5</span>Bootstrap</h1>
+    <p class="dek">Resample the data itself (with replacement) to approximate the sampling distribution of an
+      estimator — then read off bias, SE, MSE, and three different flavors of confidence interval from it.</p>
+    <div class="examtags"><span class="lab">Tested in:</span>
+      <span class="examtag">h22</span><span class="examtag">v24</span>
+      <span class="examtag">v25</span><span class="examtag">h25</span>
+      <span class="lab" style="margin-left:8px;">(not tested: v23 · h23 · h24 · v26)</span></div>
+  </header>
+
+  <details class="mobile-toc">
+    <summary>Jump to a topic ▾</summary>
+    <nav>
+      <ul class="toc-list">
+        <li><a href="topic-continuous-rv.html">1. Continuous r.v.'s</a></li>
+        <li><a href="topic-inverse-transform.html">4. Inverse transform</a></li>
+        <li><a href="topic-accept-reject.html">5. Accept‑Reject</a></li>
+        <li><a href="topic-monte-carlo-integration.html">11. Monte Carlo integrals</a></li>
+        <li><a href="topic-bootstrap.html">12. Bootstrap</a></li>
+        <li><a href="exam_roadmap.html">← Back to roadmap index</a></li>
+      </ul>
+    </nav>
+  </details>
+
+  <div class="layout">
+    <nav class="toc" aria-label="Table of contents">
+      <h2>Study order</h2>
+
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 2 — Foundations</div>
+        <ul class="toc-list">
+          <li><a href="topic-continuous-rv.html">1. Continuous r.v.'s</a></li>
+          <li><a href="topic-clt-ci.html">2. CLT &amp; CIs</a></li>
+          <li><a href="topic-mle.html">3. MLE</a></li>
+        </ul>
+      </div>
+
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 3 — Simulation basics</div>
+        <ul class="toc-list">
+          <li><a href="topic-inverse-transform.html">4. Inverse transform</a></li>
+          <li><a href="topic-accept-reject.html">5. Accept‑Reject</a></li>
+          <li><a href="topic-multivariate-sim.html">6. Multivariate sim.</a></li>
+          <li><a href="topic-composition-methods.html">7. Composition methods</a></li>
+        </ul>
+      </div>
+
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 4 — Processes &amp; applications</div>
+        <ul class="toc-list">
+          <li><a href="topic-poisson-processes.html">8. Poisson processes</a></li>
+          <li><a href="topic-markov-chains.html">9. Markov chains</a></li>
+          <li><a href="topic-reliability.html">10. Reliability systems</a></li>
+        </ul>
+      </div>
+
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 6 — MC &amp; resampling</div>
+        <ul class="toc-list">
+          <li><a href="topic-monte-carlo-integration.html">11. Monte Carlo integrals</a></li>
+          <li><span class="current">12. Bootstrap</span></li>
+          <li><a href="topic-kde.html">13. KDE vs. histogram</a></li>
+        </ul>
+      </div>
+
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 11–12 — MCMC &amp; Bayesian</div>
+        <ul class="toc-list">
+          <li><a href="topic-mcmc.html">14. MCMC — M‑H</a></li>
+          <li><a href="topic-bayesian.html">15. Bayesian stats</a></li>
+        </ul>
+      </div>
+
+      <div class="toc-tier">
+        <ul class="toc-list"><li><a href="exam_roadmap.html">← Back to roadmap index</a></li></ul>
+      </div>
+    </nav>
+
+    <main>
+    <article class="note">
+
+    <section>
+      <h2><span class="num">5.1</span>Idea and algorithm</h2>
+      <p>Given data <span class="m">x₁,…,x<sub>n</sub></span> and an estimator <span class="m">θ̂=g(x₁,…,x<sub>n</sub>)</span>,
+        the non-parametric bootstrap treats the observed data as a stand-in for the whole population:</p>
+      <ol class="algo">
+        <li>Draw a resample of size <span class="m">n</span> <b>with replacement</b> from <span class="m">x₁,…,x<sub>n</sub></span>.</li>
+        <li>Compute the same estimator on the resample: <span class="m">θ̂*<sub>b</sub></span>.</li>
+        <li>Repeat steps 1–2 a large number of times <span class="m">B</span> (e.g. 2000–4000).</li>
+        <li>Use the empirical distribution of <span class="m">θ̂*₁,…,θ̂*<sub>B</sub></span> as a stand-in for the true
+          sampling distribution of <span class="m">θ̂</span>.</li>
+      </ol>
+      <pre class="rcode"><code>B <- 4000
+boot.est <- numeric(B)
+for(i in 1:B){
+  x.star     <- sample(x, size = length(x), replace = TRUE)
+  boot.est[i] <- my.estimator(x.star)   # same formula as theta.hat, applied to the resample
+}</code></pre>
+    </section>
+
+    <section>
+      <h2><span class="num">5.2</span>Bias, SE, MSE, bias-corrected estimate</h2>
+      <div class="formula left">
+        <span class="m">bias<sub>boot</sub> = <span class="ov">θ̂*</span> − θ̂</span> &nbsp;(mean of the bootstrap replicates minus the <em>original</em> estimate)<br><br>
+        <span class="m">SE<sub>boot</sub> = sd(θ̂*₁,…,θ̂*<sub>B</sub>)</span><br><br>
+        <span class="m">MSE<sub>boot</sub> = Var(θ̂*) + bias²<sub>boot</sub></span> &nbsp;(plus, not minus — a frequent slip)<br><br>
+        Bias-corrected estimate: <span class="m">θ̂<sub>bc</sub> = θ̂ − bias<sub>boot</sub> = 2θ̂ − <span class="ov">θ̂*</span></span>
+      </div>
+    </section>
+
+    <section>
+      <h2><span class="num">5.3</span>Three confidence intervals — know all three cold</h2>
+      <div class="formula left">
+        <b>Normal:</b> &nbsp;<span class="m">θ̂ ± z<sub>α/2</sub>·SE<sub>boot</sub></span><br><br>
+        <b>Percentile:</b> &nbsp;<span class="m">[q<sub>α/2</sub>,\; q<sub>1−α/2</sub>]</span> — the raw empirical quantiles of the bootstrap distribution, used directly<br><br>
+        <b>Basic</b> (reverse-percentile): &nbsp;<span class="m">[2θ̂ − q<sub>1−α/2</sub>,\; 2θ̂ − q<sub>α/2</sub>]</span> — <em>reflects</em> the percentile interval around θ̂
+      </div>
+      <div class="callout trap"><b>The single easiest thing to mix up:</b> Basic subtracts the quantiles <em>from</em>
+        <span class="m">2θ̂</span> and swaps their order (upper quantile subtracted to get the <em>lower</em> bound);
+        Percentile just uses the quantiles as-is. If a bootstrap distribution is skewed, all three intervals will
+        visibly disagree — that disagreement is itself something exams ask you to comment on.</div>
+    </section>
+
+    <section>
+      <h2><span class="num">5.4</span>Fully worked example — all three CIs (<span class="m">h25</span>)</h2>
+      <p>Rainfall data, <span class="m">n=40</span>, <span class="m">Exponential(β)</span> model,
+        <span class="m">β̂=<span class="ov">X</span>=9.29</span>mm. <span class="m">B=4000</span> bootstrap means give
+        <span class="m">mean(θ̂*)=9.277269</span>, <span class="m">sd(θ̂*)=0.5502607</span>, and quantiles
+        <span class="m">q<sub>2.5%</sub>=8.18</span>, <span class="m">q<sub>97.5%</sub>=10.36</span>.</p>
+      <div class="formula left">
+        bias <span class="m">= 9.277269 − 9.29 = −0.0127</span> &nbsp;·&nbsp; MSE <span class="m">= 0.5502607² + (−0.0127)² ≈ 0.30295</span><br>
+        bias-corrected: <span class="m">θ̂<sub>bc</sub> = 2(9.29) − 9.277269 = 9.3027</span><br><br>
+        Normal 95%: &nbsp;<span class="m">9.29 ± 1.96(0.5503) = [8.21,\ 10.37]</span><br>
+        Percentile 95%: &nbsp;<span class="m">[8.18,\ 10.36]</span> &nbsp;(read straight off the quantiles)<br>
+        Basic 95%: &nbsp;<span class="m">[2(9.29)−10.36,\ 2(9.29)−8.18] = [8.22,\ 10.40]</span>
+      </div>
+      <p>All three land close together here because the bootstrap distribution is nearly symmetric — the giveaway is
+        that <span class="m">mean(θ̂*)≈β̂</span> and Normal/Percentile/Basic barely differ.</p>
+    </section>
+
+    <section>
+      <h2><span class="num">5.5</span>When the three CIs visibly disagree (<span class="m">v24</span>)</h2>
+      <p><span class="m">n=20</span> lifetimes, <span class="m">θ̂=0.481</span>. Bootstrap gives
+        <span class="m">mean(θ̂*)=0.498</span>, <span class="m">median(θ̂*)=0.485</span>,
+        <span class="m">sd(θ̂*)=0.101</span>, <span class="m">q<sub>5%</sub>=0.361</span>,
+        <span class="m">q<sub>95%</sub>=0.686</span>.</p>
+      <div class="formula left">
+        bias <span class="m">= 0.498−0.481 = 0.017</span> &nbsp;·&nbsp; MSE <span class="m">= 0.101² + 0.017² ≈ 0.01049</span><br><br>
+        90% Normal: &nbsp;<span class="m">0.481 ± 1.6449(0.101) = [0.315,\ 0.647]</span><br>
+        90% Percentile: &nbsp;<span class="m">[0.361,\ 0.686]</span>
+      </div>
+      <div class="callout"><b>Comment expected here —</b> the two 90% intervals are shifted relative to each other
+        (Normal centered on <span class="m">θ̂</span>, Percentile shifted right toward the bootstrap mean/median).
+        Since <span class="m">mean(θ̂*)=0.498 &gt; median(θ̂*)=0.485 &gt; θ̂=0.481</span>, the bootstrap distribution is
+        right-skewed — exactly why the symmetric Normal interval disagrees with Percentile, and why Percentile
+        (which makes no symmetry assumption) is generally preferred whenever skew is visible like this.</div>
+    </section>
+
+    <section>
+      <h2><span class="num">5.6</span>A near-symmetric case for contrast (<span class="m">h22</span>)</h2>
+      <p>KDE-based density estimate <span class="m">θ̂=0.383733</span> at a point, <span class="m">B=2000</span>,
+        <span class="m">mean(θ̂*)=0.384128</span>, <span class="m">var(θ̂*)=0.0010266</span> (note: <em>variance</em>,
+        so <span class="m">SE=√0.0010266=0.03204</span>), <span class="m">q<sub>2.5%</sub>=0.327</span>,
+        <span class="m">q<sub>97.5%</sub>=0.449</span>.</p>
+      <div class="formula left">
+        bias <span class="m">≈ 0.000395</span> (negligible) &nbsp;·&nbsp; MSE <span class="m">≈ 0.0010267</span><br><br>
+        Normal 95%: &nbsp;<span class="m">0.3837 ± 1.96(0.03204) = [0.3209,\ 0.4465]</span><br>
+        Percentile 95%: &nbsp;<span class="m">[0.327,\ 0.449]</span>
+      </div>
+      <p>Close but not identical — a small amount of skew is normal even here; comment on the <em>direction</em> of
+        any shift rather than expecting an exact match.</p>
+    </section>
+
+    <section>
+      <h2><span class="num">5.7</span>Spot-the-bug — resampling loop (<span class="m">v25</span>)</h2>
+      <pre class="rcode"><code>bootSample1 <- sample(data, size=length(data), replace=FALSE)
+
+bootSample2 <- for(i in 1:length(data)){
+  bootFunc(sample(data, size=nrep, replace=TRUE))
+}
+
+bootSample3 <- for(i in 1:nrep){
+  bootFunc(sample(data, size=length(data), replace=TRUE))
+}
+
+bootSample4 <- for(i in 1:nrep){
+  mean(sample(data, size=length(data), replace=TRUE))
+}</code></pre>
+      <div class="callout example"><b>Only <code>bootSample3</code> is correct.</b>
+        <p><code>bootSample1</code> uses <code>replace=FALSE</code> — that's just a reshuffling of the exact same
+        data, not a bootstrap resample; every "replicate" would contain identical values. <code>bootSample2</code>
+        swaps the two numbers: it loops <code>length(data)</code> times instead of <code>nrep</code>, and draws
+        samples of size <code>nrep</code> instead of <code>length(data)</code> — both dimensions are wrong.
+        <code>bootSample4</code> hardcodes <code>mean()</code> instead of calling the actual estimator
+        <code>bootFunc</code> — only correct by accident if the estimator of interest happens to be the mean.
+        <code>bootSample3</code> has both numbers in the right place: loop <span class="m">nrep</span> times, resample
+        size <span class="m">length(data)</span> with replacement, apply the real estimator each time.</p></div>
+    </section>
+
+    <section>
+      <h2><span class="num">5.8</span>Spot-the-bug — MSE formula (<span class="m">v25</span>)</h2>
+      <pre class="rcode"><code>b.mse1 <- var(bootEstB) - (mean(bootEstB) - b.MLE(data))^2
+b.mse2 <- sd(bootEstB)  - (mean(bootEstB) - b.MLE(data))^2
+b.mse3 <- sd(bootEstB)  - (mean(bootEstB))^2</code></pre>
+      <div class="callout trap"><b>None of the three are correct</b> — a genuine possibility to keep in mind, don't
+        assume one option must be right.
+        <p><code>b.mse1</code> has the right pieces (variance and squared bias) but the wrong sign: MSE is variance
+        <b>plus</b> bias², not minus. <code>b.mse2</code> repeats that sign error and additionally uses
+        <code>sd()</code> where <code>var()</code> belongs (SE and variance are not interchangeable in this formula).
+        <code>b.mse3</code> compounds both problems and also drops the subtraction of <code>b.MLE(data)</code>
+        entirely, squaring the raw bootstrap mean instead of the bias. The correct line is:</p>
+        <pre class="rcode" style="margin:8px 0 0;"><code>b.mse.correct <- var(bootEstB) + (mean(bootEstB) - b.MLE(data))^2</code></pre>
+      </div>
+    </section>
+
+    <section>
+      <h2><span class="num">5.9</span>Spot-the-bug — CI formulas (<span class="m">v25</span>)</h2>
+      <pre class="rcode"><code>normalBootCI1 <- b.MLE(data) + c(-1,1)*qnorm(0.95)  * sd(bootEstB)
+normalBootCI2 <- b.MLE(data) + c(-1,1)*qnorm(0.975) * var(bootEstB)
+
+percentBootCI_v1 <- quantile(bootEstB, probs=c(0.025,0.975))
+percentBootCI_v2 <- 1 - quantile(bootEstB, probs=c(0.025,0.975))</code></pre>
+      <div class="callout example"><b>Percentile:</b> <code>percentBootCI_v1</code> is exactly the definition in §5.3
+        — correct. <code>percentBootCI_v2</code> subtracts the quantiles from 1, which isn't a bootstrap CI for
+        anything meaningful here — wrong.</div>
+      <div class="callout trap"><b>Normal:</b> neither is fully right as a 95% interval.
+        <code>normalBootCI1</code> uses <code>qnorm(0.95)≈1.645</code>, the multiplier for a <em>90%</em> two-sided
+        interval (or a one-sided 95% bound) — wrong <span class="m">z</span> for a stated 95% two-sided CI.
+        <code>normalBootCI2</code> uses the right <span class="m">z</span> (<code>qnorm(0.975)≈1.96</code>) but
+        multiplies by <code>var()</code> instead of <code>sd()</code> — variance is in squared units and will make
+        the interval far too wide. The correct line combines the right pieces of each:
+        <code>b.MLE(data) + c(-1,1)*qnorm(0.975)*sd(bootEstB)</code>.</div>
+    </section>
+
+    <section>
+      <h2><span class="num">5.10</span>Common exam pitfalls</h2>
+      <ul>
+        <li><code>replace=TRUE</code> is non-negotiable — without it there's no bootstrap.</li>
+        <li>Bias is <span class="m"><span class="ov">θ̂*</span> − θ̂</span> (bootstrap mean minus the <em>original</em>
+          estimate), never the other way around — the sign matters for the bias-corrected estimate.</li>
+        <li>MSE adds variance and squared bias; check whether you're given <code>sd()</code> or <code>var()</code>
+          before plugging in.</li>
+        <li>Percentile CI uses the quantiles directly; Basic CI reflects them around <span class="m">2θ̂</span> — write
+          out both formulas rather than guessing which one a given line of code matches.</li>
+        <li>If asked to "compare" the CI types, look at whether <span class="m">mean(θ̂*)</span> and
+          <span class="m">median(θ̂*)</span> differ from <span class="m">θ̂</span> — that skew is exactly what drives
+          Normal and Percentile apart.</li>
+      </ul>
+      <p class="material"><span class="lab">Material:</span> LN <code>chap6_part1</code> <code>chap6_part2</code> · Ex <code>exercise_set3</code> · R <code>bootstrap_examples.R</code></p>
+    </section>
+
+    </article>
+
+      <nav class="pager">
+        <a href="topic-monte-carlo-integration.html"><span class="lab">Previous</span>← Monte Carlo integrals</a>
+        <a class="next" href="topic-kde.html"><span class="lab">Next</span>KDE vs. histogram →</a>
+      </nav>
+    </main>
+  </div>
+</div>

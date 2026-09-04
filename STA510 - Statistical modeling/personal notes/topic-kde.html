@@ -1,0 +1,174 @@
+<title>KDE vs Histogram — STA510 Notes</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;0,600;0,700;1,500&family=STIX+Two+Text:ital,wght@0,400;0,500;0,600;1,400;1,500&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="style.css">
+
+<div class="shell">
+  <div class="crumb">
+    <a href="exam_roadmap.html">STA510 Roadmap</a><span class="sep">›</span><span>Ch. 6 · Monte Carlo &amp; resampling</span>
+  </div>
+
+  <header class="note-header">
+    <div class="eyebrow"><span class="dot"></span> STA510 · Study note</div>
+    <h1><span class="num">13</span>Kernel Density Estimation vs. histogram</h1>
+    <p class="dek">Both are just bias-variance tradeoffs with a different knob — bin-width <span class="m">h</span>
+      for the histogram, bandwidth <span class="m">h</span> for KDE — and both can be fooled the same way.</p>
+    <div class="examtags"><span class="lab">Tested in:</span> <span class="examtag">h23</span><span class="examtag">h24</span></div>
+  </header>
+
+  <details class="mobile-toc">
+    <summary>Jump to a topic ▾</summary>
+    <nav>
+      <ul class="toc-list">
+        <li><a href="topic-continuous-rv.html">1. Continuous r.v.'s</a></li>
+        <li><a href="topic-inverse-transform.html">4. Inverse transform</a></li>
+        <li><a href="topic-accept-reject.html">5. Accept‑Reject</a></li>
+        <li><a href="topic-monte-carlo-integration.html">11. Monte Carlo integrals</a></li>
+        <li><a href="topic-bootstrap.html">12. Bootstrap</a></li>
+        <li><a href="exam_roadmap.html">← Back to roadmap index</a></li>
+      </ul>
+    </nav>
+  </details>
+
+  <div class="layout">
+    <nav class="toc" aria-label="Table of contents">
+      <h2>Study order</h2>
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 2 — Foundations</div>
+        <ul class="toc-list">
+          <li><a href="topic-continuous-rv.html">1. Continuous r.v.'s</a></li>
+          <li><a href="topic-clt-ci.html">2. CLT &amp; CIs</a></li>
+          <li><a href="topic-mle.html">3. MLE</a></li>
+        </ul>
+      </div>
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 3 — Simulation basics</div>
+        <ul class="toc-list">
+          <li><a href="topic-inverse-transform.html">4. Inverse transform</a></li>
+          <li><a href="topic-accept-reject.html">5. Accept‑Reject</a></li>
+          <li><a href="topic-multivariate-sim.html">6. Multivariate sim.</a></li>
+          <li><a href="topic-composition-methods.html">7. Composition methods</a></li>
+        </ul>
+      </div>
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 4 — Processes &amp; applications</div>
+        <ul class="toc-list">
+          <li><a href="topic-poisson-processes.html">8. Poisson processes</a></li>
+          <li><a href="topic-markov-chains.html">9. Markov chains</a></li>
+          <li><a href="topic-reliability.html">10. Reliability systems</a></li>
+        </ul>
+      </div>
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 6 — MC &amp; resampling</div>
+        <ul class="toc-list">
+          <li><a href="topic-monte-carlo-integration.html">11. Monte Carlo integrals</a></li>
+          <li><a href="topic-bootstrap.html">12. Bootstrap</a></li>
+          <li><span class="current">13. KDE vs. histogram</span></li>
+        </ul>
+      </div>
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 11–12 — MCMC &amp; Bayesian</div>
+        <ul class="toc-list">
+          <li><a href="topic-mcmc.html">14. MCMC — M‑H</a></li>
+          <li><a href="topic-bayesian.html">15. Bayesian stats</a></li>
+        </ul>
+      </div>
+      <div class="toc-tier">
+        <ul class="toc-list"><li><a href="exam_roadmap.html">← Back to roadmap index</a></li></ul>
+      </div>
+    </nav>
+
+    <main>
+    <article class="note">
+
+      <section>
+        <h2><span class="num">13.1</span>Histogram</h2>
+        <div class="formula">
+          <span class="m">f̂(x) = ν<sub>k</sub>/(nh)</span> for <span class="m">t<sub>k</sub>≤x&lt;t<sub>k+1</sub></span>, bins of width <span class="m">h</span>, <span class="m">ν<sub>k</sub></span> = count in bin <span class="m">k</span>
+        </div>
+        <p>Always a proper density (integrates to 1). But biased for any non-constant <span class="m">f</span> —
+          each bin reports the local <em>average</em> of <span class="m">f</span>, not its value at a point — with:</p>
+        <div class="formula left">
+          bias <span class="m">∝ h</span> &nbsp;(grows with <span class="m">h</span>) &nbsp;·&nbsp;
+          <span class="m">Var(f̂(x)) ≈ f(x)/(nh)</span> &nbsp;(shrinks with <span class="m">h</span>)
+        </div>
+      </section>
+
+      <section>
+        <h2><span class="num">13.2</span>Kernel density estimation (KDE)</h2>
+        <div class="formula">
+          <span class="m">f̂<sub>K</sub>(x) = <span class="frac"><span class="num">1</span><span class="den">n</span></span>Σ<sub>i=1</sub><sup>n</sup> <span class="frac"><span class="num">1</span><span class="den">h</span></span>K<big>(</big><span class="frac"><span class="num">x−X<sub>i</sub></span><span class="den">h</span></span><big>)</big></span>
+        </div>
+        <p>Every data point contributes a small "bump" of shape <span class="m">K</span> (usually the standard
+          normal density) centered on itself, scaled by bandwidth <span class="m">h</span>; the estimate is the
+          average of all <span class="m">n</span> bumps. Also always a proper density. Same bias-variance shape as
+          the histogram, just with a different constant:</p>
+        <div class="formula left">
+          bias <span class="m">∝ h²f″(x)/2</span> &nbsp;·&nbsp; <span class="m">Var(f̂<sub>K</sub>(x)) ∝ 1/(nh)</span>
+        </div>
+      </section>
+
+      <section>
+        <h2><span class="num">13.3</span>Bias-variance tradeoff, and how <span class="m">h</span> is chosen</h2>
+        <div class="formula left">
+          Small <span class="m">h</span>: low bias, high variance (jagged, noisy) — too many bins / too little smoothing.<br>
+          Large <span class="m">h</span>: low variance, high bias (flat, oversmoothed) — too few bins / too much smoothing.
+        </div>
+        <p>Minimizing (mean-integrated squared error, <span class="m">MISE=∫MSE(f̂(x))dx</span>) trades the two off.
+          Since the optimum depends on the unknown <span class="m">f</span> itself, practical rules plug in a normal
+          approximation:</p>
+        <div class="formula left">
+          <b>Scott's rule</b> (histogram): <span class="m">ĥ ≈ 3.49σ̂n<sup>−1/3</sup></span><br>
+          <b>Sturges' rule</b> (histogram, R's default): <span class="m">ĥ = (max−min)/(1+log₂n)</span><br>
+          <b>KDE rule of thumb</b>: <span class="m">ĥ ≈ 1.06σ̂n<sup>−1/5</sup></span> (for a Gaussian kernel)
+        </div>
+      </section>
+
+      <section>
+        <h2><span class="num">13.4</span>When both fail</h2>
+        <p>All three rules above assume the data is close to normal. Two situations break that assumption:</p>
+        <ul>
+          <li><b>Bounded/skewed data</b> (e.g. Exponential, or any distribution with a hard boundary): KDE spreads
+            probability mass <em>past</em> the boundary (e.g. below 0 for an Exponential), because a symmetric
+            kernel doesn't know about the constraint. The histogram is more robust to this, though still biased
+            near the edge.</li>
+          <li><b>Multimodal/mixture data</b> (e.g. two well-separated normal components): a bandwidth tuned for
+            overall smoothness tends to either blur the two modes together (too large) or make each mode noisy
+            (too small) — there's no single <span class="m">h</span> that's right everywhere.</li>
+        </ul>
+        <div class="callout trap"><b>h24 asks directly</b> whether Scott's rule is advisable for
+          <span class="m">n=10000</span> simulated Pareto(4,2) draws. Answer: no — Pareto is heavily right-skewed
+          with a hard lower boundary at <span class="m">a=4</span>, nothing like the normal shape Scott's rule is
+          calibrated for; it will not adapt to the sharp cutoff and will oversmooth the peak near the boundary.</div>
+      </section>
+
+      <section>
+        <h2><span class="num">13.5</span>Comparing KDEs at different bandwidths (h23-style)</h2>
+        <p>Given several KDE curves overlaid on the same histogram (e.g. of simulated reliability-system lifetimes
+          from the <a href="topic-reliability.html">Reliability page</a>) with different bandwidths: the
+          <em>widest/smoothest</em> curve has the largest <span class="m">h</span> (low variance, more bias — may
+          hide real structure like a mode or a sharp edge); the <em>most wiggly</em> curve has the smallest
+          <span class="m">h</span> (low bias, high variance — likely fitting noise). Pick the one that traces the
+          histogram's overall shape without following every random bump.</p>
+      </section>
+
+      <section>
+        <h2><span class="num">13.6</span>Common exam pitfalls</h2>
+        <ul>
+          <li>State the shared idea first (both are biased, both trade bias for variance via a smoothing
+            parameter) before listing differences — questions often ask for "what they have in common" explicitly.</li>
+          <li>Justify a bandwidth choice by its effect on bias vs. variance, not just "it looks smoother/rougher".</li>
+          <li>Normal-reference rules (Scott, KDE rule of thumb) are calibrated <em>for</em> normal-like data — flag
+            them as questionable whenever the underlying distribution is visibly skewed, bounded, or multimodal.</li>
+        </ul>
+        <p class="material"><span class="lab">Material:</span> LN <code>chap12.pdf</code> (Rizzo ch. 12.1–12.2) · R <code>KDE.R</code></p>
+      </section>
+
+    </article>
+
+      <nav class="pager">
+        <a href="topic-bootstrap.html"><span class="lab">Previous</span>← Bootstrap</a>
+        <a class="next" href="topic-mcmc.html"><span class="lab">Next</span>MCMC — Metropolis-Hastings →</a>
+      </nav>
+    </main>
+  </div>
+</div>

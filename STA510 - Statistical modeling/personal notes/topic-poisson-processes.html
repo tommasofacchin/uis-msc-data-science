@@ -1,0 +1,180 @@
+<title>Poisson Processes — STA510 Notes</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;0,600;0,700;1,500&family=STIX+Two+Text:ital,wght@0,400;0,500;0,600;1,400;1,500&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="style.css">
+
+<div class="shell">
+  <div class="crumb">
+    <a href="exam_roadmap.html">STA510 Roadmap</a><span class="sep">›</span><span>Ch. 4 · Processes &amp; applications</span>
+  </div>
+
+  <header class="note-header">
+    <div class="eyebrow"><span class="dot"></span> STA510 · Study note</div>
+    <h1><span class="num">8</span>Poisson processes</h1>
+    <p class="dek">Counting random events over time: homogeneous, non-homogeneous (via thinning), and the
+      handful of conditional-probability tricks that recur across every exam variant.</p>
+    <div class="examtags"><span class="lab">Tested in:</span>
+      <span class="examtag">h22</span><span class="examtag">h24</span><span class="examtag">h25</span></div>
+  </header>
+
+  <details class="mobile-toc">
+    <summary>Jump to a topic ▾</summary>
+    <nav>
+      <ul class="toc-list">
+        <li><a href="topic-continuous-rv.html">1. Continuous r.v.'s</a></li>
+        <li><a href="topic-inverse-transform.html">4. Inverse transform</a></li>
+        <li><a href="topic-accept-reject.html">5. Accept‑Reject</a></li>
+        <li><a href="topic-monte-carlo-integration.html">11. Monte Carlo integrals</a></li>
+        <li><a href="topic-bootstrap.html">12. Bootstrap</a></li>
+        <li><a href="exam_roadmap.html">← Back to roadmap index</a></li>
+      </ul>
+    </nav>
+  </details>
+
+  <div class="layout">
+    <nav class="toc" aria-label="Table of contents">
+      <h2>Study order</h2>
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 2 — Foundations</div>
+        <ul class="toc-list">
+          <li><a href="topic-continuous-rv.html">1. Continuous r.v.'s</a></li>
+          <li><a href="topic-clt-ci.html">2. CLT &amp; CIs</a></li>
+          <li><a href="topic-mle.html">3. MLE</a></li>
+        </ul>
+      </div>
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 3 — Simulation basics</div>
+        <ul class="toc-list">
+          <li><a href="topic-inverse-transform.html">4. Inverse transform</a></li>
+          <li><a href="topic-accept-reject.html">5. Accept‑Reject</a></li>
+          <li><a href="topic-multivariate-sim.html">6. Multivariate sim.</a></li>
+          <li><a href="topic-composition-methods.html">7. Composition methods</a></li>
+        </ul>
+      </div>
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 4 — Processes &amp; applications</div>
+        <ul class="toc-list">
+          <li><span class="current">8. Poisson processes</span></li>
+          <li><a href="topic-markov-chains.html">9. Markov chains</a></li>
+          <li><a href="topic-reliability.html">10. Reliability systems</a></li>
+        </ul>
+      </div>
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 6 — MC &amp; resampling</div>
+        <ul class="toc-list">
+          <li><a href="topic-monte-carlo-integration.html">11. Monte Carlo integrals</a></li>
+          <li><a href="topic-bootstrap.html">12. Bootstrap</a></li>
+          <li><a href="topic-kde.html">13. KDE vs. histogram</a></li>
+        </ul>
+      </div>
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 11–12 — MCMC &amp; Bayesian</div>
+        <ul class="toc-list">
+          <li><a href="topic-mcmc.html">14. MCMC — M‑H</a></li>
+          <li><a href="topic-bayesian.html">15. Bayesian stats</a></li>
+        </ul>
+      </div>
+      <div class="toc-tier">
+        <ul class="toc-list"><li><a href="exam_roadmap.html">← Back to roadmap index</a></li></ul>
+      </div>
+    </nav>
+
+    <main>
+    <article class="note">
+
+      <section>
+        <h2><span class="num">8.1</span>Homogeneous Poisson process (HPP)</h2>
+        <p>Four defining properties (rate <span class="m">λ</span>, constant): <span class="m">N(0)=0</span>;
+          independent increments; <span class="m">P(1 event in [s,s+Δs])≈λΔs</span>; <span class="m">P(&gt;1
+          event)≈0</span>. Consequence:</p>
+        <div class="formula left">
+          <span class="m">N(t) ∼ Poisson(λt)</span>, &nbsp;<span class="m">E(N(t))=Var(N(t))=λt</span><br><br>
+          Inter-arrival times <span class="m">T₁,T₂,…</span> iid <span class="m">∼ Exponential(λ)</span><br><br>
+          Time of the <span class="m">k</span>-th event <span class="m">S<sub>k</sub>=T₁+…+T<sub>k</sub> ∼ Gamma(k,1/λ)</span>
+        </div>
+      </section>
+
+      <section>
+        <h2><span class="num">8.2</span>Simulating an HPP — two equivalent ways</h2>
+        <ol class="algo">
+          <li><b>Via inter-arrival times:</b> simulate <span class="m">T₁,T₂,…∼Exp(λ)</span>, cumulative-sum them
+            for arrival times, stop once past the horizon.</li>
+          <li><b>Via count-then-place:</b> simulate <span class="m">n∼Poisson(λt)</span>, then place
+            <span class="m">n</span> arrival times as iid <span class="m">Uniform(0,t)</span> draws, sorted.</li>
+        </ol>
+        <p>Method 2 works because, conditional on <span class="m">N(t)=n</span>, the event times are exactly
+          uniformly scattered over <span class="m">[0,t]</span> — a fact reused constantly for simulation and for
+          conditional-probability questions below.</p>
+      </section>
+
+      <section>
+        <h2><span class="num">8.3</span>Worked conditional probability — splitting a Poisson count</h2>
+        <p><span class="m">P(N(0.1)=0 ∣ N(1)=8)</span>. Given the total count in <span class="m">[0,1]</span> is 8,
+          how those 8 events split between <span class="m">[0,0.1]</span> and <span class="m">(0.1,1]</span> is
+          <span class="m">Binomial(8, p)</span> with <span class="m">p</span> = the length ratio
+          <span class="m">0.1/1=0.1</span> (this <em>is</em> the uniform-placement fact from §8.2):</p>
+        <div class="formula">
+          <span class="m">N(0.1) ∣ N(1)=8 ∼ Binomial(8, 0.1)</span> &nbsp;⇒&nbsp;
+          <span class="m">P(N(0.1)=0∣N(1)=8) = (1−0.1)⁸ = 0.9⁸ ≈ 0.4305</span>
+        </div>
+        <div class="callout"><b>General recipe —</b> any "conditional count in a sub-interval given the total"
+          question reduces to this Binomial-splitting trick: <span class="m">N(s)∣N(t)=k ∼ Binomial(k, s/t)</span>
+          for <span class="m">s&lt;t</span>.</div>
+      </section>
+
+      <section>
+        <h2><span class="num">8.4</span>Worked examples — direct distribution questions</h2>
+        <p><b>h22:</b> <span class="m">T₁</span> is the first-event time of an HPP(λ); it's
+          <span class="m">Exponential(λ)</span>, so <span class="m">E(T₁²)=2/λ²</span> (from
+          <span class="m">Var+E²=1/λ²+1/λ²</span>).</p>
+        <p><b>h24:</b> Newborns at <span class="m">λ=6/day</span>. <span class="m">P(N&lt;3) = e<sup>−6</sup>(1+6+18) ≈ 0.062</span>.
+          Time to the 3rd birth exceeding 8 hours (<span class="m">=1/3</span> day) uses the Poisson↔Gamma link
+          directly instead of integrating the Gamma density:</p>
+        <div class="formula">
+          <span class="m">P(T₃&gt;1/3) = P(N(1/3)≤2)</span>, &nbsp;<span class="m">N(1/3)∼Poisson(6×1/3=2)</span><br>
+          <span class="m">= e<sup>−2</sup>(1+2+2) = 5e<sup>−2</sup> ≈ 0.677</span>
+        </div>
+        <div class="callout example"><b>The trick worth remembering:</b> <span class="m">P(S<sub>k</sub>&gt;t) = P(N(t)&lt;k)</span>
+          — rewriting a Gamma-tail probability as a Poisson-cdf is almost always faster than integrating the Gamma
+          density directly.</div>
+      </section>
+
+      <section>
+        <h2><span class="num">8.5</span>Non-homogeneous Poisson process (NHPP) &amp; thinning</h2>
+        <p>Same axioms, but the rate <span class="m">λ(t)</span> now varies with time:
+          <span class="m">N(s+t)−N(s) ∼ Poisson(∫<sub>s</sub><sup>s+t</sup> λ(u)du)</span>.</p>
+        <ol class="algo">
+          <li>Find <span class="m">λ<sub>max</sub></span> bounding <span class="m">λ(t)</span> on the interval of interest.</li>
+          <li>Simulate an HPP with rate <span class="m">λ<sub>max</sub></span>, giving candidate times <span class="m">s₁,s₂,…</span>.</li>
+          <li>For each <span class="m">s<sub>i</sub></span>, accept it (keep it as a real event) with probability
+            <span class="m">λ(s<sub>i</sub>)/λ<sub>max</sub></span> — i.e. accept if <span class="m">u<sub>i</sub> ≤ λ(s<sub>i</sub>)/λ<sub>max</sub></span>, <span class="m">u<sub>i</sub>∼Unif(0,1)</span>.</li>
+          <li>The accepted times form the NHPP — this is exactly Accept-Reject, applied to arrival times.</li>
+        </ol>
+        <p><b>h24</b> asks for the expected count under <span class="m">λ(t)=−30t²+350t+3950</span> over a period —
+          just integrate: <span class="m">E(N) = ∫λ(t)dt</span> (a polynomial, trivial to integrate term-by-term).
+          <b>h25</b> gives a periodic intensity <span class="m">λ(t)=2+8sin²(π(t−6)/12)</span> — read off
+          <span class="m">λ<sub>max</sub>=10</span> directly (since <span class="m">sin²≤1</span>) before setting up
+          thinning.</p>
+      </section>
+
+      <section>
+        <h2><span class="num">8.6</span>Common exam pitfalls</h2>
+        <ul>
+          <li>Don't integrate a Gamma density when a Poisson-cdf rewrite (§8.4) is available — it's almost always
+            faster and less error-prone.</li>
+          <li>For thinning, <span class="m">λ<sub>max</sub></span> must bound <span class="m">λ(t)</span> over the
+            <em>whole</em> interval being simulated, not just a local piece.</li>
+          <li>Read the interpretation question carefully — a periodic/non-homogeneous <span class="m">λ(t)</span> is
+            usually meant to model a real seasonal or daily pattern; state what drives the peaks/troughs.</li>
+        </ul>
+        <p class="material"><span class="lab">Material:</span> LN <code>chap4_part1</code> <code>chap8.pdf</code> · Ex <code>exercise_set4</code> · R <code>rain.R</code></p>
+      </section>
+
+    </article>
+
+      <nav class="pager">
+        <a href="topic-composition-methods.html"><span class="lab">Previous</span>← Composition methods</a>
+        <a class="next" href="topic-markov-chains.html"><span class="lab">Next</span>Markov chains →</a>
+      </nav>
+    </main>
+  </div>
+</div>

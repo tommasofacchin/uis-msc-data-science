@@ -1,0 +1,293 @@
+<title>Monte Carlo Integration — STA510 Notes</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;0,600;0,700;1,500&family=STIX+Two+Text:ital,wght@0,400;0,500;0,600;1,400;1,500&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="style.css">
+
+<div class="shell">
+  <div class="crumb">
+    <a href="exam_roadmap.html">STA510 Roadmap</a><span class="sep">›</span><span>Ch. 6 · Monte Carlo &amp; resampling</span>
+  </div>
+
+  <header class="note-header">
+    <div class="eyebrow"><span class="dot"></span> STA510 · Study note</div>
+    <h1><span class="num">4</span>Monte Carlo methods for integrals</h1>
+    <p class="dek">Turn any integral into an expectation, estimate it by averaging simulated draws, then quantify
+      how precise that average is — and, when needed, make it more precise for free.</p>
+    <div class="examtags"><span class="lab">The most-tested topic — appears in:</span>
+      <span class="examtag">h22</span><span class="examtag">v23</span><span class="examtag">h23</span>
+      <span class="examtag">v24</span><span class="examtag">h24</span><span class="examtag">v25</span>
+      <span class="examtag">h25</span><span class="examtag">v26</span></div>
+  </header>
+
+  <details class="mobile-toc">
+    <summary>Jump to a topic ▾</summary>
+    <nav>
+      <ul class="toc-list">
+        <li><a href="topic-continuous-rv.html">1. Continuous r.v.'s</a></li>
+        <li><a href="topic-inverse-transform.html">4. Inverse transform</a></li>
+        <li><a href="topic-accept-reject.html">5. Accept‑Reject</a></li>
+        <li><a href="topic-monte-carlo-integration.html">11. Monte Carlo integrals</a></li>
+        <li><a href="topic-bootstrap.html">12. Bootstrap</a></li>
+        <li><a href="exam_roadmap.html">← Back to roadmap index</a></li>
+      </ul>
+    </nav>
+  </details>
+
+  <div class="layout">
+    <nav class="toc" aria-label="Table of contents">
+      <h2>Study order</h2>
+
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 2 — Foundations</div>
+        <ul class="toc-list">
+          <li><a href="topic-continuous-rv.html">1. Continuous r.v.'s</a></li>
+          <li><a href="topic-clt-ci.html">2. CLT &amp; CIs</a></li>
+          <li><a href="topic-mle.html">3. MLE</a></li>
+        </ul>
+      </div>
+
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 3 — Simulation basics</div>
+        <ul class="toc-list">
+          <li><a href="topic-inverse-transform.html">4. Inverse transform</a></li>
+          <li><a href="topic-accept-reject.html">5. Accept‑Reject</a></li>
+          <li><a href="topic-multivariate-sim.html">6. Multivariate sim.</a></li>
+          <li><a href="topic-composition-methods.html">7. Composition methods</a></li>
+        </ul>
+      </div>
+
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 4 — Processes &amp; applications</div>
+        <ul class="toc-list">
+          <li><a href="topic-poisson-processes.html">8. Poisson processes</a></li>
+          <li><a href="topic-markov-chains.html">9. Markov chains</a></li>
+          <li><a href="topic-reliability.html">10. Reliability systems</a></li>
+        </ul>
+      </div>
+
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 6 — MC &amp; resampling</div>
+        <ul class="toc-list">
+          <li><span class="current">11. Monte Carlo integrals</span></li>
+          <li><a href="topic-bootstrap.html">12. Bootstrap</a></li>
+          <li><a href="topic-kde.html">13. KDE vs. histogram</a></li>
+        </ul>
+      </div>
+
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 11–12 — MCMC &amp; Bayesian</div>
+        <ul class="toc-list">
+          <li><a href="topic-mcmc.html">14. MCMC — M‑H</a></li>
+          <li><a href="topic-bayesian.html">15. Bayesian stats</a></li>
+        </ul>
+      </div>
+
+      <div class="toc-tier">
+        <ul class="toc-list"><li><a href="exam_roadmap.html">← Back to roadmap index</a></li></ul>
+      </div>
+    </nav>
+
+    <main>
+    <article class="note">
+
+    <section>
+      <h2><span class="num">4.1</span>Crude Monte Carlo</h2>
+      <div class="formula left">
+        <span class="m">θ = ∫<sub>0</sub><sup>1</sup> g(x) dx = E(g(X))</span>, <span class="m">X∼Unif[0,1]</span>
+        &nbsp;⇒&nbsp; <span class="m">θ̂ = <span class="ov">g(X)</span> = (1/n)Σg(X<sub>i</sub>)</span><br><br>
+        General interval: <span class="m">θ=∫<sub>a</sub><sup>b</sup> g(x)dx = (b−a)E(g(X))</span>, <span class="m">X∼Unif[a,b]</span>
+        &nbsp;⇒&nbsp; <span class="m">θ̂<sub>CMC</sub> = <span class="frac"><span class="num">b−a</span><span class="den">n</span></span>Σg(X<sub>i</sub>)</span>
+      </div>
+    </section>
+
+    <section>
+      <h2><span class="num">4.2</span>General decomposition &amp; higher dimensions</h2>
+      <p>For <span class="m">θ=∫<sub>A</sub> g(x)dx</span> with an unbounded or oddly-shaped domain, split
+        <span class="m">g(x) = h(x)f(x)</span> where <span class="m">f</span> is <em>some</em> probability density on
+        <span class="m">A</span> you know how to sample:</p>
+      <div class="formula">
+        <span class="m">θ = ∫<sub>A</sub> h(x)f(x)dx = E(h(X))</span> &nbsp;⇒&nbsp; <span class="m">θ̂<sub>GCMC</sub> = (1/n)Σh(X<sub>i</sub>)</span>, &nbsp; <span class="m">X<sub>i</sub>∼f</span>
+      </div>
+      <p>Extending to several dimensions costs almost nothing — simulate each coordinate from its own uniform (or
+        other) proposal and average the integrand at the joint draws:</p>
+      <div class="formula">
+        <span class="m">∫<sub>a1</sub><sup>a2</sup>∫<sub>b1</sub><sup>b2</sup>∫<sub>c1</sub><sup>c2</sup> f(x,y,z)\,dz\,dy\,dx ≈ <span class="frac"><span class="num">(a2−a1)(b2−b1)(c2−c1)</span><span class="den">n</span></span>Σf(X<sub>i</sub>,Y<sub>i</sub>,Z<sub>i</sub>)</span>
+      </div>
+      <p>Cost grows only linearly with dimension (one extra proposal per axis) — the reason MC beats numerical
+        quadrature for high-dimensional integrals.</p>
+    </section>
+
+    <section>
+      <h2><span class="num">4.3</span>Precision, standard error, sample size</h2>
+      <div class="formula">
+        <span class="m">SD(θ̂) = <span class="frac"><span class="num">K</span><span class="den">√n</span></span></span> — precision only improves as <span class="m">√n</span>, so doubling accuracy costs 4× the simulations
+      </div>
+      <p>For crude MC on <span class="m">[a,b]</span>: <span class="m">SD(θ̂<sub>CMC</sub>) = (b−a)·σ<sub>g(X)</sub>/√n</span>,
+        with <span class="m">σ²<sub>g(X)</sub></span> estimated by the sample variance of <span class="m">g(X<sub>1</sub>),…,g(X<sub>n</sub>)</span>.
+        Since the estimator is an average, the CLT gives an approximate <span class="m">(1−α)100%</span> CI:</p>
+      <div class="formula">
+        <span class="m">θ̂ ± z<sub>α/2</sub>·SD(θ̂)</span>
+      </div>
+      <p>Solving for the <span class="m">n</span> needed to keep the margin under a target <span class="m">ε</span>:</p>
+      <div class="formula">
+        <span class="m">n &gt; z²<sub>α/2</sub>(b−a)²σ²<sub>g(X)</sub>/ε²</span> &nbsp;(for a <em>probability</em> estimate, <span class="m">p(1−p)&lt;0.25</span> always, so <span class="m">n&gt;z²<sub>α/2</sub>/4ε²</span> — at 95%, simply <span class="m">n&gt;1/ε²</span>)
+      </div>
+      <div class="callout trap"><b>Don't confuse <span class="m">SD(individual draws)</span> with <span class="m">SD(the estimator)</span>.</b>
+        A question may hand you the sample sd of the raw simulated values <span class="m">g(X<sub>i</sub>)</span> (or of
+        0/1 indicators) — that is <em>not</em> <span class="m">SD(θ̂)</span> yet; you still need to divide by
+        <span class="m">√n</span> (and multiply by <span class="m">b−a</span> if applicable) before building a CI.</div>
+    </section>
+
+    <section>
+      <h2><span class="num">4.4</span>Antithetic variables</h2>
+      <p>If <span class="m">U∼Unif[a,b]</span> then <span class="m">V=a+b−U</span> is also <span class="m">Unif[a,b]</span>
+        but negatively correlated with <span class="m">U</span>. When <span class="m">g</span> is <b>monotonic</b> on
+        <span class="m">[a,b]</span>, this makes <span class="m">g(U)</span> and <span class="m">g(V)</span>
+        negatively correlated too, which lowers the variance of the average:</p>
+      <div class="formula">
+        <span class="m">θ̂<sub>AT</sub> = <span class="frac"><span class="num">b−a</span><span class="den">n</span></span>[Σg(U<sub>i</sub>) + Σg(V<sub>i</sub>)]</span>, &nbsp; <span class="m">n/2</span> pairs, <span class="m">V<sub>i</sub>=a+b−U<sub>i</sub></span>
+      </div>
+      <div class="callout trap"><b>Check monotonicity first —</b> if <span class="m">g</span> is not monotonic over the
+        whole interval (e.g. an even function symmetric about the midpoint), <span class="m">U</span> and
+        <span class="m">V</span> can land in regions where <span class="m">g</span> moves the <em>same</em> direction,
+        giving little or no variance reduction — sometimes even worse than crude MC. Always state this when a
+        question asks you to "assess whether antithetic variables will help".</div>
+      <p>For a general proposal <span class="m">f</span> with known <span class="m">F⁻¹</span>, the antithetic pair is
+        <span class="m">X<sub>i</sub>=F⁻¹(U<sub>i</sub>)</span>, <span class="m">Y<sub>i</sub>=F⁻¹(1−U<sub>i</sub>)</span> —
+        for <span class="m">N(μ,σ²)</span> specifically, <span class="m">X<sub>i</sub>=μ+σZ<sub>i</sub></span>,
+        <span class="m">Y<sub>i</sub>=μ−σZ<sub>i</sub></span>.</p>
+    </section>
+
+    <section>
+      <h2><span class="num">4.5</span>Importance sampling</h2>
+      <div class="formula">
+        <span class="m">θ = ∫<sub>A</sub> <span class="frac"><span class="num">g(x)</span><span class="den">f(x)</span></span>f(x)dx = E<span class="frac"><span class="num">g(X)</span><span class="den">f(X)</span></span></span> &nbsp;⇒&nbsp; <span class="m">θ̂<sub>IS</sub> = (1/n)Σ g(X<sub>i</sub>)/f(X<sub>i</sub>)</span>, &nbsp; <span class="m">X<sub>i</sub>∼f</span>
+      </div>
+      <p>Pick <span class="m">f</span> to be shaped like <span class="m">g</span> (so the ratio <span class="m">g/f</span>
+        is nearly flat) — the flatter that ratio, the smaller <span class="m">Var(g(X)/f(X))</span>. If <span class="m">f</span>'s
+        support is bigger than <span class="m">A</span>, add an indicator: <span class="m">θ̂ = (1/n)Σ g(X<sub>i</sub>)I(X<sub>i</sub>∈A)/f(X<sub>i</sub>)</span>.</p>
+      <div class="callout trap"><b>Importance sampling does not always reduce variance</b> — a poorly matched
+        proposal (thin tails relative to <span class="m">g</span>, or the wrong shape) can make
+        <span class="m">Var(θ̂<sub>IS</sub>)</span> larger than the crude estimator's. This exact question ("does IS
+        always help — justify") has been asked directly (<b>v24</b>); the honest answer is no, and the diagnostic is
+        to check whether the importance weights <span class="m">g(X<sub>i</sub>)/f(X<sub>i</sub>)</span> stay bounded
+        rather than blowing up for a few draws.</div>
+    </section>
+
+    <section>
+      <h2><span class="num">4.6</span>Past-exam gallery — generalized MC via an auxiliary distribution</h2>
+      <p><b>h22</b> gives four integrals and asks for MC estimators built from different proposals — the exact
+        pattern to recognize and reuse:</p>
+      <div class="formula left">
+        <span class="m">A = ∫<sub>0</sub><sup>∞</sup> x<sup>3/2</sup>e<sup>−2x</sup>dx ≈ 0.234996</span> — write <span class="m">x<sup>3/2</sup>e<sup>−2x</sup> = (x<sup>3/2</sup>/2)·[2e<sup>−2x</sup>]</span>, the bracket is the <span class="m">Exponential(rate=2)</span> density<br>
+        ⇒ <span class="m">Â = (1/n)Σ X<sub>i</sub><sup>3/2</sup>/2</span>, &nbsp; <span class="m">X<sub>i</sub>∼Exp(rate=2)</span><br><br>
+        <span class="m">B = ∫<sub>0</sub><sup>2</sup> x<sup>3/2</sup>e<sup>−2x</sup>dx ≈ 0.198282</span> — same proposal, truncate with an indicator:<br>
+        ⇒ <span class="m">B̂ = (1/n)Σ (X<sub>i</sub><sup>3/2</sup>/2)·I(X<sub>i</sub>&lt;2)</span>, &nbsp; <span class="m">X<sub>i</sub>∼Exp(rate=2)</span><br><br>
+        <span class="m">C = ∫<sub>−1</sub><sup>1</sup> √(1+x³)dx ≈ 1.952757</span>, &nbsp; <span class="m">D = ∫<sub>−1</sub><sup>1</sup> √(1+x⁴)dx ≈ 2.178859</span> — both crude MC from <span class="m">Unif(−1,1)</span>:<br>
+        ⇒ <span class="m">Ĉ = 2·<span class="ov">√(1+X³)</span></span>, &nbsp; <span class="m">D̂ = 2·<span class="ov">√(1+X⁴)</span></span>
+      </div>
+      <div class="callout example"><b>Same exam's antithetic follow-up (part f)</b> — pair <span class="m">X</span> with
+        <span class="m">−X</span> (since <span class="m">a+b=0</span> on <span class="m">[−1,1]</span>) for both
+        <span class="m">C</span> and <span class="m">D</span>. <span class="m">x³</span> is monotonic on
+        <span class="m">[−1,1]</span> (so is <span class="m">1+x³</span> and its square root) ⇒ antithetic <em>helps</em>
+        for <span class="m">C</span>. <span class="m">x⁴</span> is <em>not</em> monotonic (it's symmetric, decreasing
+        then increasing) ⇒ antithetic gives little or no improvement for <span class="m">D</span> — exactly the §4.4
+        warning, tested concretely.</div>
+      <p><b>h24</b> asks the same trick for <span class="m">I=∫<sub>a</sub><sup>∞</sup> ln(x)/x<sup>b</sup>dx</span>
+        using a <b>Pareto(a,b)</b> proposal (density <span class="m">b·a<sup>b</sup>/x<sup>b+1</sup></span>):</p>
+      <div class="formula">
+        <span class="frac"><span class="num">ln(x)/x<sup>b</sup></span><span class="den">b·a<sup>b</sup>/x<sup>b+1</sup></span></span> = <span class="frac"><span class="num">x·ln(x)</span><span class="den">b·a<sup>b</sup></span></span>
+        &nbsp;⇒&nbsp; <span class="m">Î = (1/n)Σ X<sub>i</sub>ln(X<sub>i</sub>)/(b a<sup>b</sup>)</span>, <span class="m">X<sub>i</sub>∼Pareto(a,b)</span>
+      </div>
+      <p>Because Pareto's <span class="m">F⁻¹</span> is closed-form (§2.4), an antithetic version is also possible here
+        — pair <span class="m">X<sub>i</sub>=a/(1−U<sub>i</sub>)^{1/b}</span> with <span class="m">Y<sub>i</sub>=a/U<sub>i</sub>^{1/b}</span>.</p>
+    </section>
+
+    <section>
+      <h2><span class="num">4.7</span>Past-exam gallery — simulate-then-summarize (no closed integral)</h2>
+      <p><b>h24</b>: <span class="m">Z=5X+3Y</span>, <span class="m">X∼Lognormal(μ=1,σ²=0.25)</span>,
+        <span class="m">Y∼χ²<sub>2</sub></span>, independent. There's no need to set up an integral at all — simulate
+        <span class="m">n</span> pairs, form <span class="m">Z<sub>i</sub>=5X<sub>i</sub>+3Y<sub>i</sub></span>, then:</p>
+      <div class="formula left">
+        <span class="m">E(Z) ≈ <span class="ov">Z</span></span> &nbsp;·&nbsp; <span class="m">P(Z&lt;20) ≈ (1/n)ΣI(Z<sub>i</sub>&lt;20)</span> &nbsp;·&nbsp; <span class="m">P(40&lt;Z&lt;60) ≈ (1/n)ΣI(40&lt;Z<sub>i</sub>&lt;60)</span>
+      </div>
+      <p>This is the same "generate data, then average an indicator/function of it" idea as everything above — just
+        without ever writing down the integral explicitly. A 3-D integral in the same exam mixes a bounded-uniform
+        proposal for two axes with a matched proposal (e.g. half-normal, when the integrand carries an
+        <span class="m">e<sup>−x²/c</sup></span> factor) for the unbounded one — always decompose per-axis, multiply
+        the interval lengths / proposal normalizing constants together.</p>
+    </section>
+
+    <section>
+      <h2><span class="num">4.8</span>Past-exam gallery — precision, CIs, and importance sampling together</h2>
+      <p><b>v25</b>: <span class="m">n=5000</span> draws from <span class="m">f(x)=20x(1−x)³</span> (Beta(2,4),
+        <span class="m">E(X)=1/3</span>), with <span class="m">Var(X)=2/63</span> given. Build a 95% CI for
+        <span class="m">E(X)</span> using <span class="m">z<sub>0.975</sub>=1.959964</span>:</p>
+      <div class="formula">
+        SE <span class="m">= √(Var(X)/n) = √((2/63)/5000) ≈ 0.002520</span> &nbsp;⇒&nbsp; margin <span class="m">≈ 1.96×0.002520 ≈ 0.00494</span><br>
+        CI <span class="m">≈ <span class="ov">X</span> ± 0.0049</span> &nbsp;(centered near the true <span class="m">1/3≈0.3333</span> once you plug in your own simulated <span class="ov">X</span>)
+      </div>
+      <p>Same exam's importance-sampling part: estimate <span class="m">I=∫<sub>0</sub><sup>1</sup> x(1−x)³dx</span>
+        (this is the Beta(2,4) kernel <em>without</em> the 20, so <span class="m">I=1/20</span> exactly) using a
+        Beta(2,2) proposal <span class="m">g(x)=6x(1−x)</span>:</p>
+      <div class="formula">
+        <span class="frac"><span class="num">x(1−x)³</span><span class="den">6x(1−x)</span></span> = <span class="frac"><span class="num">(1−x)²</span><span class="den">6</span></span>
+        &nbsp;⇒&nbsp; <span class="m">Î<sub>IS</sub> = (1/n)Σ(1−X<sub>i</sub>)²/6</span>, <span class="m">X<sub>i</sub>∼Beta(2,2)</span>
+      </div>
+      <p><b>v23</b> hands you summary output instead of raw data — read it carefully. For an indicator-based
+        estimator (e.g. <span class="m">p̂=(1/n)ΣI(⋯)</span>) with <span class="m">n=1{,}000{,}000</span>, mean
+        <span class="m">0.166846</span> and reported <span class="m">sd=0.372839</span>:</p>
+      <div class="formula left">
+        that <span class="m">sd</span> is the spread of the individual <span class="m">0/1</span> draws (here matching a Bernoulli sd <span class="m">√(p(1−p))</span> for <span class="m">p≈1/6</span>) — <b>not</b> <span class="m">SD(p̂)</span> yet.<br><br>
+        <span class="m">SE(p̂) = 0.372839/√1{,}000{,}000 = 0.000373</span> &nbsp;⇒&nbsp; 95% CI <span class="m">= 0.166846 ± 1.96(0.000373) ≈ [0.16612,\,0.16758]</span><br><br>
+        Exact <span class="m">n</span> for <span class="m">SD(p̂)&lt;0.01</span>: solve <span class="m">√(p(1−p)/n) &lt; 0.01 ⇒ n &gt; p(1−p)/0.0001 ≈ 1389</span> (no <span class="m">z</span> involved — this asks for the estimator's <em>sd</em>, not a CI margin)
+      </div>
+    </section>
+
+    <section>
+      <h2><span class="num">4.9</span>Spot-the-bug — <span class="m">v24</span></h2>
+      <p>Target: <span class="m">θ=∫<sub>1</sub><sup>6</sup> g(x)dx</span> with
+        <code>gx &lt;- function(x) exp(2-x^(3/4))*x^(1/3)/2</code>. Three candidate estimators:</p>
+      <pre class="rcode"><code>Est1: x1 <- runif(Nsim/2,1,6); x2 <- 5-x1; Est1 <- 5*mean(gx(c(x1,x2)))
+
+Est2: x <- rgamma(Nsim,4,1.4)
+      Est2 <- mean( dgamma(x,4,1.4) / (gx(x)*(x<6 & x>1)) )
+
+Est3: x <- rgamma(Nsim,4,1.4)
+      Est3 <- mean( gx(x)*(x<6 & x>1) / dgamma(x,4,1.4) )</code></pre>
+      <div class="callout example"><b>Only Est3 is correct.</b>
+        <p><b>Est1</b> attempts an antithetic pairing on <span class="m">[1,6]</span>, but the correct partner of
+        <span class="m">x1</span> is <span class="m">a+b−x1 = 1+6−x1 = 7−x1</span>, not <span class="m">5−x1</span>
+        (that's using <span class="m">b−a</span> instead of <span class="m">a+b</span>). Since <span class="m">x1∈[1,6]</span>,
+        <span class="m">5−x1</span> can land as low as <span class="m">−1</span> — outside the integration domain
+        entirely — so this estimator is simply wrong, not just less efficient.</p>
+        <p><b>Est2</b> has the importance-sampling ratio <em>inverted</em>: it computes
+        <span class="m">f<sub>proposal</sub>(x)/g(x)</span> instead of <span class="m">g(x)/f<sub>proposal</sub>(x)</span> —
+        this doesn't estimate <span class="m">θ</span> at all.</p>
+        <p><b>Est3</b> matches §4.5 exactly: <span class="m">g(x)I(1&lt;x&lt;6)/f<sub>proposal</sub>(x)</span>, correct.</p>
+      </div>
+    </section>
+
+    <section>
+      <h2><span class="num">4.10</span>Common exam pitfalls</h2>
+      <ul>
+        <li>Read whether the question wants the <b>point estimator</b>, the <b>standard error</b>, or a full
+          <b>CI</b> — they're graded as separate steps and each has its own formula.</li>
+        <li>For antithetic variables, always check (or explicitly state) monotonicity of the integrand before
+          claiming variance reduction — see §4.4 and the h22 C-vs-D contrast.</li>
+        <li>For importance sampling, match the proposal's <em>support</em> to the integration domain, or add the
+          indicator trick — and never assume IS automatically helps.</li>
+        <li>When several R estimators are given, check the antithetic reflection formula (<span class="m">a+b−x</span>,
+          not <span class="m">b−a−x</span>) and the direction of every importance-sampling ratio individually.</li>
+      </ul>
+      <p class="material"><span class="lab">Material:</span> LN <code>chap6_part1</code> <code>chap6_part2</code> · Ex <code>exercise_set2</code> · R <code>MC_integration_examples.R</code> <code>Variance_reduction.R</code> <code>importance_sampling.R</code></p>
+    </section>
+
+    </article>
+
+      <nav class="pager">
+        <a href="topic-reliability.html"><span class="lab">Previous</span>← Reliability systems</a>
+        <a class="next" href="topic-bootstrap.html"><span class="lab">Next</span>Bootstrap →</a>
+      </nav>
+    </main>
+  </div>
+</div>

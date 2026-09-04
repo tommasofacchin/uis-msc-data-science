@@ -1,424 +1,21 @@
 <title>STA510 Roadmap</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;0,600;0,700;1,500&family=STIX+Two+Text:ital,wght@0,400;0,500;0,600;1,400;1,500&family=JetBrains+Mono:wght@400;500;600&display=swap">
-<style>
-  :root{
-    --bg: #f4f5f8;
-    --surface: #ffffff;
-    --surface-2: #eceef4;
-    --text: #1c2333;
-    --text-muted: #5b6478;
-    --text-faint: #8790a3;
-    --accent: #34407a;
-    --accent-2: #4c5aa3;
-    --accent-soft: #e7e9f5;
-    --rule: #dadde6;
-    --rule-strong: #c3c8d6;
-
-    --p-high: #b0392b;
-    --p-high-soft: #f6e6e3;
-    --p-medhigh: #a56419;
-    --p-medhigh-soft: #f4ead9;
-    --p-med: #8a7314;
-    --p-med-soft: #f1edd6;
-    --p-low: #276b47;
-    --p-low-soft: #e1ede6;
-
-    --shadow: 0 1px 2px rgba(28,35,51,0.06), 0 8px 24px -12px rgba(28,35,51,0.12);
-  }
-
-  @media (prefers-color-scheme: dark){
-    :root:not([data-theme="light"]){
-      --bg: #12141c;
-      --surface: #191c27;
-      --surface-2: #20232f;
-      --text: #e7e9f2;
-      --text-muted: #a7aec2;
-      --text-faint: #757d92;
-      --accent: #97a4e8;
-      --accent-2: #b6c0f2;
-      --accent-soft: #262b46;
-      --rule: #2b2f3f;
-      --rule-strong: #383d52;
-
-      --p-high: #e28577;
-      --p-high-soft: #3a2521;
-      --p-medhigh: #dba869;
-      --p-medhigh-soft: #382c1b;
-      --p-med: #cdb85e;
-      --p-med-soft: #33301a;
-      --p-low: #7bc79c;
-      --p-low-soft: #1c332a;
-
-      --shadow: 0 1px 2px rgba(0,0,0,0.35), 0 8px 24px -12px rgba(0,0,0,0.5);
-    }
-  }
-  :root[data-theme="dark"]{
-    --bg: #12141c;
-    --surface: #191c27;
-    --surface-2: #20232f;
-    --text: #e7e9f2;
-    --text-muted: #a7aec2;
-    --text-faint: #757d92;
-    --accent: #97a4e8;
-    --accent-2: #b6c0f2;
-    --accent-soft: #262b46;
-    --rule: #2b2f3f;
-    --rule-strong: #383d52;
-
-    --p-high: #e28577;
-    --p-high-soft: #3a2521;
-    --p-medhigh: #dba869;
-    --p-medhigh-soft: #382c1b;
-    --p-med: #cdb85e;
-    --p-med-soft: #33301a;
-    --p-low: #7bc79c;
-    --p-low-soft: #1c332a;
-
-    --shadow: 0 1px 2px rgba(0,0,0,0.35), 0 8px 24px -12px rgba(0,0,0,0.5);
-  }
-
-  *{ box-sizing: border-box; }
-  html{ -webkit-text-size-adjust: 100%; }
-  body{
-    margin:0;
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'STIX Two Text', Georgia, 'Cambria', serif;
-    font-size: 17px;
-    line-height: 1.6;
-    text-rendering: optimizeLegibility;
-  }
-  ::selection{ background: var(--accent-soft); color: var(--text); }
-
-  a{ color: var(--accent-2); text-decoration-color: var(--rule-strong); text-underline-offset: 2px; }
-  a:hover{ text-decoration-color: currentColor; }
-  :focus-visible{ outline: 2px solid var(--accent-2); outline-offset: 2px; border-radius: 3px; }
-
-  code{
-    font-family: 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
-    font-size: 0.82em;
-    background: var(--surface-2);
-    border: 1px solid var(--rule);
-    border-radius: 4px;
-    padding: 0.05em 0.4em;
-    color: var(--text);
-    white-space: nowrap;
-  }
-
-  h1,h2,h3{
-    font-family: 'Fraunces', Georgia, serif;
-    font-weight: 600;
-    color: var(--text);
-    text-wrap: balance;
-  }
-
-  /* ---------- math ---------- */
-  .m{ font-style: italic; font-family: 'STIX Two Text', Georgia, serif; }
-  .frac{
-    display: inline-flex;
-    flex-direction: column;
-    vertical-align: -0.55em;
-    text-align: center;
-    font-size: 0.88em;
-    line-height: 1.15;
-    margin: 0 0.18em;
-    font-style: italic;
-  }
-  .frac .num{ border-bottom: 1.3px solid currentColor; padding: 0 0.25em 0.06em; }
-  .frac .den{ padding: 0.06em 0.25em 0; }
-  .ov{ text-decoration: overline; text-decoration-thickness: 1px; text-underline-offset: 0; }
-
-  /* ---------- layout shell ---------- */
-  .shell{
-    max-width: 1180px;
-    margin: 0 auto;
-    padding: 0 clamp(16px, 4vw, 48px) 96px;
-  }
-
-  header.masthead{
-    padding: clamp(36px, 6vw, 64px) 0 28px;
-    border-bottom: 1px solid var(--rule);
-  }
-  .eyebrow{
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12.5px;
-    letter-spacing: 0.09em;
-    text-transform: uppercase;
-    color: var(--accent);
-    display: flex;
-    align-items: center;
-    gap: 0.6em;
-    margin-bottom: 14px;
-  }
-  .eyebrow .dot{ width:6px; height:6px; border-radius:50%; background: var(--accent); display:inline-block; }
-  h1.title{
-    font-size: clamp(34px, 5vw, 50px);
-    line-height: 1.05;
-    margin: 0 0 14px;
-    letter-spacing: -0.01em;
-  }
-  .dek{
-    max-width: 62ch;
-    color: var(--text-muted);
-    font-size: 17.5px;
-    margin: 0 0 24px;
-  }
-  .dek b{ color: var(--text); font-weight: 600; }
-
-  .legend{
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px 22px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12.5px;
-    color: var(--text-muted);
-  }
-  .legend b{ color: var(--text); font-weight: 600; }
-
-  .progress-wrap{
-    margin-top: 26px;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    max-width: 420px;
-  }
-  .progress-track{
-    flex: 1;
-    height: 7px;
-    border-radius: 4px;
-    background: var(--surface-2);
-    border: 1px solid var(--rule);
-    overflow: hidden;
-  }
-  .progress-fill{
-    height: 100%;
-    width: var(--progress, 0%);
-    background: linear-gradient(90deg, var(--accent-2), var(--accent));
-    border-radius: 4px;
-    transition: width .3s ease;
-  }
-  @media (prefers-reduced-motion: reduce){ .progress-fill{ transition: none; } }
-  .progress-label{
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12.5px;
-    color: var(--text-muted);
-    white-space: nowrap;
-    font-variant-numeric: tabular-nums;
-  }
-  .reset-btn{
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11.5px;
-    color: var(--text-faint);
-    background: none;
-    border: 1px solid var(--rule);
-    border-radius: 5px;
-    padding: 5px 9px;
-    cursor: pointer;
-    letter-spacing: .02em;
-  }
-  .reset-btn:hover{ color: var(--text); border-color: var(--rule-strong); }
-
-  /* ---------- grid: nav + content ---------- */
-  .layout{
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 0;
-    padding-top: 8px;
-  }
-  @media (min-width: 980px){
-    .layout{ grid-template-columns: 232px minmax(0,760px); gap: 56px; align-items: start; }
-  }
-
-  nav.toc{
-    position: static;
-    padding: 28px 0;
-    border-bottom: 1px solid var(--rule);
-  }
-  @media (min-width: 980px){
-    nav.toc{
-      position: sticky;
-      top: 24px;
-      border-bottom: none;
-      max-height: calc(100vh - 48px);
-      overflow-y: auto;
-    }
-  }
-  nav.toc h2{
-    font-family: 'JetBrains Mono', monospace;
-    font-weight: 600;
-    font-size: 11.5px;
-    letter-spacing: .09em;
-    text-transform: uppercase;
-    color: var(--text-faint);
-    margin: 0 0 12px;
-  }
-  .toc-tier{ margin-bottom: 18px; }
-  .toc-tier-head{
-    display: flex; align-items: center; gap: 8px;
-    font-size: 13px; font-weight: 600; color: var(--text-muted);
-    margin-bottom: 6px;
-  }
-  .tier-dot{ width: 8px; height: 8px; border-radius: 50%; flex: none; }
-  .toc-list{ list-style: none; margin: 0; padding: 0; }
-  .toc-list li{ margin: 0; }
-  .toc-list a{
-    display: block;
-    font-size: 14px;
-    color: var(--text-muted);
-    text-decoration: none;
-    padding: 3px 0 3px 16px;
-    border-left: 2px solid transparent;
-  }
-  .toc-list a:hover{ color: var(--text); border-left-color: var(--rule-strong); }
-
-  main{ min-width: 0; padding-top: 8px; }
-
-  .tier-section{ padding: 40px 0 8px; border-bottom: 1px solid var(--rule); }
-  .tier-section:last-of-type{ border-bottom: none; }
-  .tier-head{
-    display: flex;
-    align-items: baseline;
-    gap: 12px;
-    flex-wrap: wrap;
-    margin-bottom: 6px;
-  }
-  .tier-badge{
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11.5px;
-    font-weight: 600;
-    letter-spacing: .06em;
-    text-transform: uppercase;
-    padding: 3px 9px;
-    border-radius: 100px;
-  }
-  .tier-section h2{ font-size: 23px; margin: 0; }
-  .tier-note{ color: var(--text-faint); font-size: 14.5px; margin: 4px 0 0; }
-
-  article.topic{ padding: 26px 0; border-top: 1px solid var(--rule); }
-  .tier-section > article.topic:first-of-type{ border-top: none; padding-top: 18px; }
-
-  .topic-head{ display: flex; align-items: flex-start; gap: 12px; }
-  .check{ position: relative; display: inline-flex; margin-top: 6px; flex: none; cursor: pointer; }
-  .check input{
-    position: absolute; opacity: 0; width: 20px; height: 20px; margin: 0; cursor: pointer;
-  }
-  .check .box{
-    width: 19px; height: 19px;
-    border: 1.5px solid var(--rule-strong);
-    border-radius: 5px;
-    display: inline-flex; align-items: center; justify-content: center;
-    background: var(--surface);
-  }
-  .check .box svg{ width: 12px; height: 12px; opacity: 0; transform: scale(.6); transition: opacity .12s ease, transform .12s ease; }
-  .check input:checked + .box{ background: var(--accent); border-color: var(--accent); }
-  .check input:checked + .box svg{ opacity: 1; transform: scale(1); stroke: white; }
-  .check input:focus-visible + .box{ outline: 2px solid var(--accent-2); outline-offset: 2px; }
-  @media (prefers-reduced-motion: reduce){ .check .box svg{ transition: none; } }
-
-  .topic h3{
-    font-size: 19px;
-    margin: 0;
-    line-height: 1.3;
-  }
-  .topic-num{
-    font-family: 'JetBrains Mono', monospace;
-    color: var(--text-faint);
-    font-weight: 500;
-    font-size: 0.72em;
-    margin-right: 0.5em;
-  }
-  article.topic.done .topic-head h3{ color: var(--text-faint); text-decoration: line-through; text-decoration-color: var(--rule-strong); text-decoration-thickness: 1px; }
-  article.topic.done{ opacity: 0.72; }
-
-  .topic ul{ margin: 12px 0 0 32px; padding: 0; }
-  .topic li{ margin: 0 0 8px; padding-left: 2px; }
-  .topic li:last-child{ margin-bottom: 0; }
-
-  .trap{
-    margin: 12px 0 0 32px;
-    padding: 10px 14px;
-    background: var(--p-high-soft);
-    border-left: 3px solid var(--p-high);
-    border-radius: 0 6px 6px 0;
-    font-size: 15px;
-  }
-  .trap b{ color: var(--p-high); }
-
-  .material{
-    margin: 14px 0 0 32px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12.5px;
-    color: var(--text-faint);
-    display: flex; flex-wrap: wrap; gap: 4px 6px; align-items: center;
-  }
-  .material .lab{ color: var(--text-muted); margin-right: 2px; }
-
-  /* ---------- how-to-use callout ---------- */
-  .howto{
-    margin-top: 44px;
-    background: var(--accent-soft);
-    border-radius: 14px;
-    padding: clamp(22px, 4vw, 34px);
-  }
-  .howto h2{ font-size: 22px; margin: 0 0 6px; }
-  .howto p.intro{ color: var(--text-muted); margin: 0 0 18px; font-size: 15px; }
-  .howto ol{ margin: 0; padding: 0; list-style: none; counter-reset: howto; }
-  .howto li{
-    counter-increment: howto;
-    display: flex; gap: 14px;
-    padding: 13px 0;
-    border-top: 1px solid rgba(0,0,0,0.06);
-  }
-  :root:not([data-theme="light"]) .howto li{ border-top-color: rgba(255,255,255,0.08); }
-  .howto li:first-child{ border-top: none; padding-top: 2px; }
-  .howto li::before{
-    content: counter(howto);
-    font-family: 'Fraunces', serif;
-    font-weight: 600;
-    font-size: 17px;
-    color: var(--accent);
-    flex: none;
-    width: 1.4em;
-  }
-  .howto li p{ margin: 0; font-size: 15.5px; }
-
-  footer{
-    margin-top: 48px;
-    padding-top: 22px;
-    border-top: 1px solid var(--rule);
-    color: var(--text-faint);
-    font-size: 13.5px;
-    line-height: 1.7;
-  }
-
-  .mobile-toc{ display: none; }
-  @media (max-width: 979px){
-    .mobile-toc{ display: block; margin: 18px 0 0; }
-    .mobile-toc summary{
-      cursor: pointer;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12.5px;
-      letter-spacing: .06em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      padding: 10px 0;
-    }
-    nav.toc{ display: none; }
-  }
-</style>
+<link rel="stylesheet" href="style.css">
 
 <div class="shell">
 
   <header class="masthead">
     <div class="eyebrow"><span class="dot"></span> STA510 · Statistical Modeling &amp; Simulation</div>
     <h1 class="title">Exam Roadmap</h1>
-    <p class="dek">A priority-ranked study guide built from <b>six past exams</b> (h22, v23, h23, h24, v26, h25)
-      and the course's lecture notes, exercises, and R examples. Topics are ordered by how often they
-      actually show up on the paper.</p>
+    <p class="dek">A <b>study-order</b> guide through the course — topics run in the sequence you should learn
+      them in, following the lecture-note chapters. Each topic still carries a priority tag from how often it
+      shows up across <b>eight past exams</b> (h22, v23, h23, v24, h24, v25, h25, v26), and the five most
+      exam-critical topics link out to full worked notes with real past-exam numbers.</p>
     <div class="legend">
       <span><b>LN</b> — Lecture Notes</span>
       <span><b>Ex</b> — Exercises</span>
       <span><b>R</b> — R‑examples</span>
+      <span><span class="mini-badge p-highest">Highest</span> <span class="mini-badge p-high">High</span> <span class="mini-badge p-med">Medium</span> — exam frequency, not study order</span>
     </div>
     <div class="progress-wrap">
       <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
@@ -430,10 +27,12 @@
       <summary>Jump to a topic ▾</summary>
       <nav>
         <ul class="toc-list">
-          <li><a href="#tier-high">① Highest priority</a></li>
-          <li><a href="#tier-medhigh">② High priority</a></li>
-          <li><a href="#tier-med">③ Medium priority</a></li>
-          <li><a href="#tier-low">④ Low priority</a></li>
+          <li><a href="#grp-ch2">① Ch. 2 — Foundations</a></li>
+          <li><a href="#grp-ch3">② Ch. 3 — Simulation basics</a></li>
+          <li><a href="#grp-ch4">③ Ch. 4 — Processes &amp; applications</a></li>
+          <li><a href="#grp-ch6">④ Ch. 6 — Monte Carlo &amp; resampling</a></li>
+          <li><a href="#grp-ch11">⑤ Ch. 11–12 — MCMC &amp; Bayesian</a></li>
+          <li><a href="#tier-low">One-off topics</a></li>
           <li><a href="#howto">How to use this</a></li>
         </ul>
       </nav>
@@ -442,46 +41,55 @@
 
   <div class="layout">
     <nav class="toc" aria-label="Table of contents">
-      <h2>On this page</h2>
+      <h2>Study order</h2>
 
       <div class="toc-tier">
-        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--p-high)"></span> Highest priority</div>
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 2 — Foundations</div>
         <ul class="toc-list">
-          <li><a href="#t1">1. Continuous r.v.'s</a></li>
-          <li><a href="#t2">2. Inverse transform</a></li>
-          <li><a href="#t3">3. Accept‑Reject</a></li>
-          <li><a href="#t4">4. Monte Carlo integrals</a></li>
-          <li><a href="#t5">5. Bootstrap</a></li>
-          <li><a href="#t6">6. MCMC — M‑H</a></li>
-          <li><a href="#t7">7. Bayesian stats</a></li>
+          <li><a href="topic-continuous-rv.html">1. Continuous r.v.'s</a></li>
+          <li><a href="topic-clt-ci.html">2. CLT &amp; CIs</a></li>
+          <li><a href="topic-mle.html">3. MLE</a></li>
         </ul>
       </div>
 
       <div class="toc-tier">
-        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--p-medhigh)"></span> High priority</div>
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 3 — Simulation basics</div>
         <ul class="toc-list">
-          <li><a href="#t8">8. Poisson processes</a></li>
-          <li><a href="#t9">9. MLE</a></li>
-          <li><a href="#t10">10. KDE vs. histogram</a></li>
-          <li><a href="#t11">11. Reliability systems</a></li>
+          <li><a href="topic-inverse-transform.html">4. Inverse transform</a></li>
+          <li><a href="topic-accept-reject.html">5. Accept‑Reject</a></li>
+          <li><a href="topic-multivariate-sim.html">6. Multivariate sim.</a></li>
+          <li><a href="topic-composition-methods.html">7. Composition methods</a></li>
         </ul>
       </div>
 
       <div class="toc-tier">
-        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--p-med)"></span> Medium priority</div>
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 4 — Processes &amp; applications</div>
         <ul class="toc-list">
-          <li><a href="#t12">12. CLT &amp; CIs</a></li>
-          <li><a href="#t13">13. Multivariate sim.</a></li>
-          <li><a href="#t14">14. Markov chains</a></li>
-          <li><a href="#t15">15. Composition methods</a></li>
+          <li><a href="topic-poisson-processes.html">8. Poisson processes</a></li>
+          <li><a href="topic-markov-chains.html">9. Markov chains</a></li>
+          <li><a href="topic-reliability.html">10. Reliability systems</a></li>
         </ul>
       </div>
 
       <div class="toc-tier">
-        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--p-low)"></span> Low priority</div>
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 6 — MC &amp; resampling</div>
         <ul class="toc-list">
-          <li><a href="#tier-low">One‑off topics</a></li>
+          <li><a href="topic-monte-carlo-integration.html">11. Monte Carlo integrals</a></li>
+          <li><a href="topic-bootstrap.html">12. Bootstrap</a></li>
+          <li><a href="topic-kde.html">13. KDE vs. histogram</a></li>
         </ul>
+      </div>
+
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 11–12 — MCMC &amp; Bayesian</div>
+        <ul class="toc-list">
+          <li><a href="topic-mcmc.html">14. MCMC — M‑H</a></li>
+          <li><a href="topic-bayesian.html">15. Bayesian stats</a></li>
+        </ul>
+      </div>
+
+      <div class="toc-tier">
+        <ul class="toc-list"><li><a href="#tier-low">One‑off topics</a></li></ul>
       </div>
 
       <div class="toc-tier">
@@ -491,18 +99,18 @@
 
     <main>
 
-      <!-- ===================== TIER: HIGHEST ===================== -->
-      <section class="tier-section" id="tier-high">
+      <!-- ===================== CH. 2 — FOUNDATIONS ===================== -->
+      <section class="tier-section" id="grp-ch2">
         <div class="tier-head">
-          <span class="tier-badge" style="background:var(--p-high-soft); color:var(--p-high)">Highest priority</span>
-          <h2>Appears in almost every exam</h2>
+          <span class="tier-badge neutral">Ch. 2 · Foundations</span>
+          <h2>Start here — everything else builds on this</h2>
         </div>
-        <p class="tier-note">Master these seven first — together they account for the bulk of the points on every past paper.</p>
+        <p class="tier-note">Random variables, limit laws and estimation basics. Skip these and nothing later makes sense.</p>
 
         <article class="topic" id="t1" data-topic="t1">
           <div class="topic-head">
             <label class="check"><input type="checkbox" data-topic="t1" aria-label="Mark topic 1 reviewed"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span></label>
-            <h3><span class="topic-num">1</span>Continuous random variables: pdf, cdf, moments</h3>
+            <h3><span class="topic-num">1</span><a href="topic-continuous-rv.html">Continuous random variables: pdf, cdf, moments</a><span class="mini-badge p-highest">Highest</span></h3>
           </div>
           <ul>
             <li>Verify that <span class="m">f(x)</span> is a proper density (integral equals 1, find the normalizing constant <span class="m">c</span>)</li>
@@ -510,12 +118,50 @@
             <li>Derive the cdf <span class="m">F(x)</span> from the pdf and use it for <span class="m">P(X&gt;a)</span>, <span class="m">P(a&lt;X&lt;b)</span></li>
           </ul>
           <p class="material"><span class="lab">Material:</span> LN <code>chap2_part1</code> <code>chap2_part2</code> · Ex <code>exercise_set0</code> <code>exercise_set1</code></p>
+          <p class="read-more"><a href="topic-continuous-rv.html">Full notes + every past-exam variant →</a></p>
         </article>
 
         <article class="topic" id="t2" data-topic="t2">
           <div class="topic-head">
             <label class="check"><input type="checkbox" data-topic="t2" aria-label="Mark topic 2 reviewed"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span></label>
-            <h3><span class="topic-num">2</span>Simulation: inverse transform method</h3>
+            <h3><span class="topic-num">2</span><a href="topic-clt-ci.html">Central Limit Theorem &amp; confidence intervals</a><span class="mini-badge p-med">Medium</span></h3>
+          </div>
+          <ul>
+            <li>Approximate distribution of <span class="m"><span class="ov">X</span></span> for large <span class="m">n</span></li>
+            <li>Construct a 95% CI for a mean or function of the mean</li>
+          </ul>
+          <div class="trap"><b>Classic trap —</b> many candidate CI expressions in R; pick the one where the point estimate and its standard error actually match. Seen in h22.</div>
+          <p class="material"><span class="lab">Material:</span> LN <code>chap2_part2</code> — cumulative topic, no single dedicated file</p>
+          <p class="read-more"><a href="topic-clt-ci.html">Full notes + h22's 6-way CI bug-spotting →</a></p>
+        </article>
+
+        <article class="topic" id="t3" data-topic="t3">
+          <div class="topic-head">
+            <label class="check"><input type="checkbox" data-topic="t3" aria-label="Mark topic 3 reviewed"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span></label>
+            <h3><span class="topic-num">3</span><a href="topic-mle.html">Maximum likelihood estimation (MLE)</a><span class="mini-badge p-high">High</span></h3>
+          </div>
+          <ul>
+            <li>Build <span class="m">L(θ)</span> and the log-likelihood from an iid sample</li>
+            <li>Derive the MLE analytically (set the derivative to 0)</li>
+            <li>Check unbiasedness, compute the estimator's variance</li>
+            <li>Find the sample size <span class="m">n</span> needed for a given margin of error at a given confidence level</li>
+          </ul>
+          <p class="material"><span class="lab">Material:</span> LN <code>chap2_part2</code> · Ex <code>exercise_set3</code></p>
+          <p class="read-more"><a href="topic-mle.html">Full notes + Pareto MLE-vs-bias-corrected comparison →</a></p>
+        </article>
+      </section>
+
+      <!-- ===================== CH. 3 — SIMULATION BASICS ===================== -->
+      <section class="tier-section" id="grp-ch3">
+        <div class="tier-head">
+          <span class="tier-badge neutral">Ch. 3 · Simulation basics</span>
+          <h2>How to generate data from any distribution</h2>
+        </div>
+
+        <article class="topic" id="t4" data-topic="t4">
+          <div class="topic-head">
+            <label class="check"><input type="checkbox" data-topic="t4" aria-label="Mark topic 4 reviewed"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span></label>
+            <h3><span class="topic-num">4</span><a href="topic-inverse-transform.html">Simulation: inverse transform method</a><span class="mini-badge p-highest">Highest</span></h3>
           </div>
           <ul>
             <li>Derive <span class="m">F<sup>−1</sup>(u)</span> analytically</li>
@@ -524,12 +170,13 @@
           </ul>
           <div class="trap"><b>Recurring trap —</b> given several candidate R functions, identify which one correctly implements <span class="m">F<sup>−1</sup>(U)</span>. Watch for sign errors, a wrong <code>runif</code> interval, or a mis-transcribed formula. Seen in h22, h23, h24, v23.</div>
           <p class="material"><span class="lab">Material:</span> LN <code>chap3_part1</code> · Ex <code>exercise_set1</code></p>
+          <p class="read-more"><a href="topic-inverse-transform.html">Full notes + real bug-spotting exam code →</a></p>
         </article>
 
-        <article class="topic" id="t3" data-topic="t3">
+        <article class="topic" id="t5" data-topic="t5">
           <div class="topic-head">
-            <label class="check"><input type="checkbox" data-topic="t3" aria-label="Mark topic 3 reviewed"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span></label>
-            <h3><span class="topic-num">3</span>Accept–Reject (AR) method</h3>
+            <label class="check"><input type="checkbox" data-topic="t5" aria-label="Mark topic 5 reviewed"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span></label>
+            <h3><span class="topic-num">5</span><a href="topic-accept-reject.html">Accept–Reject (AR) method</a><span class="mini-badge p-highest">Highest</span></h3>
           </div>
           <ul>
             <li>Choose a proposal <span class="m">g(x)</span> and find the envelope constant <span class="m">c = max f(x)/g(x)</span></li>
@@ -537,14 +184,102 @@
             <li>Compare proposals — a smaller <span class="m">c</span> means fewer rejections</li>
             <li>Spot a buggy R implementation: constant-denominator vs. proposal-density mix-ups</li>
           </ul>
-          <div class="trap"><b>Classic bug —</b> h22 problem 1e mixes up dividing by a constant vs. dividing by the proposal density evaluated at the draw. Read the denominator carefully.</div>
+          <div class="trap"><b>h22 problem 1e —</b> one candidate divides by <span class="m">c·g(x)</span>, the other by <span class="m">c</span> alone. With a <em>uniform</em> proposal both turn out statistically valid (just different efficiency) — but that's a special case, not a general rule. Full derivation on the linked page.</div>
           <p class="material"><span class="lab">Material:</span> LN <code>chap3_part2</code> · Ex <code>exercise_set1</code> · R <code>acceptance-rejection_examples.R</code> <code>AR-example.R</code></p>
+          <p class="read-more"><a href="topic-accept-reject.html">Full notes + 4 worked exam setups →</a></p>
         </article>
 
-        <article class="topic" id="t4" data-topic="t4">
+        <article class="topic" id="t6" data-topic="t6">
           <div class="topic-head">
-            <label class="check"><input type="checkbox" data-topic="t4" aria-label="Mark topic 4 reviewed"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span></label>
-            <h3><span class="topic-num">4</span>Monte Carlo methods for integrals</h3>
+            <label class="check"><input type="checkbox" data-topic="t6" aria-label="Mark topic 6 reviewed"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span></label>
+            <h3><span class="topic-num">6</span><a href="topic-multivariate-sim.html">Simulating multivariate / correlated variables</a><span class="mini-badge p-med">Medium</span></h3>
+          </div>
+          <ul>
+            <li>Multivariate normal via <b>Cholesky</b> decomposition</li>
+            <li>Compare Cholesky (direct/iid) vs. Gibbs vs. random-walk M‑H for the same target: efficiency, autocorrelation, iid vs. chain</li>
+          </ul>
+          <p class="material"><span class="lab">Material:</span> R <code>bivariate_normal.R</code> <code>multivariate_normal_example.R</code></p>
+          <p class="read-more"><a href="topic-multivariate-sim.html">Full notes + v23's 3-way algorithm comparison →</a></p>
+        </article>
+
+        <article class="topic" id="t7" data-topic="t7">
+          <div class="topic-head">
+            <label class="check"><input type="checkbox" data-topic="t7" aria-label="Mark topic 7 reviewed"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span></label>
+            <h3><span class="topic-num">7</span><a href="topic-composition-methods.html">Simulation via composition / transformation</a><span class="mini-badge p-med">Medium</span></h3>
+          </div>
+          <ul>
+            <li>Lognormal from Normal (exponential transform)</li>
+            <li>χ² from Normal (sum of squares)</li>
+            <li>Linear combinations, e.g. <span class="m">Z = aX + bY</span>, and MC estimation of <span class="m">E(Z)</span>, <span class="m">P(Z&lt;c)</span></li>
+          </ul>
+          <p class="material"><span class="lab">Material:</span> R <code>sums_mixtures_examples.R</code> <code>inverse_transform_examples_poiss.R</code></p>
+          <p class="read-more"><a href="topic-composition-methods.html">Full notes: sums vs. mixtures, worked both ways →</a></p>
+        </article>
+      </section>
+
+      <!-- ===================== CH. 4 — PROCESSES & APPLICATIONS ===================== -->
+      <section class="tier-section" id="grp-ch4">
+        <div class="tier-head">
+          <span class="tier-badge neutral">Ch. 4 · Processes &amp; applications</span>
+          <h2>Simulation techniques applied over time</h2>
+        </div>
+
+        <article class="topic" id="t8" data-topic="t8">
+          <div class="topic-head">
+            <label class="check"><input type="checkbox" data-topic="t8" aria-label="Mark topic 8 reviewed"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span></label>
+            <h3><span class="topic-num">8</span><a href="topic-poisson-processes.html">Poisson processes</a><span class="mini-badge p-high">High</span></h3>
+          </div>
+          <ul>
+            <li>Homogeneous process: distribution of <span class="m">N(t)</span>; inter-arrival times <span class="m">∼ Exponential(λ)</span>; time of the <span class="m">k</span>‑th event <span class="m">∼ Gamma(k, λ)</span></li>
+            <li><b>Non-homogeneous</b> process: time-varying intensity <span class="m">λ(t)</span> — know its interpretation</li>
+            <li>Simulate via <b>thinning</b>: accept–reject on arrival times of a homogeneous process with rate <span class="m">λ<sub>max</sub></span></li>
+            <li>Conditional probabilities, e.g. <span class="m">P(N(0.1)=0 | N(1)=8)</span></li>
+          </ul>
+          <p class="material"><span class="lab">Material:</span> LN <code>chap4_part1</code> <code>chap8.pdf</code> · Ex <code>exercise_set4</code> · R <code>rain.R</code></p>
+          <p class="read-more"><a href="topic-poisson-processes.html">Full notes + the Binomial-splitting trick →</a></p>
+        </article>
+
+        <article class="topic" id="t9" data-topic="t9">
+          <div class="topic-head">
+            <label class="check"><input type="checkbox" data-topic="t9" aria-label="Mark topic 9 reviewed"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span></label>
+            <h3><span class="topic-num">9</span><a href="topic-markov-chains.html">Markov chains &amp; stochastic processes</a><span class="mini-badge p-med">Medium</span></h3>
+          </div>
+          <ul>
+            <li>Simple random walk — is it Markov? Why?</li>
+            <li>State space and stationary distribution: existence and reasoning</li>
+            <li>Mean and variance of a random walk over time</li>
+          </ul>
+          <p class="material"><span class="lab">Material:</span> LN <code>chap4_part1</code> <code>markov_proc.pdf</code> · R <code>Markov.R</code></p>
+          <p class="read-more"><a href="topic-markov-chains.html">Full notes + v26's drift/stationarity walkthrough →</a></p>
+        </article>
+
+        <article class="topic" id="t10" data-topic="t10">
+          <div class="topic-head">
+            <label class="check"><input type="checkbox" data-topic="t10" aria-label="Mark topic 10 reviewed"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span></label>
+            <h3><span class="topic-num">10</span><a href="topic-reliability.html">Reliability systems &amp; lifetime distributions</a><span class="mini-badge p-high">High</span></h3>
+          </div>
+          <ul>
+            <li>Series / parallel systems: <span class="m">S = min(X<sub>1</sub>,…,X<sub>n</sub>)</span> or <span class="m">max(X<sub>1</sub>,…,X<sub>n</sub>)</span></li>
+            <li>Exponential is a special case of Weibull — use that to simplify simulation</li>
+            <li>Simulate a system lifetime by combining component distributions</li>
+          </ul>
+          <p class="material"><span class="lab">Material:</span> R <code>robot_system.R</code> <code>production_profile.R</code></p>
+          <p class="read-more"><a href="topic-reliability.html">Full notes + the robot-system worked example →</a></p>
+        </article>
+      </section>
+
+      <!-- ===================== CH. 6 — MC & RESAMPLING ===================== -->
+      <section class="tier-section" id="grp-ch6">
+        <div class="tier-head">
+          <span class="tier-badge neutral">Ch. 6 · Monte Carlo &amp; resampling</span>
+          <h2>Estimating integrals, and estimating uncertainty itself</h2>
+        </div>
+        <p class="tier-note">The single most-tested chapter — MC integration appears in all eight past exams.</p>
+
+        <article class="topic" id="t11" data-topic="t11">
+          <div class="topic-head">
+            <label class="check"><input type="checkbox" data-topic="t11" aria-label="Mark topic 11 reviewed"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span></label>
+            <h3><span class="topic-num">11</span><a href="topic-monte-carlo-integration.html">Monte Carlo methods for integrals</a><span class="mini-badge p-highest">Highest</span></h3>
           </div>
           <ul>
             <li><b>Crude MC</b> — write <span class="m">I = E[g(X)]</span> under a known density; estimate by averaging <span class="m">g(X<sub>i</sub>)</span></li>
@@ -553,13 +288,14 @@
             <li><b>Antithetic variables</b> — pair <span class="m">U</span> with <span class="m">1−U</span> (or <span class="m">−X</span> with <span class="m">X</span>); helps for monotone integrands, not otherwise</li>
             <li>Standard error of an MC estimator: <span class="frac"><span class="num">sd(g(X))</span><span class="den">√n</span></span></li>
           </ul>
-          <p class="material"><span class="lab">Material:</span> LN <code>chap4_part1</code> <code>chap4_part2</code> · Ex <code>exercise_set2</code> · R <code>MC_integration_examples.R</code> <code>Variance_reduction.R</code> <code>importance_sampling.R</code></p>
+          <p class="material"><span class="lab">Material:</span> LN <code>chap6_part1</code> <code>chap6_part2</code> · Ex <code>exercise_set2</code> · R <code>MC_integration_examples.R</code> <code>Variance_reduction.R</code> <code>importance_sampling.R</code></p>
+          <p class="read-more"><a href="topic-monte-carlo-integration.html">Full notes + 8 exams' worth of worked integrals →</a></p>
         </article>
 
-        <article class="topic" id="t5" data-topic="t5">
+        <article class="topic" id="t12" data-topic="t12">
           <div class="topic-head">
-            <label class="check"><input type="checkbox" data-topic="t5" aria-label="Mark topic 5 reviewed"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span></label>
-            <h3><span class="topic-num">5</span>Bootstrap</h3>
+            <label class="check"><input type="checkbox" data-topic="t12" aria-label="Mark topic 12 reviewed"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span></label>
+            <h3><span class="topic-num">12</span><a href="topic-bootstrap.html">Bootstrap</a><span class="mini-badge p-highest">Highest</span></h3>
           </div>
           <ul>
             <li>Non-parametric bootstrap: resample with replacement from the observed data</li>
@@ -573,12 +309,35 @@
             </li>
           </ul>
           <p class="material"><span class="lab">Material:</span> LN <code>chap6_part1</code> <code>chap6_part2</code> · Ex <code>exercise_set3</code> · R <code>bootstrap_examples.R</code></p>
+          <p class="read-more"><a href="topic-bootstrap.html">Full notes + 3 fully-worked exam CIs →</a></p>
         </article>
 
-        <article class="topic" id="t6" data-topic="t6">
+        <article class="topic" id="t13" data-topic="t13">
           <div class="topic-head">
-            <label class="check"><input type="checkbox" data-topic="t6" aria-label="Mark topic 6 reviewed"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span></label>
-            <h3><span class="topic-num">6</span>MCMC — Metropolis–Hastings</h3>
+            <label class="check"><input type="checkbox" data-topic="t13" aria-label="Mark topic 13 reviewed"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span></label>
+            <h3><span class="topic-num">13</span><a href="topic-kde.html">Kernel Density Estimation vs. histogram</a><span class="mini-badge p-high">High</span></h3>
+          </div>
+          <ul>
+            <li>Pros/cons of histograms vs. KDE, and what they share</li>
+            <li>Bandwidth effect: too small → noisy; too large → oversmoothed</li>
+            <li>Automatic bin-width rules (e.g. Scott's rule) — know when they're appropriate</li>
+          </ul>
+          <p class="material"><span class="lab">Material:</span> LN <code>chap12.pdf</code> · R <code>KDE.R</code></p>
+          <p class="read-more"><a href="topic-kde.html">Full notes + when Scott's rule fails →</a></p>
+        </article>
+      </section>
+
+      <!-- ===================== CH. 11-12 — MCMC & BAYESIAN ===================== -->
+      <section class="tier-section" id="grp-ch11">
+        <div class="tier-head">
+          <span class="tier-badge neutral">Ch. 11–12 · MCMC &amp; Bayesian</span>
+          <h2>The capstone: sampling when nothing else works</h2>
+        </div>
+
+        <article class="topic" id="t14" data-topic="t14">
+          <div class="topic-head">
+            <label class="check"><input type="checkbox" data-topic="t14" aria-label="Mark topic 14 reviewed"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span></label>
+            <h3><span class="topic-num">14</span><a href="topic-mcmc.html">MCMC — Metropolis–Hastings</a><span class="mini-badge p-highest">Highest</span></h3>
           </div>
           <ul>
             <li>Recognize the algorithm from R code:
@@ -593,12 +352,13 @@
             <li>Diagnostics: trace plot, acceptance rate (too low/high is bad), effective sample size (ESS), burn-in, thinning</li>
           </ul>
           <p class="material"><span class="lab">Material:</span> LN <code>chap11_part1</code> <code>chap11_part2</code> <code>chap11_part3</code> · R <code>mcmc_1.R</code> <code>mcmc_2.R</code> <code>mcmc_3.R</code></p>
+          <p class="read-more"><a href="topic-mcmc.html">Full notes + 8 exams' worth of sampler-recognition code →</a></p>
         </article>
 
-        <article class="topic" id="t7" data-topic="t7">
+        <article class="topic" id="t15" data-topic="t15">
           <div class="topic-head">
-            <label class="check"><input type="checkbox" data-topic="t7" aria-label="Mark topic 7 reviewed"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span></label>
-            <h3><span class="topic-num">7</span>Bayesian statistics</h3>
+            <label class="check"><input type="checkbox" data-topic="t15" aria-label="Mark topic 15 reviewed"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span></label>
+            <h3><span class="topic-num">15</span><a href="topic-bayesian.html">Bayesian statistics</a><span class="mini-badge p-highest">Highest</span></h3>
           </div>
           <ul>
             <li>Build the likelihood <span class="m">L(θ)</span> from iid data</li>
@@ -607,136 +367,16 @@
             <li>Non-conjugate cases need MCMC (RWMH or Gibbs) to sample the posterior</li>
             <li><b>Gibbs sampler</b> — derive full conditionals (e.g. Normal–Normal–LogNormal model for <span class="m">μ</span> and <span class="m">σ²</span>) and describe the algorithm</li>
           </ul>
-          <p class="material"><span class="lab">Material:</span> LN <code>bayes.pdf</code> <code>chap12.pdf</code> · Ex <code>exercise_set5</code> <code>exercise_set6</code></p>
+          <p class="material"><span class="lab">Material:</span> LN <code>bayes.pdf</code> · Ex <code>exercise_set5</code> <code>exercise_set6</code></p>
+          <p class="read-more"><a href="topic-bayesian.html">Full notes + conjugate vs. non-conjugate worked both ways →</a></p>
         </article>
       </section>
 
-      <!-- ===================== TIER: HIGH ===================== -->
-      <section class="tier-section" id="tier-medhigh">
-        <div class="tier-head">
-          <span class="tier-badge" style="background:var(--p-medhigh-soft); color:var(--p-medhigh)">High priority</span>
-          <h2>Appears in several exams</h2>
-        </div>
-
-        <article class="topic" id="t8" data-topic="t8">
-          <div class="topic-head">
-            <label class="check"><input type="checkbox" data-topic="t8" aria-label="Mark topic 8 reviewed"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span></label>
-            <h3><span class="topic-num">8</span>Poisson processes</h3>
-          </div>
-          <ul>
-            <li>Homogeneous process: distribution of <span class="m">N(t)</span>; inter-arrival times <span class="m">∼ Exponential(λ)</span>; time of the <span class="m">k</span>‑th event <span class="m">∼ Gamma(k, λ)</span></li>
-            <li><b>Non-homogeneous</b> process: time-varying intensity <span class="m">λ(t)</span> — know its interpretation</li>
-            <li>Simulate via <b>thinning</b>: accept–reject on arrival times of a homogeneous process with rate <span class="m">λ<sub>max</sub></span></li>
-            <li>Conditional probabilities, e.g. <span class="m">P(N(0.1)=0 | N(1)=8)</span></li>
-          </ul>
-          <p class="material"><span class="lab">Material:</span> LN <code>chap8.pdf</code> · Ex <code>exercise_set4</code> · R <code>rain.R</code></p>
-        </article>
-
-        <article class="topic" id="t9" data-topic="t9">
-          <div class="topic-head">
-            <label class="check"><input type="checkbox" data-topic="t9" aria-label="Mark topic 9 reviewed"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span></label>
-            <h3><span class="topic-num">9</span>Maximum likelihood estimation (MLE)</h3>
-          </div>
-          <ul>
-            <li>Build <span class="m">L(θ)</span> and the log-likelihood from an iid sample</li>
-            <li>Derive the MLE analytically (set the derivative to 0)</li>
-            <li>Check unbiasedness, compute the estimator's variance</li>
-            <li>Find the sample size <span class="m">n</span> needed for a given margin of error at a given confidence level</li>
-          </ul>
-          <p class="material"><span class="lab">Material:</span> LN <code>chap6_part1</code> · Ex <code>exercise_set3</code></p>
-        </article>
-
-        <article class="topic" id="t10" data-topic="t10">
-          <div class="topic-head">
-            <label class="check"><input type="checkbox" data-topic="t10" aria-label="Mark topic 10 reviewed"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span></label>
-            <h3><span class="topic-num">10</span>Kernel Density Estimation vs. histogram</h3>
-          </div>
-          <ul>
-            <li>Pros/cons of histograms vs. KDE, and what they share</li>
-            <li>Bandwidth effect: too small → noisy; too large → oversmoothed</li>
-            <li>Automatic bin-width rules (e.g. Scott's rule) — know when they're appropriate</li>
-          </ul>
-          <p class="material"><span class="lab">Material:</span> LN <code>chap6_part2</code> · R <code>KDE.R</code></p>
-        </article>
-
-        <article class="topic" id="t11" data-topic="t11">
-          <div class="topic-head">
-            <label class="check"><input type="checkbox" data-topic="t11" aria-label="Mark topic 11 reviewed"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span></label>
-            <h3><span class="topic-num">11</span>Reliability systems &amp; lifetime distributions</h3>
-          </div>
-          <ul>
-            <li>Series / parallel systems: <span class="m">S = min(X<sub>1</sub>,…,X<sub>n</sub>)</span> or <span class="m">max(X<sub>1</sub>,…,X<sub>n</sub>)</span></li>
-            <li>Exponential is a special case of Weibull — use that to simplify simulation</li>
-            <li>Simulate a system lifetime by combining component distributions</li>
-          </ul>
-          <p class="material"><span class="lab">Material:</span> R <code>robot_system.R</code> <code>production_profile.R</code></p>
-        </article>
-      </section>
-
-      <!-- ===================== TIER: MEDIUM ===================== -->
-      <section class="tier-section" id="tier-med">
-        <div class="tier-head">
-          <span class="tier-badge" style="background:var(--p-med-soft); color:var(--p-med)">Medium priority</span>
-          <h2>Recurring but less central</h2>
-        </div>
-
-        <article class="topic" id="t12" data-topic="t12">
-          <div class="topic-head">
-            <label class="check"><input type="checkbox" data-topic="t12" aria-label="Mark topic 12 reviewed"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span></label>
-            <h3><span class="topic-num">12</span>Central Limit Theorem &amp; confidence intervals</h3>
-          </div>
-          <ul>
-            <li>Approximate distribution of <span class="m"><span class="ov">X</span></span> for large <span class="m">n</span></li>
-            <li>Construct a 95% CI for a mean or function of the mean</li>
-          </ul>
-          <div class="trap"><b>Classic trap —</b> many candidate CI expressions in R; pick the one where the point estimate and its standard error actually match. Seen in h22.</div>
-          <p class="material"><span class="lab">Material:</span> cumulative topic — no single dedicated file</p>
-        </article>
-
-        <article class="topic" id="t13" data-topic="t13">
-          <div class="topic-head">
-            <label class="check"><input type="checkbox" data-topic="t13" aria-label="Mark topic 13 reviewed"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span></label>
-            <h3><span class="topic-num">13</span>Simulating multivariate / correlated variables</h3>
-          </div>
-          <ul>
-            <li>Multivariate normal via <b>Cholesky</b> decomposition</li>
-            <li>Compare Cholesky (direct/iid) vs. Gibbs vs. random-walk M‑H for the same target: efficiency, autocorrelation, iid vs. chain</li>
-          </ul>
-          <p class="material"><span class="lab">Material:</span> R <code>bivariate_normal.R</code> <code>multivariate_normal_example.R</code></p>
-        </article>
-
-        <article class="topic" id="t14" data-topic="t14">
-          <div class="topic-head">
-            <label class="check"><input type="checkbox" data-topic="t14" aria-label="Mark topic 14 reviewed"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span></label>
-            <h3><span class="topic-num">14</span>Markov chains &amp; stochastic processes</h3>
-          </div>
-          <ul>
-            <li>Simple random walk — is it Markov? Why?</li>
-            <li>State space and stationary distribution: existence and reasoning</li>
-            <li>Mean and variance of a random walk over time</li>
-          </ul>
-          <p class="material"><span class="lab">Material:</span> LN <code>markov_proc.pdf</code> · R <code>Markov.R</code></p>
-        </article>
-
-        <article class="topic" id="t15" data-topic="t15">
-          <div class="topic-head">
-            <label class="check"><input type="checkbox" data-topic="t15" aria-label="Mark topic 15 reviewed"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span></label>
-            <h3><span class="topic-num">15</span>Simulation via composition / transformation</h3>
-          </div>
-          <ul>
-            <li>Lognormal from Normal (exponential transform)</li>
-            <li>χ² from Normal (sum of squares)</li>
-            <li>Linear combinations, e.g. <span class="m">Z = aX + bY</span>, and MC estimation of <span class="m">E(Z)</span>, <span class="m">P(Z&lt;c)</span></li>
-          </ul>
-          <p class="material"><span class="lab">Material:</span> R <code>sums_mixtures_examples.R</code> <code>inverse_transform_examples_poiss.R</code></p>
-        </article>
-      </section>
-
-      <!-- ===================== TIER: LOW ===================== -->
+      <!-- ===================== ONE-OFF TOPICS ===================== -->
       <section class="tier-section" id="tier-low">
         <div class="tier-head">
-          <span class="tier-badge" style="background:var(--p-low-soft); color:var(--p-low)">Low priority</span>
-          <h2>Appeared once, still worth understanding</h2>
+          <span class="tier-badge" style="background:var(--p-low-soft); color:var(--p-low)">Seen once</span>
+          <h2>One-off topics, still worth understanding</h2>
         </div>
         <ul style="margin-left:2px;">
           <li>Estimating <span class="m">π</span> with a Monte Carlo circle method — a clean "easy mode" example of an MC estimator</li>
@@ -751,7 +391,7 @@
         <h2>How to use this roadmap</h2>
         <p class="intro">Five habits that map directly onto how these exams are actually built.</p>
         <ol>
-          <li><p>For every topic in the <b>highest-priority</b> tier, redo at least two exercises from <code>old exams\</code> without looking at the solution, then check against the matching <code>..._solution.pdf</code>.</p></li>
+          <li><p>Work through the study order top to bottom the first time; once you've covered everything, switch to drilling by the <span class="mini-badge p-highest" style="margin-left:0;">Highest</span> tag regardless of chapter — those are the topics worth the most repetition.</p></li>
           <li><p>Write algorithms out in pseudocode by hand, not just in your head — many questions explicitly ask for "words and formulas, not code."</p></li>
           <li><p>Drill "which of these R functions is correct" questions — they recur constantly. Check integration limits, the parameters passed to <code>runif</code> / <code>rnorm</code> / <code>rgamma</code>, and whether the code actually matches the formula.</p></li>
           <li><p>For MCMC, practice instant recognition: independence sampler vs. random-walk M‑H vs. Gibbs — and judging chain quality from a trace plot plus acceptance rate and ESS.</p></li>
@@ -760,8 +400,9 @@
       </section>
 
       <footer>
-        Built from STA510 past exams h22 · v23 · h23 · h24 · v26 · h25 and the course
-        material folder (Lecture Notes, Exercises, R‑examples, formula sheets).
+        Built from all eight STA510 past exams — h22 · v23 · h23 · v24 · h24 · v25 · h25 · v26 — and the course
+        material folder (Lecture Notes, Exercises, R‑examples, formula sheets). Every topic's full notes page
+        was cross-checked question-by-question against every one of these exams.
         Checkmarks are saved locally in this browser only — reload anytime, they'll still be here.
       </footer>
 

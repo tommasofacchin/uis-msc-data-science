@@ -1,0 +1,269 @@
+<title>MCMC & Metropolis-Hastings — STA510 Notes</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;0,600;0,700;1,500&family=STIX+Two+Text:ital,wght@0,400;0,500;0,600;1,400;1,500&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="style.css">
+
+<div class="shell">
+  <div class="crumb">
+    <a href="exam_roadmap.html">STA510 Roadmap</a><span class="sep">›</span><span>Ch. 11–12 · MCMC &amp; Bayesian</span>
+  </div>
+
+  <header class="note-header">
+    <div class="eyebrow"><span class="dot"></span> STA510 · Study note</div>
+    <h1><span class="num">14</span>MCMC — Metropolis-Hastings</h1>
+    <p class="dek">When you can evaluate a target density only up to an unknown constant, build a Markov chain
+      whose stationary distribution <em>is</em> that target — the constant cancels out of every acceptance ratio.</p>
+    <div class="examtags"><span class="lab">Tested in:</span>
+      <span class="examtag">h22</span><span class="examtag">v23</span><span class="examtag">h23</span>
+      <span class="examtag">v24</span><span class="examtag">h24</span><span class="examtag">v25</span>
+      <span class="examtag">h25</span><span class="examtag">v26</span></div>
+  </header>
+
+  <details class="mobile-toc">
+    <summary>Jump to a topic ▾</summary>
+    <nav>
+      <ul class="toc-list">
+        <li><a href="topic-continuous-rv.html">1. Continuous r.v.'s</a></li>
+        <li><a href="topic-inverse-transform.html">4. Inverse transform</a></li>
+        <li><a href="topic-accept-reject.html">5. Accept‑Reject</a></li>
+        <li><a href="topic-monte-carlo-integration.html">11. Monte Carlo integrals</a></li>
+        <li><a href="topic-bootstrap.html">12. Bootstrap</a></li>
+        <li><a href="exam_roadmap.html">← Back to roadmap index</a></li>
+      </ul>
+    </nav>
+  </details>
+
+  <div class="layout">
+    <nav class="toc" aria-label="Table of contents">
+      <h2>Study order</h2>
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 2 — Foundations</div>
+        <ul class="toc-list">
+          <li><a href="topic-continuous-rv.html">1. Continuous r.v.'s</a></li>
+          <li><a href="topic-clt-ci.html">2. CLT &amp; CIs</a></li>
+          <li><a href="topic-mle.html">3. MLE</a></li>
+        </ul>
+      </div>
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 3 — Simulation basics</div>
+        <ul class="toc-list">
+          <li><a href="topic-inverse-transform.html">4. Inverse transform</a></li>
+          <li><a href="topic-accept-reject.html">5. Accept‑Reject</a></li>
+          <li><a href="topic-multivariate-sim.html">6. Multivariate sim.</a></li>
+          <li><a href="topic-composition-methods.html">7. Composition methods</a></li>
+        </ul>
+      </div>
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 4 — Processes &amp; applications</div>
+        <ul class="toc-list">
+          <li><a href="topic-poisson-processes.html">8. Poisson processes</a></li>
+          <li><a href="topic-markov-chains.html">9. Markov chains</a></li>
+          <li><a href="topic-reliability.html">10. Reliability systems</a></li>
+        </ul>
+      </div>
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 6 — MC &amp; resampling</div>
+        <ul class="toc-list">
+          <li><a href="topic-monte-carlo-integration.html">11. Monte Carlo integrals</a></li>
+          <li><a href="topic-bootstrap.html">12. Bootstrap</a></li>
+          <li><a href="topic-kde.html">13. KDE vs. histogram</a></li>
+        </ul>
+      </div>
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 11–12 — MCMC &amp; Bayesian</div>
+        <ul class="toc-list">
+          <li><span class="current">14. MCMC — M‑H</span></li>
+          <li><a href="topic-bayesian.html">15. Bayesian stats</a></li>
+        </ul>
+      </div>
+      <div class="toc-tier">
+        <ul class="toc-list"><li><a href="exam_roadmap.html">← Back to roadmap index</a></li></ul>
+      </div>
+    </nav>
+
+    <main>
+    <article class="note">
+
+      <section>
+        <h2><span class="num">14.1</span>The problem MCMC solves</h2>
+        <p>You know a target density only as <span class="m">π(θ)=g(θ)/C</span>, where <span class="m">g</span> is
+          computable but the normalizing constant <span class="m">C=∫g(θ)dθ</span> is not (typically because
+          <span class="m">θ</span> is high-dimensional). MCMC builds a Markov chain whose stationary distribution
+          is exactly <span class="m">π</span>, using only <span class="m">g</span> — <span class="m">C</span> cancels
+          out of every ratio <span class="m">g(θ*)/g(θ<sub>t−1</sub>)</span> automatically.</p>
+      </section>
+
+      <section>
+        <h2><span class="num">14.2</span>Random-walk Metropolis-Hastings (RWMH)</h2>
+        <ol class="algo">
+          <li>Propose <span class="m">θ* ∼ N(θ<sub>t−1</sub>, Σ)</span> (symmetric around the current state).</li>
+          <li>Compute <span class="m">α = min(1, g(θ*)/g(θ<sub>t−1</sub>))</span>.</li>
+          <li>Draw <span class="m">u∼Unif(0,1)</span>; if <span class="m">u&lt;α</span> move to
+            <span class="m">θ*</span>, else stay at <span class="m">θ<sub>t−1</sub></span>.</li>
+        </ol>
+        <div class="callout"><b>Tuning</b> — accept rate around <b>20–40%</b> is the standard target for moderate
+          dimension. Too small <span class="m">Σ</span>: high acceptance but the chain barely moves (slow
+          exploration). Too large <span class="m">Σ</span>: most proposals land where <span class="m">g</span> is
+          tiny, low acceptance, chain gets stuck.</div>
+      </section>
+
+      <section>
+        <h2><span class="num">14.3</span>General Metropolis-Hastings &amp; the independence sampler</h2>
+        <p>For an asymmetric proposal <span class="m">q(θ*∣θ<sub>t−1</sub>)</span>, the acceptance ratio must
+          correct for the proposal's own asymmetry:</p>
+        <div class="formula">
+          <span class="m">α = min<big>(</big>1, <span class="frac"><span class="num">q(θ<sub>t−1</sub>∣θ*)g(θ*)</span><span class="den">q(θ*∣θ<sub>t−1</sub>)g(θ<sub>t−1</sub>)</span></span><big>)</big></span>
+        </div>
+        <p>RWMH is the special case <span class="m">q(θ<sub>t−1</sub>∣θ*)=q(θ*∣θ<sub>t−1</sub>)</span> (symmetric),
+          so those terms cancel. The <b>independence sampler</b> is the opposite special case:
+          <span class="m">q(θ*∣θ<sub>t−1</sub>)=r(θ*)</span> doesn't depend on the current state at all:</p>
+        <div class="formula">
+          <span class="m">α = min<big>(</big>1, <span class="frac"><span class="num">g(θ*)/r(θ*)</span><span class="den">g(θ<sub>t−1</sub>)/r(θ<sub>t−1</sub>)</span></span><big>)</big></span>
+        </div>
+        <p>Same idea as importance sampling — <span class="m">r</span> should hug <span class="m">g</span>'s shape —
+          but the goal now is a good <em>sample</em>, not a good integral.</p>
+      </section>
+
+      <section>
+        <h2><span class="num">14.4</span>Spot-the-bug — recognizing the sampler from R code</h2>
+        <p><b>v23</b> gives an independence-sampler implementation directly:</p>
+        <pre class="rcode"><code>x.prop  <- runif(1, min=-2, max=2)              # <- doesn't depend on x[t-1]!
+wt.prop <- C*exp(-0.5*x.prop^2) / dunif(x.prop, -2, 2)
+wt.old  <- C*exp(-0.5*x[t-1]^2) / dunif(x[t-1], -2, 2)
+alpha   <- min(1, wt.prop/wt.old)</code></pre>
+        <div class="callout example"><b>Independence sampler.</b> The tell: <code>x.prop</code> is drawn from
+          <code>runif(-2,2)</code> with no reference to <code>x[t-1]</code>. The
+          <code>wt.old</code>/<code>wt.star</code>-style weight ratio (<span class="m">g/r</span> at the proposal,
+          divided by <span class="m">g/r</span> at the current state) is the exact signature of §14.3's
+          independence-sampler ratio — whenever you see this "importance-weight" naming pattern in R, that's the
+          giveaway, regardless of the specific target.</div>
+        <p><b>h22</b> gives the RWMH signature instead — proposal <em>does</em> reference the previous state,
+          and the ratio has no separate proposal-density term:</p>
+        <pre class="rcode"><code>x.prop <- x[t-1] + 3*rnorm(1)                    # <- centered on x[t-1]
+alpha  <- min(1, dnorm(x.prop,mean=2,sd=2) / dnorm(x[t-1],mean=2,sd=2))</code></pre>
+        <div class="callout example">Proposal: <span class="m">N(x<sub>t−1</sub>, 3²)</span>. Target:
+          <span class="m">N(2,2)</span> (read off the <code>dnorm</code> arguments). Since it's RWMH, the chain's
+          draws are autocorrelated — an average of the last 500 draws has <b>larger</b> SD than an average of 500
+          truly iid target draws would, because correlated samples carry less independent information (this is
+          exactly the ESS gap in §14.6).</div>
+      </section>
+
+      <section>
+        <h2><span class="num">14.5</span>Spot-the-bug — log-posterior kernel construction</h2>
+        <p><b>h23</b>: target posterior <span class="m">∝ L(θ)·p(θ)</span> with prior
+          <span class="m">θ∼Gamma(a=15, b=1/20)</span> (scale <span class="m">b</span>). Recall from §14.7's
+          distribution-recognition table: a Gamma log-kernel must look like <span class="m">const + (a−1)log(θ) − θ/b</span>.
+          Four candidate log-prior lines:</p>
+        <pre class="rcode"><code>Option1: dgamma(theta, shape=a, scale=b, log=TRUE)     # built-in, correct
+Option2: logc1 + n*log(theta) - c2*theta               # manual likelihood kernel, correct form
+Option3: log(theta^(a-1)) - log(theta/b)                # BUG
+Option4: (a-1)*log(theta) - theta/b                     # correct Gamma kernel</code></pre>
+        <div class="callout example"><b>Option 3 is the bug.</b> Expand it:
+          <span class="m">log(θ<sup>a−1</sup>) − log(θ/b) = (a−1)log(θ) − log(θ) + log(b) = (a−2)log(θ) + const</span> —
+          the linear-in-<span class="m">θ</span> decay term <span class="m">−θ/b</span> has vanished entirely.
+          Without it the "density" doesn't decay at all as <span class="m">θ→∞</span> and isn't normalizable —
+          not a Gamma, not a proper density of any kind. Options 1, 2, and 4 all correctly reduce to the
+          <span class="m">(a−1)log(θ)−θ/b</span> template.</div>
+      </section>
+
+      <section>
+        <h2><span class="num">14.6</span>Diagnostics: burn-in, ESS, acceptance rate</h2>
+        <div class="formula left">
+          <b>Burn-in:</b> discard early samples before the chain has "forgotten" its start — check via trace plot.<br><br>
+          <b>ESS</b> (effective sample size): how many <em>iid</em> draws would give the same precision as your
+          <span class="m">T</span> correlated ones. Rule of thumb: want <span class="m">ESS&gt;200</span>; if
+          <span class="m">ESS/T&lt;0.01</span>, something is wrong.<br><br>
+          CI for <span class="m">E(θ)</span>: <span class="m"><span class="ov">θ</span> ± z<sub>α/2</sub>·SD(θ)/√ESS</span> &nbsp;(<b>not</b> <span class="m">√T</span> — see the <a href="topic-markov-chains.html">Markov chains page</a> §9.5)
+        </div>
+        <div class="callout trap"><b>h24</b> reports a RWMH chain with <b>acceptance rate 0.67</b> and
+          <b>ESS=15.73</b> out of 1000 iterations (<span class="m">ESS/T≈1.6%</span>) — a strong red flag despite a
+          seemingly reasonable acceptance rate. High acceptance with very low ESS usually means the proposal steps
+          are too small: the chain accepts almost everything but barely moves, so consecutive draws are nearly
+          identical (highly autocorrelated). Fix: increase the proposal spread, run longer, or thin.</div>
+      </section>
+
+      <section>
+        <h2><span class="num">14.7</span>The Gibbs sampler</h2>
+        <p>Split <span class="m">θ=(θ⁽¹⁾,θ⁽²⁾,…)</span> into blocks; cycle through sampling each block from its
+          <b>full conditional</b> given all the others — each conditional is exact, no accept/reject step needed
+          when it has closed form:</p>
+        <ol class="algo">
+          <li>Update <span class="m">θ⁽¹⁾ ∼ π(θ⁽¹⁾∣θ⁽²⁾<sub>t−1</sub>)</span>.</li>
+          <li>Update <span class="m">θ⁽²⁾ ∼ π(θ⁽²⁾∣θ⁽¹⁾<sub>t</sub>)</span>.</li>
+          <li>Repeat — this preserves the joint target distribution.</li>
+        </ol>
+        <p>Find each conditional by reading off the <em>shape</em> of <span class="m">log g</span> as a function of
+          one block only (everything else fixed) — the recognition table:</p>
+        <div class="examtable" style="overflow-x:auto;">
+        <table class="examtable">
+          <tr><th>log-kernel shape</th><th>distribution</th></tr>
+          <tr><td>a+bx+cx²</td><td>N(−b/2c, −1/2c)</td></tr>
+          <tr><td>a+bx</td><td>Exp(−1/b)</td></tr>
+          <tr><td>a+b·log(x)+cx</td><td>Gamma(b+1, −1/c)</td></tr>
+          <tr><td>a+b·log(x)+c·log(1−x)</td><td>Beta(b+1, c+1)</td></tr>
+          <tr><td>a+b·log(x)−c/x</td><td>InverseGamma(−(b+1), c)</td></tr>
+        </table>
+        </div>
+        <div class="callout"><b>v25/v26 both ask you to describe the Gibbs algorithm</b> and to give efficiency
+          tips: make blocks as large as possible (update a whole multivariate-normal block at once rather than
+          coordinate-by-coordinate), keep strongly-correlated variables in the <em>same</em> block, and reserve
+          low-dimensional Metropolis steps (a "Metropolized Gibbs sampler") for whichever conditional has no
+          closed form.</div>
+      </section>
+
+      <section>
+        <h2><span class="num">14.8</span>Worked example — Normal mean &amp; precision (classic Gibbs)</h2>
+        <p><span class="m">y<sub>i</sub>∣μ,τ ∼ N(μ,τ⁻¹)</span>, priors <span class="m">μ∼N(0,10²)</span>,
+          <span class="m">τ∼Gamma(1,1)</span>. Reading the log-posterior kernel's shape in each variable separately:</p>
+        <div class="formula left">
+          <span class="m">μ∣τ,y ∼ N<big>(</big><span class="frac"><span class="num">τΣy<sub>i</sub></span><span class="den">nτ+1/100</span></span>, <span class="frac"><span class="num">1</span><span class="den">nτ+1/100</span></span><big>)</big></span> &nbsp;(quadratic in μ ⇒ Normal)<br><br>
+          <span class="m">τ∣μ,y ∼ Gamma<big>(</big><span class="frac"><span class="num">n</span><span class="den">2</span></span>+1, <span class="frac"><span class="num">1</span><span class="den">S²/2+1</span></span><big>)</big></span>, &nbsp;<span class="m">S²=Σ(y<sub>i</sub>−μ)²</span> &nbsp;(<span class="m">a+b log(τ)+cτ</span> shape ⇒ Gamma)
+        </div>
+        <p>A big, intractable joint posterior reduces to two trivial-to-sample conditionals — this is exactly the
+          pattern <b>v24</b> and <b>v26</b> test with a Gamma-Gamma pair and a Normal-Normal/log-Normal-variance
+          model respectively.</p>
+      </section>
+
+      <section>
+        <h2><span class="num">14.9</span>Worked example — when RWMH breaks on a constrained parameter</h2>
+        <p><b>h25</b>: target <span class="m">β&gt;0</span> with posterior kernel
+          <span class="m">log g(β)=(a₀−n−1)log(β) − β/b₀ − ΣX<sub>i</sub>/β</span>. A naive RWMH with
+          <span class="m">β* ∼ N(β<sub>t−1</sub>, σ²)</span> reports acceptance 37% and
+          <span class="m">ESS≈4089</span> (out of 20000) — numbers that look reasonable, yet the sampler is flawed:
+          a symmetric normal proposal on an unconstrained scale will regularly propose <span class="m">β*&lt;0</span>,
+          invalid for this target. Two standard fixes:</p>
+        <div class="formula left">
+          <b>Log-scale proposal:</b> <span class="m">log(β*) = log(β<sub>t−1</sub>) + ε</span>, <span class="m">ε∼N(0,σ²)</span> —
+          always positive, but now <span class="m">q</span> is asymmetric on the <span class="m">β</span>-scale, so
+          the acceptance ratio needs a <b>Jacobian</b> correction (extra factor <span class="m">β*/β<sub>t−1</sub></span>).<br><br>
+          <b>Independent Gamma proposal</b> centered on the MLE <span class="m">β̂</span>: match the Gamma's mean to
+          <span class="m">β̂</span> and its variance to the estimated <span class="m">Var(β̂)</span>, then use the
+          independence-sampler ratio from §14.3.
+        </div>
+        <div class="callout trap">This is exactly why the roadmap flags "remember the Jacobian term" for log-scale
+          proposals — forgetting it silently biases the stationary distribution even though the chain still looks
+          fine on a trace plot.</div>
+      </section>
+
+      <section>
+        <h2><span class="num">14.10</span>Common exam pitfalls</h2>
+        <ul>
+          <li>Recognize the sampler from the proposal line alone: does it reference the current state
+            (RWMH/Gibbs) or not (independence sampler)?</li>
+          <li>Any time a parameter has a hard constraint (positivity, an interval), a plain symmetric-normal RWMH
+            on the natural scale is suspect — expect a log-transform or a matched-support proposal instead.</li>
+          <li>Good-looking acceptance rate ≠ good sampler — always check ESS too.</li>
+          <li>For Gibbs, derive each conditional by isolating the terms of <span class="m">log g</span> that
+            involve that block; everything else folds into an irrelevant constant.</li>
+        </ul>
+        <p class="material"><span class="lab">Material:</span> LN <code>chap11_part1</code> <code>chap11_part2</code> <code>chap11_part3</code> · R <code>mcmc_1.R</code> <code>mcmc_2.R</code> <code>mcmc_3.R</code></p>
+      </section>
+
+    </article>
+
+      <nav class="pager">
+        <a href="topic-kde.html"><span class="lab">Previous</span>← KDE vs. histogram</a>
+        <a class="next" href="topic-bayesian.html"><span class="lab">Next</span>Bayesian statistics →</a>
+      </nav>
+    </main>
+  </div>
+</div>

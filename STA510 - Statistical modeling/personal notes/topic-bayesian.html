@@ -1,0 +1,201 @@
+<title>Bayesian Statistics — STA510 Notes</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;0,600;0,700;1,500&family=STIX+Two+Text:ital,wght@0,400;0,500;0,600;1,400;1,500&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="style.css">
+
+<div class="shell">
+  <div class="crumb">
+    <a href="exam_roadmap.html">STA510 Roadmap</a><span class="sep">›</span><span>Ch. 11–12 · MCMC &amp; Bayesian</span>
+  </div>
+
+  <header class="note-header">
+    <div class="eyebrow"><span class="dot"></span> STA510 · Study note</div>
+    <h1><span class="num">15</span>Bayesian statistics</h1>
+    <p class="dek">Treat the parameter itself as random: combine a prior belief with the likelihood via Bayes'
+      rule to get the posterior — then either derive it in closed form, or hand it to <a href="topic-mcmc.html">MCMC</a>.</p>
+    <div class="examtags"><span class="lab">Tested in:</span>
+      <span class="examtag">h23</span><span class="examtag">v24</span><span class="examtag">v25</span>
+      <span class="examtag">h25</span><span class="examtag">v26</span></div>
+  </header>
+
+  <details class="mobile-toc">
+    <summary>Jump to a topic ▾</summary>
+    <nav>
+      <ul class="toc-list">
+        <li><a href="topic-continuous-rv.html">1. Continuous r.v.'s</a></li>
+        <li><a href="topic-inverse-transform.html">4. Inverse transform</a></li>
+        <li><a href="topic-accept-reject.html">5. Accept‑Reject</a></li>
+        <li><a href="topic-monte-carlo-integration.html">11. Monte Carlo integrals</a></li>
+        <li><a href="topic-bootstrap.html">12. Bootstrap</a></li>
+        <li><a href="exam_roadmap.html">← Back to roadmap index</a></li>
+      </ul>
+    </nav>
+  </details>
+
+  <div class="layout">
+    <nav class="toc" aria-label="Table of contents">
+      <h2>Study order</h2>
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 2 — Foundations</div>
+        <ul class="toc-list">
+          <li><a href="topic-continuous-rv.html">1. Continuous r.v.'s</a></li>
+          <li><a href="topic-clt-ci.html">2. CLT &amp; CIs</a></li>
+          <li><a href="topic-mle.html">3. MLE</a></li>
+        </ul>
+      </div>
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 3 — Simulation basics</div>
+        <ul class="toc-list">
+          <li><a href="topic-inverse-transform.html">4. Inverse transform</a></li>
+          <li><a href="topic-accept-reject.html">5. Accept‑Reject</a></li>
+          <li><a href="topic-multivariate-sim.html">6. Multivariate sim.</a></li>
+          <li><a href="topic-composition-methods.html">7. Composition methods</a></li>
+        </ul>
+      </div>
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 4 — Processes &amp; applications</div>
+        <ul class="toc-list">
+          <li><a href="topic-poisson-processes.html">8. Poisson processes</a></li>
+          <li><a href="topic-markov-chains.html">9. Markov chains</a></li>
+          <li><a href="topic-reliability.html">10. Reliability systems</a></li>
+        </ul>
+      </div>
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 6 — MC &amp; resampling</div>
+        <ul class="toc-list">
+          <li><a href="topic-monte-carlo-integration.html">11. Monte Carlo integrals</a></li>
+          <li><a href="topic-bootstrap.html">12. Bootstrap</a></li>
+          <li><a href="topic-kde.html">13. KDE vs. histogram</a></li>
+        </ul>
+      </div>
+      <div class="toc-tier">
+        <div class="toc-tier-head"><span class="tier-dot" style="background:var(--accent)"></span> Ch. 11–12 — MCMC &amp; Bayesian</div>
+        <ul class="toc-list">
+          <li><a href="topic-mcmc.html">14. MCMC — M‑H</a></li>
+          <li><span class="current">15. Bayesian stats</span></li>
+        </ul>
+      </div>
+      <div class="toc-tier">
+        <ul class="toc-list"><li><a href="exam_roadmap.html">← Back to roadmap index</a></li></ul>
+      </div>
+    </nav>
+
+    <main>
+    <article class="note">
+
+      <section>
+        <h2><span class="num">15.1</span>Prior, likelihood, posterior</h2>
+        <div class="formula left">
+          <b>Prior</b> <span class="m">p(θ)</span> — what's known before data.<br>
+          <b>Likelihood</b> <span class="m">L(θ)=p(y∣θ)</span> — same object as in the <a href="topic-mle.html">MLE page</a>.<br>
+          <b>Posterior</b> <span class="m">p(θ∣y) = <span class="frac"><span class="num">p(y,θ)</span><span class="den">∫p(y,θ)dθ</span></span> ∝ L(θ)p(θ)</span>
+        </div>
+        <p>The denominator (the "evidence") is exactly the unknown normalizing constant <span class="m">C</span>
+          from the <a href="topic-mcmc.html">MCMC page</a> — this is <em>why</em> MCMC exists: to sample
+          <span class="m">p(θ∣y)</span> without ever computing that integral.</p>
+      </section>
+
+      <section>
+        <h2><span class="num">15.2</span>Worked example — Normal-Normal conjugacy</h2>
+        <p><span class="m">y∣θ ∼ N(θ,σ²)</span>, prior <span class="m">θ∼N(0,100)</span>. The joint
+          <span class="m">(y,θ)</span> is bivariate normal, giving a closed-form posterior:</p>
+        <div class="formula">
+          <span class="m">θ∣y ∼ N<big>(</big><span class="frac"><span class="num">100y</span><span class="den">100+σ²</span></span>, <span class="frac"><span class="num">100σ²</span><span class="den">100+σ²</span></span><big>)</big></span>
+        </div>
+        <p>Interpretation: small <span class="m">σ</span> (informative data) ⇒ posterior ≈ the data
+          (<span class="m">E(θ∣y)≈y</span>); large <span class="m">σ</span> (noisy data) ⇒ posterior ≈ the prior
+          (<span class="m">E(θ∣y)≈0</span>). Use the posterior directly for probability statements —
+          <span class="m">P(θ&gt;0)</span>, a 95% interval as the 2.5%/97.5% quantiles — with no "repeated
+          sampling" story needed, unlike a frequentist CI.</p>
+      </section>
+
+      <section>
+        <h2><span class="num">15.3</span>Recognizing conjugate posteriors from the log-kernel shape</h2>
+        <p>Same recognition table as the <a href="topic-mcmc.html">MCMC/Gibbs page</a> §14.7 — this is the exact
+          skill both topics share, since a Gibbs sampler's conditionals <em>are</em> Bayesian posteriors:</p>
+        <div class="formula left">
+          <span class="m">a+b·log(θ)+cθ</span> ⇒ <span class="m">Gamma(b+1,−1/c)</span> &nbsp;→&nbsp; classic <b>Gamma–Exponential</b> and <b>Gamma–Poisson</b> conjugate pairs<br>
+          <span class="m">a+bθ+cθ²</span> ⇒ <span class="m">N(−b/2c,−1/2c)</span> &nbsp;→&nbsp; <b>Normal–Normal</b>
+        </div>
+      </section>
+
+      <section>
+        <h2><span class="num">15.4</span>Worked example — Gamma prior, exponential-type likelihood</h2>
+        <p><b>h23/h25-style:</b> data with likelihood kernel <span class="m">L(θ)∝θⁿe<sup>−θc</sup></span> (for
+          some data-dependent constant <span class="m">c</span>), prior <span class="m">θ∼Gamma(a,b)</span>
+          (shape <span class="m">a</span>, scale <span class="m">b</span>):</p>
+        <div class="formula left">
+          <span class="m">log g(θ) = n·log(θ) − θc + (a−1)log(θ) − θ/b = (n+a−1)log(θ) − θ(c+1/b)</span><br><br>
+          ⇒ <span class="m">θ∣y ∼ Gamma(n+a, 1/(c+1/b))</span> &nbsp;— conjugate, closed form, no MCMC needed.
+        </div>
+        <p>The moment you can write the log-posterior kernel as <span class="m">const+b′log(θ)+c′θ</span>, stop —
+          you already know the answer is Gamma; don't integrate anything.</p>
+      </section>
+
+      <section>
+        <h2><span class="num">15.5</span>Worked example — a genuinely two-block posterior</h2>
+        <p><b>v24-style:</b> <span class="m">T<sub>i</sub>∼Exponential(ab)</span> iid, independent priors
+          <span class="m">a∼Exp(3)</span>, <span class="m">b∼Exp(3)</span>. The joint posterior kernel:</p>
+        <div class="formula">
+          <span class="m">p(a,b∣t) ∝ (ab)ⁿ·e<sup>−ab·Σt<sub>i</sub></sup>·e<sup>−3(a+b)</sup></span>
+        </div>
+        <p>Fixing <span class="m">b</span> and reading the shape in <span class="m">a</span> only:
+          <span class="m">n·log(a) − a(b·Σt<sub>i</sub>+3)</span> — a Gamma shape again:</p>
+        <div class="formula">
+          <span class="m">a∣b,t ∼ Gamma(n+1, 1/(bΣt<sub>i</sub>+3))</span>, &nbsp;and symmetrically &nbsp;<span class="m">b∣a,t ∼ Gamma(n+1, 1/(aΣt<sub>i</sub>+3))</span>
+        </div>
+        <p>Two simple Gamma conditionals — feed straight into a Gibbs sampler (<a href="topic-mcmc.html">MCMC
+          page</a> §14.7–14.8).</p>
+      </section>
+
+      <section>
+        <h2><span class="num">15.6</span>Worked example — non-conjugate posterior needs MCMC</h2>
+        <p><b>v26-style:</b> <span class="m">y<sub>i</sub>∣μ,σ² ∼ N(μ,σ²)</span> iid, <span class="m">μ∣σ²∼N(m₀,σ²/κ₀)</span>
+          (conjugate for <span class="m">μ</span>), but the prior on <em>variance</em> is
+          <span class="m">log(σ²)∼N(0,1)</span> instead of the conjugate Inverse-Gamma. Consequences:</p>
+        <ul>
+          <li><span class="m">μ∣σ²,y</span> is still Normal (Normal-Normal conjugacy on <span class="m">μ</span>
+            survives regardless of the prior on <span class="m">σ²</span>) — closed form, sample directly.</li>
+          <li><span class="m">σ²∣μ,y</span> is <em>not</em> a standard distribution — the
+            <span class="m">(log σ²)²</span> term from the prior doesn't match any entry in the recognition table
+            — needs a Metropolis step within the Gibbs sampler (a "Metropolized Gibbs sampler", see
+            <a href="topic-mcmc.html">MCMC page</a> §14.7).</li>
+        </ul>
+        <div class="callout">This is the general pattern behind "is this conjugate?" questions: check each
+          block's conditional against the recognition table <em>separately</em> — a model can be conjugate in one
+          parameter and not in another.</div>
+      </section>
+
+      <section>
+        <h2><span class="num">15.7</span>Using the posterior</h2>
+        <div class="formula left">
+          <span class="m">P(θ&gt;0∣y) = ∫₀<sup>∞</sup> p(θ∣y)dθ</span> &nbsp;·&nbsp;
+          95% interval: the 2.5%/97.5% quantiles of <span class="m">p(θ∣y)</span> directly<br><br>
+          Derived quantity <span class="m">η=k(θ)</span>: if closed-form, transform the distribution directly (e.g.
+          <span class="m">η=θ+273.15</span> shifts a Normal posterior's mean only); otherwise apply
+          <span class="m">k</span> to MCMC samples and summarize the transformed sample.
+        </div>
+      </section>
+
+      <section>
+        <h2><span class="num">15.8</span>Common exam pitfalls</h2>
+        <ul>
+          <li>"Derive the posterior kernel" means: multiply likelihood × prior, take logs, drop every additive term
+            that doesn't involve <span class="m">θ</span> — don't try to track the normalizing constant.</li>
+          <li>Match a derived log-kernel against the recognition table term-by-term (coefficient of
+            <span class="m">log(θ)</span>, coefficient of <span class="m">θ</span>) rather than guessing the
+            distribution from the model's "story".</li>
+          <li>A Bayesian 95% interval is a direct probability statement about <span class="m">θ</span> — resist
+            the urge to describe it with frequentist "repeated sampling" language.</li>
+        </ul>
+        <p class="material"><span class="lab">Material:</span> LN <code>bayes.pdf</code> · Ex <code>exercise_set5</code> <code>exercise_set6</code></p>
+      </section>
+
+    </article>
+
+      <nav class="pager">
+        <a href="topic-mcmc.html"><span class="lab">Previous</span>← MCMC — Metropolis-Hastings</a>
+        <a class="next" href="exam_roadmap.html"><span class="lab">Next</span>Back to roadmap →</a>
+      </nav>
+    </main>
+  </div>
+</div>

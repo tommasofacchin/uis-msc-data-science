@@ -1,0 +1,272 @@
+---
+title: "STA510 - Mandatory Assignment 1"
+author: "Tommaso Facchin"
+date: "`r format(Sys.Date(), '%d %B %Y')`"
+output:
+  html_document:
+    toc: true
+    number_sections: true
+geometry: margin=2.5cm
+fontsize: 11pt
+lang: en
+---
+
+```{r setup, include=FALSE}
+rm(list = ls())
+
+knitr::opts_chunk$set(
+  echo = TRUE,
+  warning = FALSE,
+  message = FALSE
+)
+```
+
+
+# Problem 1
+
+## a)
+
+
+\[
+\int_a^{a+20} c(x-a)(a+20-x)\,dx = 1.
+\]
+
+Using the substitution
+
+\[
+u = x-a,
+\qquad
+dx = du,
+\]
+
+we obtain
+
+\[
+c\int_0^{20}u(20-u)\,du = 1.
+\]
+
+\[
+c\left[10u^2-\frac{u^3}{3}\right]_0^{20} = 1.
+\]
+
+\[
+c\frac{4000}{3} = 1.
+\]
+
+\[
+\boxed{c=\frac{3}{4000}}.
+\]
+
+The valid pdf is
+
+\[
+f(x;a)=
+\begin{cases}
+\displaystyle \frac{3}{4000}(x-a)(a+20-x),
+& a \leq x \leq a+20,\\[6pt]
+0, & \text{otherwise}.
+\end{cases}
+\]
+
+
+## b) 
+
+\[
+E[X]
+=
+\int_a^{a+20}
+x \cdot c(x-a)(a+20-x)\,dx.
+\]
+
+I used the substitution like before and got:
+
+\[
+E[X]
+=
+c\int_0^{20}
+\left(
+20u^2-u^3+20au-au^2
+\right)\,du.
+\]
+
+\[
+E[X]
+=
+c
+\left[
+\frac{20u^3}{3}
+-\frac{u^4}{4}
++10au^2
+-\frac{au^3}{3}
+\right]_0^{20}.
+\]
+
+\[
+\boxed{E[X]=a+10}.
+\]
+
+
+---
+
+\[
+\operatorname{Var}(X)=E[X^2]-(E[X])^2.
+\]
+
+\[
+E[X^2]
+=
+\int_a^{a+20}x^2f(x;a)\,dx.
+\]
+
+\[
+E[X^2]
+=
+a^2+40a+400.
+\]
+
+
+\[
+\operatorname{Var}(X)
+=
+(a^2+40a+400)-(a+10)^2.
+\]
+
+\[
+\boxed{\operatorname{Var}(X)=100}.
+\]
+
+---
+
+E[X] = a+10 means that a + 10m/s is the expected daily maximum wind speed during autumn. right in the middle of the minimum and maximum threshold.+
+
+Var[X] = 100 means that the daily maximum wind speeds have a spread around their expected value with standard deviation 10m/s.
+
+
+
+
+## c)
+
+The cumulative distribution function is 
+
+\[
+F(x;a)
+=
+\int_a^x \frac{3}{4000}(t-a)(a+20-t)\,dt.
+\]
+
+using substitution: 
+
+\[
+F(x;a)
+=
+\frac{3}{4000}
+\int_0^{x-a}u(20-u)\,du.
+\]
+
+
+\[
+F(x;a)
+=
+\frac{3}{4000}
+\left[
+10u^2-\frac{u^3}{3}
+\right]_0^{x-a}.
+\]
+
+\[
+F(x;a)
+=
+\frac{3}{4000}
+\left(
+10(x-a)^2-\frac{(x-a)^3}{3}
+\right).
+\]
+
+
+\[
+\boxed{
+F(x;a)
+=
+\frac{3}{4000}
+\left(
+10(x-a)^2-\frac{(x-a)^3}{3}
+\right),
+\qquad a\leq x\leq a+20.
+}
+\]
+
+
+## d)
+
+
+
+```{r}
+a <- 5
+n <- 5000
+
+F <- function(x, a) {(3 / 4000) * (10 * (x - a)^2 - (x - a)^3 / 3)}
+
+F_inv <- function(p, a) {
+  uniroot(
+    function(x) F(x, a) - p,
+    lower = a,
+    upper = a + 20
+  )$root
+}
+
+set.seed(42)
+
+u <- runif(n)
+
+wind_speed <- sapply(u, F_inv, a = a)
+
+```
+
+
+```{r}
+hist(
+  wind_speed,
+  breaks = "Scott",
+  probability = TRUE,
+  col = "lightblue",
+  main = "Histogram of simulated wind speeds",
+  xlab = "Wind speed (m/s)"
+)
+
+curve(
+  (3 / 4000) * (x - 5) * (25 - x),
+  from = 5,
+  to = 25,
+  add = TRUE,
+  col = "red",
+  lwd = 2
+)
+```
+
+The simulated values follow the expected parabolic shape. 
+The density is close to zero near the limits (\(5\) m/s and \(25\) m/s), and it reaches its maximum around \(15\) m/s. 
+
+
+```{r ecdf}
+plot(
+  ecdf(wind_speed),
+  main = "Empirical and true CDF",
+  xlab = "Wind speed (m/s)",
+  ylab = "Cumulative probability",
+  col = "lightblue",
+  lwd = 2
+)
+
+curve(
+  (3 / 4000) * (10 * (x - 5)^2 - (x - 5)^3 / 3),
+  from = 5,
+  to = 25,
+  add = TRUE,
+  col = "red",
+  lwd = 2
+)
+```
+
+The empirical CDF is very similar to the true CDF. The empirical CDF is
+a step function based on the simulated sample, whereas the true CDF is smooth.
+The two curves are almost overlapping.

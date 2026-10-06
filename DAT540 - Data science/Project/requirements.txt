@@ -1,0 +1,6 @@
+# Notebook
+ipykernel
+jupyter
+pandas
+numpy
+pyarrow

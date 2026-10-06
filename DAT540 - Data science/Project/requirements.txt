@@ -1,6 +1,8 @@
-# Notebook
 ipykernel
 jupyter
 pandas
 numpy
 pyarrow
+matplotlib
+seaborn
+scikit-learn

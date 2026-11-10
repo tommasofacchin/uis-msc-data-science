@@ -1,0 +1,93 @@
+\documentclass[10pt,a5paper]{article}
+
+\usepackage[a5paper,top=1.3cm,bottom=1.5cm,left=1.2cm,right=1.2cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb}
+\usepackage{xcolor}
+\usepackage{framed}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{longtable}
+\usepackage{fancyvrb}
+\usepackage{multicol}
+\usepackage[colorlinks=true,linkcolor=blue!50!black,urlcolor=blue!50!black]{hyperref}
+
+% ---------- spacing ----------
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt plus 1pt}
+\renewcommand{\arraystretch}{1.25}
+\setcounter{tocdepth}{2}
+\setlength{\emergencystretch}{3em}
+\sloppy
+
+% ---------- colours ----------
+\definecolor{ideabg}{RGB}{232,240,252}
+\definecolor{exambar}{RGB}{200,60,40}
+\definecolor{trapbg}{RGB}{253,236,230}
+\definecolor{algobg}{RGB}{238,238,238}
+\definecolor{exbar}{RGB}{40,120,60}
+
+% ---------- boxes ----------
+% Big idea (blue background)
+\newenvironment{idea}{%
+  \def\FrameCommand{\fboxsep=7pt\colorbox{ideabg}}%
+  \MakeFramed{\advance\hsize-\width\FrameRestore}%
+  \textbf{\color{blue!45!black}The big idea.}\ }{\endMakeFramed}
+
+% Algorithm (grey background)
+\newenvironment{algo}[1]{%
+  \def\FrameCommand{\fboxsep=7pt\colorbox{algobg}}%
+  \MakeFramed{\advance\hsize-\width\FrameRestore}%
+  \textbf{Algorithm: #1}\par}{\endMakeFramed}
+
+% Exam focus (red left bar)
+\newenvironment{exam}{%
+  \def\FrameCommand{{\color{exambar}\vrule width 3pt}\hspace{8pt}}%
+  \MakeFramed{\advance\hsize-\width\FrameRestore}%
+  \textbf{\color{exambar}What the exam asks.}\ }{\endMakeFramed}
+
+% Traps (pink background)
+\newenvironment{traps}{%
+  \def\FrameCommand{\fboxsep=7pt\colorbox{trapbg}}%
+  \MakeFramed{\advance\hsize-\width\FrameRestore}%
+  \textbf{\color{exambar}Common traps.}\par}{\endMakeFramed}
+
+% Worked example (green left bar)
+\newenvironment{example}[1]{%
+  \def\FrameCommand{{\color{exbar}\vrule width 3pt}\hspace{8pt}}%
+  \MakeFramed{\advance\hsize-\width\FrameRestore}%
+  \textbf{\color{exbar}Worked example: #1}\par}{\endMakeFramed}
+
+% ---------- math shortcuts ----------
+\newcommand{\E}{\mathrm{E}}
+\newcommand{\Var}{\mathrm{Var}}
+\newcommand{\Cov}{\mathrm{Cov}}
+\newcommand{\Cor}{\mathrm{Cor}}
+\newcommand{\SE}{\mathrm{SE}}
+\newcommand{\iid}{\overset{\text{iid}}{\sim}}
+\newcommand{\Unif}{\mathrm{Unif}}
+\newcommand{\Exp}{\mathrm{Exp}}
+\newcommand{\Gam}{\mathrm{Gamma}}
+\newcommand{\Pois}{\mathrm{Poisson}}
+\newcommand{\N}{\mathrm{N}}
+\newcommand{\Ind}{\mathbf{1}}
+
+% code font size
+\fvset{fontsize=\scriptsize,xleftmargin=0pt}
+
+\title{\textbf{STA510 -- Statistical Modeling and Simulation}\\[4pt]
+\Large A study guide from zero to exam}
+\author{Theory, methods, worked examples and exam traps\\
+\small Built from the lecture notes, the formula sheet and the past exams h22--v26}
+\date{}
+
+\begin{document}
+
+\input{part1_foundations}
+\input{part2_generation}
+\input{part3_processes}
+\input{part4_montecarlo}
+\input{part5_bayes_mcmc}
+
+\end{document}

@@ -1,0 +1,62 @@
+\section*{How to use this guide}
+\addcontentsline{toc}{section}{How to use this guide}
+
+This guide assumes you have \emph{not} studied the course yet. Every chapter follows the same pattern:
+
+\begin{enumerate}
+  \item \textbf{The big idea} (blue box): what problem the method solves, in plain words.
+  \item \textbf{Theory}: the definitions and the reasoning behind the formulas, step by step.
+  \item \textbf{Algorithm} (grey box): the method written the way the exam wants it, as numbered steps with formulas.
+  \item \textbf{Worked examples} (green bar): taken from the past exams, solved in full.
+  \item \textbf{What the exam asks} (red bar) and \textbf{common traps} (pink box).
+\end{enumerate}
+
+Read the chapters in order the first time: later chapters reuse earlier ones (for example, Monte Carlo integration uses the law of large numbers from Chapter~2, and MCMC uses Markov chains from Chapter~9).
+
+\subsection*{What the course is about, in one paragraph}
+Many probability questions cannot be answered with pen and paper: the integral is too hard, the distribution has no nice formula, or the system is too complicated. The course teaches you to answer them by \textbf{simulation}: make the computer generate many random numbers from the right distribution, then use averages and frequencies of those numbers as estimates. The course has five blocks:
+\begin{enumerate}
+  \item \textbf{Foundations} (Ch.~1--2): random variables, expectations, estimators, confidence intervals, maximum likelihood.
+  \item \textbf{Generating random numbers} (Ch.~3--7): turning uniform random numbers into any distribution you want.
+  \item \textbf{Stochastic processes} (Ch.~8--9): randomness over time (Poisson processes, random walks, Markov chains).
+  \item \textbf{Monte Carlo methods} (Ch.~10--13): estimating integrals, reducing variance, the bootstrap, density estimation.
+  \item \textbf{Bayesian statistics and MCMC} (Ch.~14--16): treating parameters as random and sampling from posteriors.
+\end{enumerate}
+
+\subsection*{The exam}
+\begin{itemize}
+  \item 4 hours, pen and paper. Allowed: a simple calculator and \textbf{one A4 sheet of your own handwritten notes}. The formula sheet (\texttt{tablesformulas.pdf}) is attached to the exam.
+  \item Usually 2--5 long problems, each mixing several topics (h25 was a single ``rainfall in Stavanger'' story: distribution $\to$ MLE $\to$ bootstrap $\to$ Poisson process $\to$ Bayes $\to$ MCMC).
+  \item Two recurring question styles: \emph{``Explain with words and formulas, not code''} and \emph{``Which of these R functions is correct? Justify your answer.''}
+\end{itemize}
+
+\subsection*{What is already on the formula sheet (you do not need to memorise it)}
+\begin{itemize}
+  \item pmf/pdf, mean and variance of: Binomial, Poisson, Geometric, Negative binomial, Normal, Multivariate normal, Exponential, Lognormal, $\chi^2$, $t$, Gamma, Weibull, Uniform, Beta, Pareto. Relations between distributions, sums of independent variables, mean and variance of linear combinations.
+  \item Properties of MLEs and the variance approximation $\Var(\hat\theta) \approx 1/J(\hat\theta)$.
+  \item The hazard rate, derivatives and integrals (including integration by parts), log rules.
+  \item \textbf{The Metropolis--Hastings, random-walk MH, independence sampler and Gibbs sampler algorithms.}
+  \item \textbf{Rules for recognising Normal, Exponential, Gamma and Beta distributions from a log-density.}
+\end{itemize}
+So what you must \emph{understand} is how and when to use these. What you should \emph{write on your A4 sheet} is everything else: the algorithm boxes and the formulas in this guide that are not on the formula sheet.
+
+\subsection*{Parametrisations used in this course (important!)}
+The formula sheet uses \textbf{scale} parameters. R sometimes uses \textbf{rates} (rate $=1/$scale).
+
+\begin{center}
+\small
+\begin{tabular}{lll}
+\toprule
+Distribution & Density in the course & In R \\
+\midrule
+Exponential, mean $\beta$ & $f(x) = \frac{1}{\beta}e^{-x/\beta},\ x\ge 0$ & \texttt{rexp(n, 1/beta)} \\
+Gamma$(\alpha,\beta)$, scale $\beta$ & $f(x) = \frac{1}{\beta^\alpha\Gamma(\alpha)}x^{\alpha-1}e^{-x/\beta}$ & \texttt{rgamma(n, alpha,}\\ & & \quad\texttt{scale=beta)} \\
+Weibull$(\alpha,\beta)$ & $f(x) = \alpha\beta x^{\beta-1}e^{-\alpha x^\beta}$ & (inverse transform) \\
+Pareto$(a,b)$ & $f(x) = \frac{b a^b}{x^{b+1}},\ x > a$ & (inverse transform) \\
+Normal$(\mu,\sigma^2)$ & $f(x) = \frac{1}{\sqrt{2\pi}\sigma}e^{-(x-\mu)^2/(2\sigma^2)}$ & \texttt{rnorm(n, mu, sigma)} \\
+\bottomrule
+\end{tabular}
+\end{center}
+In \texttt{rexp(n, 1/beta)} the second argument is the \textbf{rate}; in \texttt{rnorm(n, mu, sigma)} the third is the standard deviation. Watch out: \texttt{rgamma(n, 4, 1.4)} means shape 4 and \textbf{rate} 1.4, because the third positional argument of \texttt{rgamma} is the rate. And \texttt{rnorm} wants the \textbf{standard deviation}, not the variance.
+
+\newpage

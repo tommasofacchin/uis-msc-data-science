@@ -1,0 +1,183 @@
+\part{Bayesian statistics and MCMC}
+
+%=====================================================================
+\section{Bayesian statistics}
+%=====================================================================
+\textit{Lecture notes: bayes. Exercises: sets 5--6. In almost every recent exam (h23, v24, v25, h25, v26).}
+
+\begin{idea}
+In classical (frequentist) statistics the parameter $\theta$ is a fixed unknown number. In Bayesian statistics we describe our uncertainty about $\theta$ with a probability distribution. Before seeing data we have a \textbf{prior} $p(\theta)$ (e.g.\ from historical records). The data update it, through the likelihood, into the \textbf{posterior} $p(\theta\mid x)$, which combines both sources of information.
+\end{idea}
+
+\subsection{Bayes' theorem for parameters}
+\[
+p(\theta\mid x) = \frac{L(\theta)\,p(\theta)}{p(x)} \qquad\Longrightarrow\qquad
+\underbrace{p(\theta\mid x)}_{\text{posterior}}\ \propto\ \underbrace{L(\theta)}_{\text{likelihood}}\times\underbrace{p(\theta)}_{\text{prior}}.
+\]
+The denominator $p(x) = \int L(\theta)p(\theta)\,d\theta$ does not depend on $\theta$: it is only the constant that makes the posterior integrate to 1. The symbol $\propto$ (``proportional to'') means ``equal up to a constant factor that does not involve $\theta$''. We therefore work with the \textbf{posterior kernel} and drop every factor without $\theta$. On the log scale constants become additive and can also be dropped:
+\[
+\log p(\theta\mid x) = \ell(\theta) + \log p(\theta) + \text{const}.
+\]
+Why this is enough: (1) if the kernel has the shape of a known distribution, we can read off that distribution; (2) if not, MCMC (Chapter~15) can sample from a distribution known only up to a constant.
+
+\textbf{Using the posterior:} posterior mean as a point estimate; quantiles for a credible interval (``$\theta$ is in this interval with 95\% probability''). With MCMC samples: their average and their empirical quantiles.
+
+\subsection{Recipe: deriving a posterior kernel}
+\begin{algo}{posterior kernel}
+\begin{enumerate}
+  \item Likelihood: $L(\theta) = \prod_i f(x_i\mid\theta)$; simplify (collect powers, sum the exponents).
+  \item Prior: write it keeping only the factors containing $\theta$. Example: Gamma$(a,b)$ with scale $b$: $p(\theta)\propto\theta^{a-1}e^{-\theta/b}$.
+  \item Multiply and collect: powers of $\theta$ together, exponentials together.
+  \item If asked, take logs.
+  \item Try to recognise a standard distribution using the rules on the formula sheet (\S10).
+\end{enumerate}
+\end{algo}
+
+\textbf{Recognition rules (formula sheet \S10):}
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+Log-kernel in $x$ & Distribution \\
+\midrule
+$a + bx + cx^2$ (with $c<0$) & $\N\left(-\frac{b}{2c},\ -\frac{1}{2c}\right)$ \\
+$a + bx$, $x>0$ (with $b<0$) & $\Exp$ with mean $-1/b$ \\
+$a + b\log x + cx$, $x>0$ & $\Gam\left(b+1,\ -\frac1c\right)$ (shape, scale) \\
+$a + b\log x + c\log(1-x)$, $0<x<1$ & Beta$(b+1,\ c+1)$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+Where the Gamma rule comes from: $\log$ Gamma$(\alpha,\beta) = \text{const}+(\alpha-1)\log x - x/\beta$, so $b=\alpha-1$ and $c = -1/\beta$.
+
+\subsection{Conjugate priors}
+A prior is \textbf{conjugate} if the posterior belongs to the same family, so it can be written down exactly.
+Three conjugate pairs to know (Gamma with scale $b$):
+\begin{itemize}
+  \item \textbf{Poisson data}, $X_i\sim\Pois(\lambda)$, prior $\lambda\sim\Gam(a,b)$:
+  \[ \lambda\mid x\sim\Gam\left(a+\textstyle\sum x_i,\ \dfrac1{1/b+n}\right). \]
+  \item \textbf{Exponential data with rate} $\lambda$, prior $\lambda\sim\Gam(a,b)$:
+  \[ \lambda\mid x\sim\Gam\left(a+n,\ \dfrac{1}{1/b+\sum x_i}\right). \]
+  \item \textbf{Normal data}, $X_i\sim\N(\mu,\sigma^2)$ with $\sigma^2$ known, prior $\mu\sim\N(m_0,\sigma^2/\kappa_0)$:
+  \[ \mu\mid x\sim\N\left(\frac{\kappa_0m_0+n\bar x}{\kappa_0+n},\ \frac{\sigma^2}{\kappa_0+n}\right). \]
+\end{itemize}
+Derivation of the Poisson line: $L(\lambda)\propto\lambda^{\sum x_i}e^{-n\lambda}$ and $p(\lambda)\propto\lambda^{a-1}e^{-\lambda/b}$, so the posterior is $\propto\lambda^{a+\sum x_i-1}e^{-\lambda(n+1/b)}$, a Gamma kernel. Notice how the posterior mean blends prior and data: in the normal case it is a weighted average of the prior mean $m_0$ and the sample mean $\bar x$, with weights $\kappa_0$ and $n$.
+
+Prior mean and variance of a Gamma$(a,b)$: $ab$ and $ab^2$ (h23: Gamma$(15,1/20)$ has mean $0.75$ and variance $0.0375$).
+
+\begin{example}{a non-conjugate posterior (h25)}
+Rainfall $X_i\sim\Exp$ with scale $\beta$, prior $\beta\sim\Gam(a_0=4,b_0=2)$.
+Likelihood $L(\beta) = \beta^{-n}e^{-\sum x_i/\beta}$; prior $\propto\beta^{a_0-1}e^{-\beta/b_0}$. Hence
+\[
+p(\beta\mid x)\propto\beta^{a_0-n-1}\exp\left(-\frac{\beta}{b_0}-\frac{\sum x_i}{\beta}\right),
+\]
+\[
+\log p(\beta\mid x) = (a_0-n-1)\log\beta-\frac{\beta}{b_0}-\frac{\sum x_i}{\beta}+\text{const}.
+\]
+The $1/\beta$ term does not fit any recognition rule, so the posterior is not a standard distribution: we sample it with MCMC.
+\end{example}
+
+\begin{example}{two parameters with Gamma conditionals (v24)}
+Posterior $p(a,b\mid t)\propto(ab)^ne^{-ab\sum t_i}e^{-3(a+b)}$. As a function of $a$ alone (treat $b$ as a constant):
+$\log p = n\log a - a\left(b\sum t_i+3\right)+\text{const}$. This is the form $B\log a + Ca$, so
+$a\mid b,t\sim\Gam\left(n+1,\ \frac{1}{b\sum t_i+3}\right)$, and by symmetry the same holds for $b\mid a$. These ``full conditionals'' are what a Gibbs sampler needs (Chapter~16).
+\end{example}
+
+\begin{traps}
+\textbf{``Which log-target is valid?'' (h23):}
+\begin{itemize}
+  \item \texttt{log(prod(f(x)))}: mathematically right but numerically unstable (the product underflows to 0 for large $n$). Prefer \texttt{sum(log(f(x)))}.
+  \item Gamma log-prior: \texttt{(a-1)*log(theta) - theta/b} is correct. \texttt{log(theta\^{}(a-1)) - log(theta/b)} is wrong (it should be $\theta/b$, not $\log(\theta/b)$).
+  \item \texttt{dgamma(theta, shape=a, scale=b, log=TRUE)} is correct (it includes constants, which do not matter).
+\end{itemize}
+\end{traps}
+
+%=====================================================================
+\section{Markov chain Monte Carlo: Metropolis--Hastings}
+%=====================================================================
+\textit{Lecture notes: chap11\_part1, chap11\_part2. R: mcmc\_1.R, mcmc\_2.R. In almost every exam.}
+
+\begin{idea}
+We want samples from a target distribution $\pi(\theta)$, typically a posterior, but we only know a kernel $g(\theta)\propto\pi(\theta)$. Build a Markov chain (Chapter~9) that wanders around the parameter space: from the current value, propose a move and accept it with a probability chosen so that, in the long run, the chain spends time in each region in proportion to $\pi$. The unknown constant cancels because the rule only uses \emph{ratios} $g(\theta^*)/g(\theta)$.
+\end{idea}
+
+\subsection{The algorithm}
+\begin{algo}{Metropolis--Hastings (also on the formula sheet \S9)}
+\begin{enumerate}
+  \item Choose a starting value $\theta_0$; set $t=1$.
+  \item Propose $\theta^*\sim q(\cdot\mid\theta_{t-1})$.
+  \item Compute the acceptance probability
+  \[
+  \alpha = \min\left(1,\ \frac{g(\theta^*)\,q(\theta_{t-1}\mid\theta^*)}{g(\theta_{t-1})\,q(\theta^*\mid\theta_{t-1})}\right).
+  \]
+  \item Draw $U\sim\Unif(0,1)$. If $U<\alpha$, set $\theta_t=\theta^*$ (accept); otherwise $\theta_t=\theta_{t-1}$ (reject, stay put).
+  \item Set $t\leftarrow t+1$ and go to step 2.
+\end{enumerate}
+\end{algo}
+\textbf{On the log scale} (numerically stable; this is how it is coded and how exam answers are written):
+\[
+\log\alpha = \min\Big(0,\ \log g(\theta^*)-\log g(\theta_{t-1})+\log q(\theta_{t-1}\mid\theta^*)-\log q(\theta^*\mid\theta_{t-1})\Big),
+\]
+and accept if $\log U<\log\alpha$.
+
+\textbf{Reading the ratio.} $g(\theta^*)/g(\theta_{t-1})$: moves to more probable places are always accepted, moves to less probable places sometimes. $q(\theta_{t-1}\mid\theta^*)/q(\theta^*\mid\theta_{t-1})$: corrects for proposals that prefer some directions (``how easy is it to come back?'').
+
+\textbf{Why it works (intuition).} The acceptance rule makes the flow from $\theta$ to $\theta'$ equal to the flow back, $\pi(\theta)P(\theta\to\theta') = \pi(\theta')P(\theta'\to\theta)$ (``detailed balance''). With balanced flows, $\pi$ does not change from one step to the next, so it is the stationary distribution of the chain.
+
+\subsection{The three variants to recognise}
+\begin{center}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.2\textwidth}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}p{0.27\textwidth}}
+\toprule
+Variant & Proposal and acceptance & How it looks in R \\
+\midrule
+\textbf{Random-walk MH (RWMH)} & $\theta^* = \theta_{t-1}+\varepsilon$, $\varepsilon\sim\N(0,\sigma^2)$. Symmetric, so the $q$'s cancel: $\alpha = \min(1, g(\theta^*)/g(\theta_{t-1}))$. & \texttt{rnorm(1, x[t-1], sigma)} \\
+\textbf{Independence sampler} & $q(\theta^*\mid\theta_{t-1}) = r(\theta^*)$, independent of the current state. $\alpha = \min\left(1,\frac{g(\theta^*)/r(\theta^*)}{g(\theta_{t-1})/r(\theta_{t-1})}\right)$: a ratio of importance weights. & proposal with a \emph{fixed} mean, e.g.\ \texttt{rnorm(1, 5, sigma)}; weights \texttt{wt.star}, \texttt{wt.old} \\
+\textbf{General MH} & asymmetric proposal (e.g.\ log-normal): use the full formula with $q$. & proposal on the log scale \\
+\bottomrule
+\end{tabularx}
+\end{center}
+\textbf{Reading the target from code (h22):}
+\begin{Verbatim}
+x.prop <- x[t-1] + 3*rnorm(1)
+alpha  <- min(1, dnorm(x.prop, mean=2, sd=2)/dnorm(x[t-1], mean=2, sd=2))
+\end{Verbatim}
+The density in the ratio is the target, $\N(2,2^2)$; the proposal is $\N(x_{t-1},3^2)$, symmetric around the current value, so this is RWMH.
+
+\subsection{Positive parameters: proposals on the log scale (h25, v26)}
+A normal random walk on $\theta>0$ can propose negative values. Those have target density 0 and are always rejected, which wastes iterations and hurts mixing near 0. Fix: walk on the log scale,
+\[
+\log\theta^* = \log\theta_{t-1}+\varepsilon,\ \varepsilon\sim\N(0,\sigma^2)\quad\Longleftrightarrow\quad\theta^*\sim\text{Lognormal}(\log\theta_{t-1},\sigma^2),
+\]
+which is always positive. This proposal is \textbf{not symmetric}. The log-normal density is $q(\theta^*\mid\theta) = \frac{1}{\theta^*\sigma\sqrt{2\pi}}\exp\left(-\frac{(\log\theta^*-\log\theta)^2}{2\sigma^2}\right)$; the exponential parts are equal in both directions, so $\frac{q(\theta_{t-1}\mid\theta^*)}{q(\theta^*\mid\theta_{t-1})} = \frac{\theta^*}{\theta_{t-1}}$ and
+\[
+\log\alpha = \min\Big(0,\ \log g(\theta^*)-\log g(\theta_{t-1})+\log\theta^*-\log\theta_{t-1}\Big).
+\]
+\textbf{Equivalent view (Jacobian):} sample $\phi = \log\theta$ with a symmetric RWMH whose target is $\tilde g(\phi) = g(e^\phi)\,e^\phi$ (the factor $e^\phi$ is the Jacobian $d\theta/d\phi$), then transform back with $\theta = e^\phi$.
+
+\subsection{Independence sampler centred at the MLE (h25)}
+Proposal $\Gam(a_p,b_p)$ with mean $\hat\beta$ and variance $\hat\beta^2/n$ (the estimated variance of the MLE):
+$a_pb_p = \hat\beta$ and $a_pb_p^2 = \hat\beta^2/n$, which gives $a_p = n$, $b_p = \hat\beta/n$. Then
+\[
+\log\alpha = \min\Big(0,\ \big[\log g(\theta^*)-\log q(\theta^*)\big]-\big[\log g(\theta_{t-1})-\log q(\theta_{t-1})\big]\Big).
+\]
+An independence sampler works well only if $r$ is close to the target (ideally with heavier tails); then the acceptance rate is high.
+
+\subsection{Checking the output: diagnostics and tuning}
+\begin{itemize}
+  \item \textbf{Trace plot} (value vs iteration): it should look like a stationary ``hairy caterpillar'' around a fixed level. An initial trend means the chain has not reached the target yet: discard those iterations as \textbf{burn-in}. Long flat stretches: too many rejections. Slow snake-like wandering: steps too small.
+  \item \textbf{Acceptance rate of RWMH:} aim for about \textbf{20\%--40\%}.
+  \begin{itemize}
+    \item $\sigma$ too small: almost every move is accepted, but the steps are tiny and the chain explores slowly (high autocorrelation).
+    \item $\sigma$ too large: proposals land in low-probability regions and are rejected; the chain sticks (flat steps in the trace).
+  \end{itemize}
+  \item \textbf{Effective sample size (ESS):} the number of independent draws that would give an average as precise as our $T$ correlated draws, $\mathrm{ESS} = \frac{T}{1+2\sum_{k\ge1}\rho_k}$ ($\rho_k$ = autocorrelation at lag $k$). Rules: want $\mathrm{ESS}>200$; $\mathrm{ESS}/T<0.01$ signals trouble. CI for the posterior mean: $\bar\theta\pm z_{\alpha/2}\,\mathrm{sd}(\theta_t)/\sqrt{\mathrm{ESS}}$.
+  \item \textbf{Geweke test} (one chain): compares the mean of the early part with the late part; $Z\approx\N(0,1)$ if stationary. \textbf{Gelman--Rubin} (several chains): potential scale reduction factor in $[1,1.1)$ indicates convergence.
+  \item \textbf{MCMC average vs iid average (h22):} consecutive MCMC draws are positively correlated, so the average of 500 MCMC draws has a \emph{larger} standard deviation than the average of 500 iid draws ($\mathrm{ESS}<500$).
+\end{itemize}
+
+\begin{example}{judging an MCMC run}
+\textbf{h25:} RWMH, acceptance 37\%, ESS $\approx4089$ out of 20\,000, trace looks stationary, so it is well tuned. \emph{But} the normal proposal can propose $\beta<0$ although $\beta>0$; better use a log-scale or Gamma proposal.\\
+\textbf{h24:} chain started at $\theta_1=100$ (far from the target), acceptance 0.67, ESS $=15.7$ out of 1000: not usable as it is. Fixes: discard a burn-in, start at a sensible value, increase $\sigma$ to bring acceptance towards 20--40\%, run longer.\\
+\textbf{Which algorithm to prefer?} Independence sampler: excellent if the proposal matches the target, terrible otherwise. RWMH: robust and general but correlated. Gibbs with known conditionals: no rejections, but slow when parameters are strongly correlated.
+\end{example}
+
+\textbf{Mention only:} MALA (Langevin) uses the gradient of $\log g$ to push proposals towards high-density regions (desired acceptance about 50--90\%); Hamiltonian Monte Carlo (Stan) is the state of the art but not in the syllabus.
+

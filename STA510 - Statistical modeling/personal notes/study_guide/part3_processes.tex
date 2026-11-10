@@ -1,0 +1,139 @@
+\part{Stochastic processes}
+
+A \textbf{stochastic process} is a collection of random variables indexed by time, $\{X(t)\}$ or $\{X_n\}$: randomness that evolves. We study two families: Poisson processes (random events in continuous time) and Markov processes (random walks and their relatives in discrete time).
+
+%=====================================================================
+\section{Poisson processes}
+%=====================================================================
+\textit{Lecture notes: chap4\_part1. R: stochastic\_processes\_examples.R, rain.R. Appeared in h22, v24, h24, h25.}
+
+\begin{idea}
+Events (storms, births, earthquakes, customers) arrive one at a time, independently, at a constant average rate $\lambda$ per unit time. $N(t)$ counts how many have happened by time $t$. This simple assumption implies two facts you will use constantly: the count in a period is \emph{Poisson} and the waiting times between events are \emph{exponential}.
+\end{idea}
+
+\subsection{Definition and key properties (homogeneous Poisson process, HPP)}
+A counting process $N(t)$, $t\ge 0$, is a Poisson process with intensity (rate) $\lambda>0$ if
+\begin{enumerate}
+  \item $N(0) = 0$;
+  \item counts in non-overlapping time intervals are independent;
+  \item the count in any interval of length $t$ is $\Pois(\lambda t)$: $P(N(t)=k) = \frac{(\lambda t)^k}{k!}e^{-\lambda t}$.
+\end{enumerate}
+Consequences:
+\begin{itemize}
+  \item $\E N(t) = \Var N(t) = \lambda t$.
+  \item \textbf{Interarrival times} $T_1, T_2,\dots$ (time to the first event, between first and second, \ldots) are iid exponential with mean $1/\lambda$. Proof for the first one: $P(T_1>t) = P(\text{no event in }[0,t]) = P(N(t)=0) = e^{-\lambda t}$, the exponential survival function. So $\E T_1 = 1/\lambda$ and $\E T_1^2 = \Var T_1 + (\E T_1)^2 = 2/\lambda^2$.
+  \item The time of the $k$-th event, $S_k = T_1+\dots+T_k$, is $\Gam(k, 1/\lambda)$ (sum of $k$ exponentials).
+  \item Waiting more than $t$ for the $k$-th event is the same as seeing fewer than $k$ events by time $t$:
+  \[
+  P(S_k > t) = P(N(t) < k).
+  \]
+  \item Given $N(t) = n$, the $n$ event times are distributed like $n$ independent $\Unif(0,t)$ values, sorted. Hence $P(N(s)=0\mid N(t)=n) = (1-s/t)^n$ for $s<t$.
+\end{itemize}
+
+\begin{example}{births at a hospital (h24)}
+Births follow an HPP with $\lambda = 6$ per day.
+\begin{itemize}
+  \item $P(\text{fewer than 3 births in a day}) = P(N(1)\le 2) = e^{-6}\left(1+6+\frac{6^2}{2}\right) = 25e^{-6}\approx 0.062$.
+  \item $P(\text{more than 8 hours until the 3rd birth})$: 8 hours $=\frac13$ day, so the expected count in 8 hours is $6\cdot\frac13 = 2$, and $P(S_3>8\text{h}) = P(N(8\text{h})<3) = e^{-2}(1+2+2) = 5e^{-2}\approx 0.677$.
+\end{itemize}
+\end{example}
+
+\begin{example}{a conditional probability (h22)}
+$P(N(0.1)=0\mid N(1)=8)$: the 8 events are like 8 uniform points on $[0,1]$; none falls in $[0,0.1]$ with probability $0.9^8\approx 0.430$.
+\end{example}
+
+\subsection{Simulating an HPP on $[0,T]$}
+\begin{algo}{two equivalent ways}
+\textbf{Option 1 (interarrival times).} Draw $T_1,T_2,\dots\iid\Exp$ with mean $1/\lambda$ (e.g.\ $T_i = -\ln U_i/\lambda$). Arrival times are the cumulative sums $S_k = T_1+\dots+T_k$. Stop when the sum exceeds $T$ and keep the arrivals $\le T$.
+
+\textbf{Option 2 (count first).} Draw $N\sim\Pois(\lambda T)$. Draw $N$ values from $\Unif(0,T)$ and sort them: these are the arrival times.
+\end{algo}
+
+\textbf{Estimating a probability by simulation (h25).} Storms with $\lambda = 6$ per month; $P(N(12)\ge 90)$? Simulate $M$ (e.g.\ 5000) one-year processes, record each count $N_m(12)$, and estimate
+\[
+\widehat P\big(N(12)\ge 90\big) = \frac{\#\{m : N_m(12)\ge 90\}}{M}.
+\]
+(Here one could also compute it exactly, since $N(12)\sim\Pois(72)$.)
+
+\subsection{Non-homogeneous Poisson process (NHPP)}
+Often the rate changes over time (more storms in winter, more customers at lunch). Then the intensity is a function $\lambda(t)$.
+\begin{itemize}
+  \item \textbf{Interpretation:} $\lambda(t)$ is the instantaneous event rate at time $t$: the probability of an event in a short interval $[t,t+dt]$ is about $\lambda(t)\,dt$. If it varies, the process has seasonality, and an HPP fits worse (h25).
+  \item The expected number of events up to time $t$ is $\Lambda(t) = \int_0^t \lambda(s)\,ds$, and $N(t)\sim\Pois(\Lambda(t))$.
+\end{itemize}
+
+\begin{example}{expected counts}
+h22: $\lambda(t) = 1+t/10$, so $N(5)\sim\Pois\left(\int_0^5 (1+\frac t{10})dt\right) = \Pois(5+1.25) = \Pois(6.25)$.\\
+h24: births per month $\lambda(t) = -30t^2+350t+3950$; expected births in a year $=\int_0^{12}\lambda(t)dt = -10\cdot12^3+175\cdot12^2+3950\cdot12 = 55\,320$.
+\end{example}
+
+\textbf{Simulating an NHPP: thinning.} Simulate too many events from an HPP with a rate that is always high enough, then randomly delete some of them so that the surviving rate at time $t$ is $\lambda(t)$. It is accept--reject applied to event times.
+\begin{algo}{thinning}
+\begin{enumerate}
+  \item Find a bound $\lambda_{\max}\ge\lambda(t)$ for all $t\in[0,T]$ (from the plot, or by maximising $\lambda$).
+  \item Simulate an HPP with rate $\lambda_{\max}$ on $[0,T]$: times $s_1,\dots,s_N$.
+  \item For each $s_i$ draw $U_i\sim\Unif(0,1)$ and \textbf{keep} $s_i$ if $U_i\le\lambda(s_i)/\lambda_{\max}$.
+  \item The kept times are an NHPP with intensity $\lambda(t)$.
+\end{enumerate}
+\end{algo}
+(h25: $\lambda(t) = 2+8\sin^2(\pi(t-6)/12)$ has maximum $\lambda_{\max}=10$.)
+
+\textbf{Renewal process:} like an HPP but the interarrival times are iid from any positive distribution; simulate it with Option 1. (Queueing systems in chap4\_part2 are optional reading, not part of the syllabus.)
+
+\begin{traps}
+\begin{itemize}
+  \item Mixing time units: convert hours to days (or vice versa) before computing $\lambda t$.
+  \item ``Mean $1/\lambda$'' for interarrival times: in R this is \texttt{rexp(n, rate = lambda)}.
+  \item In thinning, keep a time with probability $\lambda(s_i)/\lambda_{\max}$, not $1-\lambda(s_i)/\lambda_{\max}$.
+\end{itemize}
+\end{traps}
+
+%=====================================================================
+\section{Discrete-time Markov processes}
+%=====================================================================
+\textit{Lecture notes: markov\_proc. R: Markov.R, AR1sim.R. Appeared in v26 (and needed for MCMC).}
+
+\begin{idea}
+In a Markov process, \textbf{the future depends on the past only through the present}. To simulate it you only need a rule ``given today's state, draw tomorrow's''. MCMC (Chapter~15) builds exactly such a rule so that the process settles into a distribution we want to sample from.
+\end{idea}
+
+\subsection{Markov property}
+$X_n$ is a Markov process if
+\[
+P(X_{n+1}\in A\mid X_n = c, X_{n-1}=a_1,\dots) = P(X_{n+1}\in A\mid X_n = c).
+\]
+\begin{itemize}
+  \item $X_{n+1} = aX_n + \varepsilon_{n+1}$ with iid noise: Markov (tomorrow depends only on today).
+  \item $X_{n+1} = aX_n + bX_{n-1}+\varepsilon_{n+1}$: \emph{not} Markov (it also needs yesterday).
+\end{itemize}
+A Markov process is defined by its \textbf{transition distribution} $Q$: $X_{n+1}\mid X_n\sim Q(X_n)$. Simulation: fix $X_1$, then repeatedly draw $X_{n+1}\sim Q(X_n)$.
+
+\subsection{Stationarity}
+A Markov process is \textbf{stationary} (in the sense of this course) if the distribution of $X_n$ given the start $X_1=a$ approaches a fixed distribution $\pi$ with finite variance as $n\to\infty$, whatever $a$ is. $\pi$ is the \textbf{stationary distribution}: once the process is there, it stays there. To show a process is \emph{not} stationary, show that its mean or variance grows without bound.
+
+\subsection{The simple random walk (v26)}
+\begin{Verbatim}
+x[1] <- 0
+for (t in 2:T) x[t] <- x[t-1] + sample(c(-1,1), 1, prob = c(0.5,0.5))
+\end{Verbatim}
+\begin{itemize}
+  \item \textbf{What it is:} a symmetric one-dimensional random walk. $X_t = X_{t-1}+Z_t$, where the steps $Z_t\in\{-1,+1\}$ are independent with $P(Z_t=1)=p$ (here $p=\frac12$).
+  \item \textbf{Markov?} Yes: the next position depends only on the current position plus an independent step.
+  \item \textbf{State space:} all integers $\mathbb Z$ (it is unbounded).
+  \item \textbf{Mean and variance:} $\E Z = 1\cdot p + (-1)(1-p) = 2p-1$, $\E Z^2 = 1$, so $\Var Z = 1-(2p-1)^2$. With $p=\frac12$: $\E Z=0$, $\Var Z = 1$. Since $X_t$ is a sum of independent steps, $\E X_t = 0$ and $\Var X_t$ grows linearly with $t$ ($=t$ if we count $t$ steps).
+  \item \textbf{Stationary distribution?} No: the variance grows without bound, so the walk keeps spreading out and never settles.
+  \item \texttt{prob = c(0.4,0.6)}: an \textbf{asymmetric random walk with upward drift}, $\E Z = 0.2$, so the mean grows like $0.2t$. Still not stationary.
+\end{itemize}
+The Gaussian random walk $X_{n+1} = X_n + \varepsilon_{n+1}$ with $\varepsilon\sim\N(0,\sigma^2)$ has $X_n\mid X_1=a\sim\N(a,(n-1)\sigma^2)$: not stationary either.
+
+\subsection{The AR(1) process}
+$X_{n+1} = \mu + \phi X_n + \varepsilon_{n+1}$, $\varepsilon\sim\N(0,\sigma^2)$. If $|\phi|<1$ the effect of the starting point dies out ($\phi^n\to0$) and the process is stationary with
+\[
+\pi = \N\left(\frac{\mu}{1-\phi},\ \frac{\sigma^2}{1-\phi^2}\right).
+\]
+If $|\phi|\ge1$ it is not stationary ($\phi=1$ is the random walk).
+
+\subsection{Why this matters for MCMC}
+For a stationary Markov process, averages along the path still converge: $\frac1T\sum g(X_n)\to\int g(x)\pi(x)dx$ (a law of large numbers). \textbf{But} consecutive values are correlated, so the average is less precise than an average of $T$ independent draws. This is the price we pay in MCMC, measured by the effective sample size (Chapter~15).
+
+\newpage

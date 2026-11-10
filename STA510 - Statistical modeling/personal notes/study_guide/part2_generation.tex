@@ -1,0 +1,241 @@
+\part{Generating random numbers}
+
+%=====================================================================
+\section{Why simulate, and where random numbers come from}
+%=====================================================================
+\textit{Lecture notes: intro, chap3\_part1.}
+
+\begin{idea}
+A computer can produce numbers that behave like independent draws from $\Unif(0,1)$ (\texttt{runif} in R). Everything else (exponential lifetimes, normal heights, Poisson counts, posterior samples) is built by \emph{transforming} uniforms. Chapters 4--7 are the toolbox for those transformations.
+\end{idea}
+
+\textbf{Pseudo-random numbers.} R's generator (the Mersenne Twister) is a deterministic algorithm whose output passes every practical test of randomness. \texttt{set.seed(123)} fixes its starting point, so a simulation can be reproduced exactly.
+
+\textbf{Why simulate?} Once we can draw $X_1,\dots,X_n$ from a distribution, the LLN (Chapter~2) lets us estimate anything about it:
+\[
+\E(X) \approx \bar X,\qquad \E(g(X)) \approx \frac1n\sum g(X_i),\qquad P(X\in A) \approx \frac{\#\{i : X_i\in A\}}{n},
+\]
+and the CLT tells us the error of these estimates. This works even for quantities with no formula, such as the lifetime of a complicated system or the number of storms above some level.
+
+%=====================================================================
+\section{The inverse transform method}
+%=====================================================================
+\textit{Lecture notes: chap3\_part1. R: inverse\_transform\_examples.R. In almost every exam.}
+
+\begin{idea}
+The cdf $F$ maps values of $X$ to probabilities in $[0,1]$. Run it backwards: pick a random probability $U\sim\Unif(0,1)$ and ask ``which $x$ has $F(x) = U$?''. That $x$ has exactly the distribution $F$.
+\end{idea}
+
+\subsection{Why it works}
+Let $X = F^{-1}(U)$ with $U\sim\Unif(0,1)$. Since $F$ is increasing, $F^{-1}(U)\le x$ exactly when $U \le F(x)$, so
+\[
+P(X \le x) = P\big(F^{-1}(U) \le x\big) = P\big(U \le F(x)\big) = F(x),
+\]
+because $P(U\le u) = u$ for a uniform. So $X$ has cdf $F$. Intuition: regions where $F$ is steep (high density) catch many values of $U$.
+
+\begin{algo}{inverse transform (continuous)}
+\begin{enumerate}
+  \item Find the cdf $F(x) = \int_{-\infty}^x f(t)\,dt$.
+  \item Solve $F(x) = u$ for $x$; this gives the inverse cdf $x = F^{-1}(u)$.
+  \item For $i = 1,\dots,n$: draw $U_i \sim\Unif(0,1)$ and set $X_i = F^{-1}(U_i)$.
+  \item Return $X_1,\dots,X_n$: an iid sample with density $f$.
+\end{enumerate}
+\end{algo}
+
+\begin{example}{exponential (h25)}
+$F(x) = 1-e^{-x/\beta}$. Solve $1 - e^{-x/\beta} = u$: $e^{-x/\beta} = 1-u$, so $x = -\beta\ln(1-u)$.
+Since $1-U$ is also $\Unif(0,1)$, we may equally use $X = -\beta\ln U$.
+\end{example}
+
+\subsection{Inverses you should be able to derive}
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+Distribution & $F(x)$ & $F^{-1}(u)$ \\
+\midrule
+$\Unif(a,b)$ & $\frac{x-a}{b-a}$ & $a + (b-a)u$ \\
+$\Exp$ (mean $\beta$) & $1-e^{-x/\beta}$ & $-\beta\ln(1-u)\ \equiv\ -\beta\ln u$ \\
+Weibull$(\alpha,\beta)$ & $1-e^{-\alpha x^\beta}$ & $\left(-\frac{\ln(1-u)}{\alpha}\right)^{1/\beta}$ \\
+Pareto$(a,b)$ & $1-(a/x)^b$ & $a(1-u)^{-1/b}\ \equiv\ a\,u^{-1/b}$ \\
+$f(x) = \frac{3}{16}\sqrt x$ on $[0,4]$ (v23) & $\frac{x^{3/2}}{8}$ & $(8u)^{2/3} = 4u^{2/3}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Discrete version}
+For a discrete $X$ with values $x_1 < x_2 < \dots$: draw $U$ and return the smallest $x_k$ with $F(x_k) \ge U$. In words: split $[0,1]$ into consecutive pieces of lengths $p(x_1), p(x_2),\dots$ and return the value whose piece $U$ falls in.
+
+\subsection{When it does not work}
+The method needs $F^{-1}$ in closed form. In v26, $F(x) = \frac{x-\cos x+1}{\pi+2}$: the equation $x - \cos x = (\pi+2)u - 1$ mixes $x$ linearly and inside a cosine and has no algebraic solution. Likewise $F(x) = 3x^2-2x^3$ needs solving a cubic. Then use accept--reject (next chapter).
+
+\begin{exam}
+``Show that $F(x) = \dots$; derive $F^{-1}$; explain with words and formulas how to simulate $n$ values''; and very often: ``Which of these R functions simulates correctly? Argue why the others are wrong.''
+\end{exam}
+
+\begin{example}{which R function is correct? (h24, Pareto with $a=4$, $b=2$)}
+$F^{-1}(u) = 4(1-u)^{-1/2} = 4/\sqrt{1-u}$.
+\begin{Verbatim}
+r.pareto1 <- function(n) 4/sqrt(runif(n,2,4))      # wrong: U must be on (0,1)
+r.pareto2 <- function(n) 4/sqrt(runif(n))          # correct: uses U instead of 1-U
+r.pareto3 <- function(n) 4/sqrt(1-runif(n))        # correct: exactly F^{-1}(U)
+r.pareto4 <- function(n) 2/(1-runif(n)^(1/4))      # wrong formula
+\end{Verbatim}
+Same exercise in v23 for $F^{-1}(u)=4u^{2/3}$: \texttt{4*runif(n)\^{}(2/3)} is correct; \texttt{4*runif(n,max=4)\^{}(2/3)} uses the wrong interval; \texttt{(3/16)*sqrt(runif(n))} and \texttt{(1/8)*runif(n)\^{}(3/2)} plug $u$ into the pdf or the cdf instead of the inverse cdf.
+\end{example}
+
+\begin{traps}
+\begin{itemize}
+  \item \texttt{runif} on the wrong interval. Inverse transform needs $\Unif(0,1)$.
+  \item Exponent upside down ($u^{b}$ instead of $u^{-1/b}$), lost minus sign in front of the log, scale vs rate.
+  \item Using $U$ instead of $1-U$ is \emph{not} a mistake: both are $\Unif(0,1)$.
+\end{itemize}
+\end{traps}
+
+%=====================================================================
+\section{The accept--reject (AR) method}
+%=====================================================================
+\textit{Lecture notes: chap3\_part1. R: acceptance-rejection\_examples.R, AR-example.R.}
+
+\begin{idea}
+We cannot sample from $f$ directly, but we can sample from a simpler \textbf{proposal} density $g$. Draw a candidate from $g$ and keep it with a probability that is high where $f$ is large compared with $g$ and low where it is small. The kept values follow $f$ exactly. Picture: throw darts uniformly under the curve $c\,g(x)$ and keep only those that also land under $f(x)$.
+\end{idea}
+
+\subsection{Theory}
+We need a constant $c$ such that the \textbf{envelope} $c\,g(x)$ lies above $f$ everywhere:
+\[
+f(x) \le c\,g(x)\ \text{ for all } x, \qquad\text{the smallest such } c \text{ is } c = \max_x \frac{f(x)}{g(x)} .
+\]
+\textbf{Why the accepted values have density $f$:} a candidate near $y$ is proposed with density $g(y)$ and accepted with probability $\frac{f(y)}{c\,g(y)}$, so accepted values appear with density proportional to $g(y)\cdot\frac{f(y)}{c\,g(y)} = \frac{f(y)}{c} \propto f(y)$.
+
+\textbf{Efficiency.} The overall probability of accepting a candidate is $\int g(y)\frac{f(y)}{c\,g(y)}dy = \frac1c$. The number of tries needed for one accepted value is geometric with mean $c$. So \textbf{a good proposal has a small $c$} (close to 1), i.e.\ $g$ has a shape similar to $f$.
+
+Requirements: $g$ must be easy to sample from and its support must cover the support of $f$ (otherwise some values could never be proposed).
+
+\begin{algo}{accept--reject}
+\begin{enumerate}
+  \item Draw a candidate $Y \sim g$.
+  \item Draw $U \sim\Unif(0,1)$, independent of $Y$.
+  \item If $U \le \dfrac{f(Y)}{c\,g(Y)}$, accept and return $X = Y$. Otherwise reject $Y$ and go back to step 1.
+\end{enumerate}
+\end{algo}
+
+\textbf{How to find $c$:} write the ratio $r(x) = f(x)/g(x)$, find its maximum (set $r'(x) = 0$ or argue where $r$ is largest, also checking the endpoints).
+
+\begin{example}{uniform proposal for $f(x)=6x(1-x)$ (v24, h23)}
+Proposal $\Unif(0,1)$, $g(x)=1$. $r(x) = 6x(1-x)$ is maximal at $x=\frac12$, so $c = 6\cdot\frac14 = 1.5$.
+Accept if $U \le \frac{6Y(1-Y)}{1.5} = 4Y(1-Y)$. Acceptance probability $1/c = 2/3$.
+\end{example}
+
+\begin{example}{Beta(2,2) proposal for $f(x) = 20x(1-x)^3$ (v25)}
+$g(x) = 6x(1-x)$. $r(x) = \frac{20x(1-x)^3}{6x(1-x)} = \frac{10}{3}(1-x)^2$, largest as $x\to 0$, so $c = \frac{10}{3}$.
+Accept if $U \le (1-Y)^2$.
+\end{example}
+
+\begin{example}{uniform proposal on $[0,\pi]$ (v26)}
+$f(x) = \frac{1+\sin x}{\pi+2}$, proposal $\Unif(0,\pi)$ with $g(x) = \frac1\pi$.
+$r(x) = \frac{\pi(1+\sin x)}{\pi+2}$ is maximal at $x = \pi/2$: $c = \frac{2\pi}{\pi+2}\approx 1.22$.
+Accept if $U \le \frac{f(Y)}{c\,g(Y)} = \frac{1+\sin Y}{2}$.
+\end{example}
+
+\begin{example}{a truncated normal (v23)}
+$f(x) = C e^{-x^2/2}$ on $[-2,2]$, $C\approx 0.418$. Two valid iid samplers:
+\begin{enumerate}
+  \item Draw $Z\sim\N(0,1)$ and keep it only if $|Z|\le 2$ (acceptance $\approx 0.954$).
+  \item AR with $\Unif(-2,2)$ proposal: $g = \frac14$, $c = \max\frac{f}{g} = 4C \approx 1.67$ (at $x=0$). Accept if $U \le e^{-Y^2/2}$.
+\end{enumerate}
+\end{example}
+
+\textbf{Choosing between proposals (v23):} compute $c$ for each and pick the one with the smaller $c$ (if both are equally cheap to sample).
+
+\begin{example}{a subtle R question (h22)}
+$f(x)=\frac{e^{x/4}}{4C}$ on $[0,4]$ ($C=e-1$), proposal $\Unif(0,4)$, \texttt{c <- 4*f(4)}.
+\begin{Verbatim}
+if (runif(1) < f(x)/(c*dunif(x,0,4))) return(x)    # version 1
+if (runif(1) < f(x)/c) return(x)                   # version 2
+\end{Verbatim}
+Version 1 is the textbook algorithm (acceptance $1/c\approx 0.63$). Version 2 forgets $g = 1/4$, so its acceptance probability is $\frac14\cdot\frac{f(x)}{c\,g(x)}$: still \emph{proportional to $f$} and below 1, so the samples are \textbf{still correct}, just 4 times slower. Rule: AR is correct as long as the acceptance probability is proportional to $f(y)/g(y)$ and never exceeds 1; the constant only affects efficiency.
+\end{example}
+
+\begin{traps}
+\begin{itemize}
+  \item The ratio must be $f(Y)/(c\,g(Y))$ with the proposal density evaluated at $Y$.
+  \item The candidate must be drawn on the right interval (\texttt{runif(1,0,pi)}, not \texttt{runif(1)}).
+  \item AR works with $f$ known only up to a constant (the constant goes into $c$): useful in Bayes.
+\end{itemize}
+\end{traps}
+
+%=====================================================================
+\section{Transformations, mixtures and the multivariate normal}
+%=====================================================================
+\textit{Lecture notes: chap3\_part2.\\ R: sums\_mixtures\_examples.R, bivariate\_normal.R,\\ multivariate\_normal\_example.R.}
+
+\begin{idea}
+Many distributions are simple functions of others (see the relationship diagram on the formula sheet). If you can simulate the ingredients, apply the function.
+\end{idea}
+
+\begin{center}
+\begin{tabularx}{\textwidth}{lX}
+\toprule
+Target & Recipe \\
+\midrule
+$\N(0,1)$ (Box--Muller) & $U_1,U_2\iid\Unif(0,1)$: $Z_1 = \sqrt{-2\ln U_1}\cos(2\pi U_2)$, $Z_2 = \sqrt{-2\ln U_1}\sin(2\pi U_2)$ are two independent $\N(0,1)$. \\
+$\N(\mu,\sigma^2)$ & $X = \mu + \sigma Z$. \\
+Lognormal$(\mu,\sigma^2)$ & $X = e^{\mu+\sigma Z}$. \\
+$\chi^2_\nu$ & $Z_1^2+\dots+Z_\nu^2$ ($\chi^2_2$ is also $\Exp$ with mean 2, i.e.\ $-2\ln U$). \\
+$\Gam(k,\beta)$, $k$ integer & sum of $k$ independent $\Exp(\beta)$. \\
+Mixture $p f_1 + (1-p) f_2$ & draw $U$; if $U<p$ sample from $f_1$, else from $f_2$. \\
+Laplace$(0,b)$ & $X = S\cdot E$ with $E\sim\Exp(b)$ and a random sign $S=\pm1$. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\textbf{Lognormal with a given mean $m$ and variance $v$ (h24).} The formula sheet gives $\E X = e^{\mu+\sigma^2/2}$ and $\Var X = e^{2\mu+\sigma^2}(e^{\sigma^2}-1)$. Solving,
+\[
+\sigma^2 = \ln\left(1+\frac{v}{m^2}\right), \qquad \mu = \ln m - \frac{\sigma^2}{2}.
+\]
+For $m = v = 1$: $\sigma^2 = \ln 2$, $\mu = -\frac{\ln 2}{2}$; then $X = e^{\mu+\sigma Z}$.
+
+\textbf{Functions of several variables by simulation (h24).} For $Z = 5X+3Y$: simulate $X_i$ and $Y_i$, form $Z_i = 5X_i+3Y_i$, then $\widehat{\E Z} = \bar Z$, $\widehat P(Z<20) = \frac1n\#\{Z_i<20\}$, $\widehat P(40<Z<60) = \frac1n\#\{40<Z_i<60\}$.
+
+\subsection{The multivariate normal via Cholesky}
+To draw $X\sim\N_d(\mu,\Sigma)$ with correlated components:
+\begin{algo}{Cholesky}
+\begin{enumerate}
+  \item Compute the Cholesky factor: a lower-triangular $L$ with $\Sigma = LL^T$ (\texttt{t(chol(Sigma))} in R).
+  \item Draw $Z = (Z_1,\dots,Z_d)$ iid $\N(0,1)$.
+  \item Return $X = \mu + LZ$. (Indeed $\Cov(LZ) = L\,I\,L^T = \Sigma$.)
+\end{enumerate}
+\end{algo}
+In two dimensions with standard deviations $\sigma_1,\sigma_2$ and correlation $\rho$:
+$X_1 = \mu_1+\sigma_1 Z_1$, $X_2 = \mu_2+\sigma_2\big(\rho Z_1+\sqrt{1-\rho^2}Z_2\big)$.
+
+\textbf{Three ways to sample the same bivariate normal (v23).} The exam showed three codes for $\mu = 0$, unit variances, $\rho = 0.9$:
+\begin{itemize}
+  \item \emph{Gibbs sampler} (updates one coordinate at a time from its conditional): alternately \texttt{x1 <- rnorm(1, rho*x2, sqrt(1-rho\^{}2))} and \texttt{x2 <- rnorm(1, rho*x1, sqrt(1-rho\^{}2))}, using the conditionals $X_1\mid X_2=x_2\sim\N(\rho x_2,1-\rho^2)$.
+  \item \emph{Random-walk Metropolis--Hastings} (Chapter~15): propose \texttt{x[,i-1] + rnorm(2)}, accept with the ratio of \texttt{dmvnorm}.
+  \item \emph{Cholesky}: \texttt{x[,i] <- L \%*\% rnorm(2)}.
+\end{itemize}
+\textbf{Preferred: Cholesky}, because it gives exact, independent draws. Gibbs and RWMH produce a correlated Markov chain (fewer effective samples, burn-in needed); with $\rho = 0.9$ the Gibbs sampler moves in small steps along the axes and mixes slowly.
+
+%=====================================================================
+\section{Reliability: lifetimes of systems}
+%=====================================================================
+\textit{R: robot\_system.R, production\_profile.R. Appeared in h23.}
+
+\begin{idea}
+A system made of components fails depending on how the components are connected. Its lifetime is a function (min, max, \ldots) of the component lifetimes: simulate the components, apply the function.
+\end{idea}
+
+\begin{itemize}
+  \item \textbf{Series system} (fails as soon as \emph{one} component fails): $S = \min(X_1,\dots,X_n)$, and for independent components $P(S>t) = \prod_i P(X_i>t)$.
+  \item \textbf{Parallel system} (fails when \emph{all} components have failed): $S = \max(X_1,\dots,X_n)$, $P(S\le t) = \prod_i P(X_i\le t)$.
+  \item Mixed systems combine these, e.g.\ $S = \min\big(X_1,\max(X_2,X_3)\big)$.
+  \item \textbf{Hazard rate} $r(t) = \frac{f(t)}{1-F(t)}$: the failure rate of an item that has survived to time $t$. Constant for the exponential (no ageing); increasing for a Weibull with $\beta>1$ (wear-out).
+  \item Useful facts: the minimum of independent exponentials with rates $\lambda_i$ is exponential with rate $\sum\lambda_i$; the minimum of independent Weibull$(\alpha_i,\beta)$ with the same $\beta$ is Weibull$(\sum\alpha_i,\beta)$, since $P(S>t) = \prod e^{-\alpha_i t^\beta}$. The exponential is the Weibull with $\beta=1$.
+\end{itemize}
+
+\begin{algo}{simulating a system lifetime (h23)}
+For $j = 1,\dots,n$: simulate $X_{1j},X_{2j}$ (Weibull, by inverse transform) and $X_{3j}$ (exponential); set $S_j = \min(X_{1j},X_{2j},X_{3j})$. Then estimate $\E S$ by $\bar S$, $P(S>t)$ by the fraction of $S_j > t$, and plot a histogram of the $S_j$.
+\end{algo}
+
+\newpage

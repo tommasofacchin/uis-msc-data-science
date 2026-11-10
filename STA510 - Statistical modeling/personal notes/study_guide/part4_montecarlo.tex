@@ -1,0 +1,299 @@
+\part{Monte Carlo methods}
+
+%=====================================================================
+\section{Monte Carlo integration}
+%=====================================================================
+\textit{Lecture notes: chap6\_part1. R: MC\_integration\_examples.R. In almost every exam.}
+
+\begin{idea}
+An integral can be rewritten as an \textbf{expectation}. An expectation can be estimated by an \textbf{average of simulated values} (law of large numbers). So: integral $\to$ expectation $\to$ average. The CLT then gives the error of the estimate.
+\end{idea}
+
+\subsection{Crude Monte Carlo on a finite interval}
+If $U\sim\Unif(a,b)$, its density is $\frac1{b-a}$, so
+\[
+\theta = \int_a^b g(x)\,dx = (b-a)\int_a^b g(x)\frac{1}{b-a}\,dx = (b-a)\,\E\big[g(U)\big].
+\]
+Replace the expectation by an average:
+\[
+\hat\theta_{\text{CMC}} = \frac{b-a}{n}\sum_{i=1}^n g(U_i), \qquad U_i\iid\Unif(a,b).
+\]
+
+\subsection{General Monte Carlo (any domain, including infinite ones)}
+On $[0,\infty)$ or $(-\infty,\infty)$ there is no uniform distribution, so instead \textbf{split the integrand} into a function times a density we can sample from:
+\[
+\theta = \int g(x)\,dx = \int h(x)f(x)\,dx = \E_f\big[h(X)\big], \qquad h(x) = \frac{g(x)}{f(x)},
+\]
+\[
+\hat\theta = \frac1n\sum_{i=1}^n h(X_i), \qquad X_i\iid f.
+\]
+The density $f$ must be positive wherever $g\ne0$. Natural choices: exponential or gamma on $[0,\infty)$, normal or Laplace on $(-\infty,\infty)$. If $f$ lives on a bigger set than the integration domain $A$, add an indicator: $\hat\theta = \frac1n\sum\frac{g(X_i)\Ind(X_i\in A)}{f(X_i)}$.
+
+\begin{algo}{describing a Monte Carlo estimator (exam format)}
+\begin{enumerate}
+  \item Rewrite the integral as $\E_f[h(X)]$ for a density $f$ that you can sample from (state $f$ and $h$).
+  \item Draw $X_1,\dots,X_n$ iid from $f$ (say how, e.g.\ inverse transform).
+  \item Compute $h(X_1),\dots,h(X_n)$.
+  \item Estimate $\hat\theta = \frac1n\sum h(X_i)$.
+  \item Report the standard error $s_h/\sqrt n$, where $s_h$ is the sample standard deviation of the $h(X_i)$, and a CI $\hat\theta\pm1.96\,s_h/\sqrt n$.
+\end{enumerate}
+\end{algo}
+
+\begin{example}{an integral on $[0,\infty)$ with exponential draws (h25)}
+$I = \int_0^\infty\ln(1+4x^2)e^{-x/2}dx$. The factor $e^{-x/2}$ looks like an exponential density with $\beta = 2$: $f(x) = \frac12e^{-x/2}$. So
+\[
+I = \int_0^\infty 2\ln(1+4x^2)\cdot\tfrac12e^{-x/2}dx = \E\big[2\ln(1+4X^2)\big],\quad X\sim\Exp(\beta=2),
+\]
+\[
+\hat I = \frac1n\sum_{i=1}^n 2\ln(1+4X_i^2), \qquad X_i = -2\ln U_i.
+\]
+\end{example}
+
+\begin{example}{integrals on the real line with normal or Laplace draws (v23)}
+$A = \int_{-\infty}^\infty g(x)\,dx$ with $X_i\sim\N(0,1)$ and $\phi$ the $\N(0,1)$ density (\texttt{dnorm}): $\hat A = \frac1n\sum\frac{g(X_i)}{\phi(X_i)}$.\\
+$B = \int_{-\pi/2}^{\pi/2}g(x)\,dx$ with the same normal draws: $\hat B = \frac1n\sum\frac{g(X_i)\Ind(|X_i|\le\pi/2)}{\phi(X_i)}$.\\
+$B$ with $U_i\sim\Unif(-\frac\pi2,\frac\pi2)$: $\hat B = \frac{\pi}{n}\sum g(U_i)$.\\
+With Laplace$(0,2)$ draws, $p(x) = e^{-|x|/2}/4$: the same formulas with $p$ in place of $\phi$. The Laplace has heavier tails than the normal, which keeps the ratios $g/p$ stable (see importance sampling below).
+\end{example}
+
+\subsection{Probabilities and areas: hit-or-miss}
+A probability is the expectation of an indicator: $P(X\in A) = \E[\Ind(X\in A)]$, estimated by the fraction of simulated values in $A$.
+
+\begin{example}{estimating $\pi$ (v26)}
+For $X,Y\iid\Unif(0,1)$, the point $(X,Y)$ is uniform on the unit square and $P(X^2+Y^2\le1) = \frac\pi4$ (a quarter disc). So
+\[
+\hat\pi = 4\cdot\frac1n\sum_{i=1}^n\Ind(X_i^2+Y_i^2\le1).
+\]
+This is a crude MC estimator whose integrand is an indicator. A loop version and a vectorised version (\texttt{rowSums(u\^{}2) <= 1}) compute the same estimator; the vectorised one is just faster.
+\end{example}
+
+\textbf{Precision of hit-or-miss (v23).} If $\hat A = \frac{4}{n}\sum\Ind_i$ with $\sum\Ind_i\sim\mathrm{Binomial}(n,p)$ and $p = A/4$, then
+\[
+\Var(\hat A) = \frac{16\,p(1-p)}{n}.
+\]
+For $\mathrm{sd}(\hat A)<0.01$ we need $\frac{16p(1-p)}{n}<10^{-4}$, i.e.\ $n>16p(1-p)\cdot10^4$ (with $p=\frac16$: $n\ge22\,223$). Without simulating, $P(\hat A<a)\approx\Phi\left(\frac{a-A}{\sqrt{16p(1-p)/n}}\right)$ by the CLT.
+
+\subsection{Error of a Monte Carlo estimate}
+Since $\hat\theta$ is an average of $n$ iid terms,
+\[
+\SE(\hat\theta) = \frac{\mathrm{sd}(h(X))}{\sqrt n}\approx\frac{s_h}{\sqrt n},
+\]
+which goes down only like $1/\sqrt n$. This slow convergence motivates the next chapter: instead of increasing $n$, make $\mathrm{sd}(h(X))$ smaller.
+
+\begin{traps}
+\begin{itemize}
+  \item Forgetting the factor $(b-a)$ in crude MC, or the factor coming from the density (the ``2'' in the h25 example).
+  \item Using a density whose support does not cover the domain of integration.
+  \item The SE uses the standard deviation of the $h(X_i)$ values, not of the $X_i$.
+\end{itemize}
+\end{traps}
+
+%=====================================================================
+\section{Variance reduction}
+%=====================================================================
+\textit{Lecture notes: chap6\_part2. R: Variance\_reduction.R, importance\_sampling.R.}
+
+\subsection{Antithetic variables}
+\begin{idea}
+Instead of independent draws, use \textbf{pairs} of draws that are negatively correlated: when one is too high, the other tends to be too low, so their errors partly cancel in the average.
+\end{idea}
+
+\textbf{Theory.} For two values with the same variance $\sigma^2$ and correlation $\rho$,
+\[
+\Var\left(\frac{X_1+X_2}{2}\right) = \frac14\left(\sigma^2+\sigma^2+2\rho\sigma^2\right) = \frac{\sigma^2(1+\rho)}{2}.
+\]
+With $n/2$ such pairs (so still $n$ function evaluations), the estimator has variance $\frac{\sigma^2(1+\rho)}{n}$, compared with $\frac{\sigma^2}{n}$ for $n$ independent draws. So: $\rho<0$ helps; $\rho=0$ changes nothing; $\rho>0$ hurts (with $\rho=1$ the variance doubles).
+
+\textbf{How to make antithetic pairs:}
+\begin{itemize}
+  \item $U\sim\Unif(0,1)$: partner $1-U$ (also uniform, correlation $-1$).
+  \item $U\sim\Unif(a,b)$: partner $a+b-U$.
+  \item Any distribution by inverse transform: $X = F^{-1}(U)$ and $Y = F^{-1}(1-U)$.
+  \item Normal: $X = \mu+\sigma Z$ and $Y = \mu-\sigma Z$.
+\end{itemize}
+\textbf{When does it work?} We need $h(X)$ and $h(Y)$ to be negatively correlated, not just $X$ and $Y$. This is guaranteed if \textbf{$h$ is monotone} (always increasing or always decreasing) on the domain.
+
+\[
+\hat\theta_{\text{AT}} = \frac1n\sum_{i=1}^{n/2}\big[h(X_i)+h(Y_i)\big],\qquad X_i = F^{-1}(U_i),\ Y_i = F^{-1}(1-U_i).
+\]
+
+\begin{example}{judging antithetic estimators}
+\begin{itemize}
+  \item h25: $h(x) = 2\ln(1+4x^2)$ is increasing on $[0,\infty)$, so the antithetic estimator with $X_i=-2\ln U_i$, $Y_i = -2\ln(1-U_i)$ reduces the variance.
+  \item v26: the indicator $\Ind(x^2+y^2\le1)$ is decreasing in $x$ and in $y$, so pairing $(U_1,U_2)$ with $(1-U_1,1-U_2)$ helps: \texttt{v <- 1-u; y[i] <- ((u[1]\^{}2+u[2]\^{}2<=1)+(v[1]\^{}2+v[2]\^{}2<=1))/2}.
+  \item h23: the Weibull density has a peak (not monotone), so a reduction is not guaranteed; you must argue it.
+  \item h22/v23, \textbf{even functions with symmetric partners}: on $\Unif(-1,1)$ the partner of $U$ is $-U$. For $1+x^3$ (monotone) it works perfectly ($g(U)+g(-U)=2$ exactly: zero variance!). For $1+x^4$ or $e^{-x^2}\cos x$ (even functions) $g(-U) = g(U)$, so $\rho=+1$: you only get $n/2$ distinct values and the estimator is \textbf{worse} than crude MC.
+\end{itemize}
+\end{example}
+
+\begin{traps}
+\begin{itemize}
+  \item v24: \texttt{x1 <- runif(N/2,1,6); x2 <- 5-x1} is wrong. For $\Unif(1,6)$ the partner is $1+6-U = 7-U$; \texttt{5-x1} leaves the interval.
+  \item Saying ``antithetic always helps''. It needs a monotone integrand.
+\end{itemize}
+\end{traps}
+
+\subsection{Importance sampling (IS)}
+\begin{idea}
+In general MC we are free to choose the density $f$. Choose it so that the ratio $g/f$ is \textbf{almost constant}: then every draw gives nearly the same value and the average has tiny variance. In practice: make $f$ similar in shape to $g$, so that we sample more often where $g$ is large (where the ``important'' part of the integral is).
+\end{idea}
+
+\[
+\theta = \int_A g(x)\,dx = \int_A\frac{g(x)}{f(x)}f(x)\,dx = \E_f\left[\frac{g(X)}{f(X)}\right],
+\]
+\[
+\hat\theta_{\text{IS}} = \frac1n\sum_{i=1}^n\frac{g(X_i)}{f(X_i)},\ X_i\iid f.
+\]
+\[
+\Var(\hat\theta_{\text{IS}}) = \frac1n\Var\left(\frac{g(X)}{f(X)}\right).
+\]
+The ratios $w_i = g(X_i)/f(X_i)$ are the \textbf{importance weights}.
+\begin{itemize}
+  \item If $g/f$ is constant the variance is \textbf{zero} (perfect choice).
+  \item The weights must stay \textbf{bounded}. If $f$ goes to zero faster than $g$ somewhere (typically in the tails: e.g.\ a normal $f$ for a heavy-tailed $g$), rare draws get enormous weights and the variance explodes. Choose $f$ with \textbf{heavier tails} than $g$.
+  \item Check the behaviour near the edges too (e.g.\ near 0). In h22, for $g(x) = e^{-2x}x^{k}$ and a Gamma proposal $f\propto x^{\alpha-1}e^{-2x}$, the weight is $\propto x^{k-\alpha+1}$: bounded (and even constant if $k=\alpha-1$) or exploding as $x\to0$ depending on the sign of the exponent.
+  \item IS does \textbf{not} always reduce the variance (v24): a badly chosen $f$ increases it.
+  \item If the support of $f$ is larger than $A$, multiply by the indicator $\Ind(X_i\in A)$.
+\end{itemize}
+
+\begin{example}{Beta(2,2) as importance density (v25)}
+$I = \int_0^1x(1-x)^3dx$ with $f(x) = 6x(1-x)$:
+\[
+\hat I_{\text{IS}} = \frac1n\sum\frac{X_i(1-X_i)^3}{6X_i(1-X_i)} = \frac1n\sum\frac{(1-X_i)^2}{6},\qquad X_i\sim\mathrm{Beta}(2,2).
+\]
+\end{example}
+
+\begin{example}{which R estimate is correct? (v24, $\theta=\int_1^6 g(x)dx$)}
+\begin{Verbatim}
+x <- rgamma(N, 4, 1.4)
+Est2 <- mean(dgamma(x,4,1.4)/(gx(x)*(x<6 & x>1)))   # wrong: ratio upside down
+Est3 <- mean(gx(x)*(x<6 & x>1)/dgamma(x,4,1.4))     # correct IS estimate (g*1/f)
+\end{Verbatim}
+\end{example}
+
+\subsection{Control variates (``read on your own'', low priority)}
+If $h(X)$ is correlated with $g(X)$ and $\mu = \E h(X)$ is known, use
+$\hat\theta_c = \overline{g(X)} + c\big(\overline{h(X)}-\mu\big)$. It is unbiased for any $c$; the best $c^* = -\Cov(g,h)/\Var(h)$ reduces the variance by the fraction $\Cor(g,h)^2$.
+
+%=====================================================================
+\section{The bootstrap}
+%=====================================================================
+\textit{Lecture notes: chap8. R: bootstrap\_examples.R. Asked with numbers in h22, v24, v25, h25.}
+
+\begin{idea}
+To know how uncertain an estimate $\hat\theta$ is, we would like many new datasets from the true distribution $F$ and see how $\hat\theta$ varies. We do not know $F$, but the data are our best picture of it. So we \textbf{resample the data themselves} (with replacement) to create many fake datasets, recompute the estimate on each, and look at how much those estimates vary. ``The sample plays the role of the population.''
+\end{idea}
+
+\subsection{Theory}
+The \textbf{empirical cdf} $\hat F$ puts probability $1/n$ on each observation. Drawing from $\hat F$ = drawing uniformly from $x_1,\dots,x_n$ \emph{with replacement}. That is the \textbf{non-parametric bootstrap}. (A \textbf{parametric bootstrap} instead simulates from the fitted model $F_{\hat\theta}$: more efficient if the model is right, less robust if it is wrong. The course focuses on the non-parametric one.)
+
+\begin{algo}{non-parametric bootstrap}
+\begin{enumerate}
+  \item Compute the estimate $\hat\theta$ from the original data $x_1,\dots,x_n$.
+  \item For $b = 1,\dots,B$ (e.g.\ $B\ge2000$ for intervals):
+  \begin{enumerate}
+    \item draw $x^{*}_1,\dots,x^{*}_n$ from the data \textbf{with replacement}, with the \textbf{same size $n$};
+    \item compute $\hat\theta^{*(b)}$ with the \textbf{same estimator}.
+  \end{enumerate}
+  \item The values $\hat\theta^{*(1)},\dots,\hat\theta^{*(B)}$ approximate the sampling distribution of $\hat\theta$. Compute bias, SE, MSE and intervals from them.
+\end{enumerate}
+\end{algo}
+In R: \texttt{for(b in 1:B) est[b] <- estimator(sample(x, size=length(x), replace=TRUE))}.
+
+\subsection{Formulas}
+Let $\bar\theta^* = \frac1B\sum_b\hat\theta^{*(b)}$ (\texttt{mean(est)}) and $\hat\theta^*_{(p)}$ the $p$-quantile of the bootstrap values.
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+Quantity & Bootstrap estimate \\
+\midrule
+Bias & $\widehat{\mathrm{bias}} = \bar\theta^* - \hat\theta$ \\
+Standard error & $\widehat\SE = \mathrm{sd}\big(\hat\theta^{*(b)}\big)$ \quad(\texttt{sd(est)}) \\
+MSE & $\widehat\SE^2 + \widehat{\mathrm{bias}}^2$ \\
+Bias-corrected estimate & $\hat\theta - \widehat{\mathrm{bias}} = 2\hat\theta - \bar\theta^*$ \\
+\midrule
+Standard normal interval & $\hat\theta\pm z_{\alpha/2}\,\widehat\SE$ \\
+Percentile interval & $\big[\hat\theta^*_{(\alpha/2)},\ \hat\theta^*_{(1-\alpha/2)}\big]$ \\
+Basic interval & $\big[2\hat\theta-\hat\theta^*_{(1-\alpha/2)},\ 2\hat\theta-\hat\theta^*_{(\alpha/2)}\big]$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+Why the basic interval swaps the quantiles: it assumes the error $\hat\theta-\theta$ behaves like the bootstrap error $\hat\theta^*-\hat\theta$. If the bootstrap values tend to be above $\hat\theta$, the truth is probably below it, so the interval is the bootstrap distribution ``reflected'' around $\hat\theta$.
+
+\textbf{Which interval?} Normal: simple, but assumes approximate normality and no bias; least reliable. Percentile: no normality assumption, adapts to skewness. Basic: reflection idea above. BCa (bias-corrected and accelerated): generally the best, only needs to be mentioned. If the bootstrap histogram is symmetric and bell-shaped, all intervals are close.
+
+\begin{example}{full computation from R output (h25)}
+$\hat\beta = \bar x = 9.29$. Output: \texttt{mean(estB)} $=9.28$, \texttt{sd(estB)} $=0.55$, quantiles 2.5\%: 8.18, 97.5\%: 10.36.
+\begin{itemize}
+  \item Bias $= 9.28-9.29 = -0.01$. Bias-corrected estimate $= 9.29-(-0.01) = 9.30$.
+  \item MSE $=0.55^2+0.01^2\approx0.303$.
+  \item Normal 95\%: $9.29\pm1.96\cdot0.55 = [8.21,\ 10.37]$.
+  \item Basic 95\%: $[2\cdot9.29-10.36,\ 2\cdot9.29-8.18] = [8.22,\ 10.40]$.
+  \item Percentile 95\%: $[8.18,\ 10.36]$.
+\end{itemize}
+The three intervals are almost equal because the bootstrap distribution of a mean is nearly normal and symmetric.
+\end{example}
+
+\begin{example}{when R gives the variance (h22)}
+Estimate of a density value $\hat f(1) = 0.3837$ (a KDE: the bootstrap works for \emph{any} estimator). Output: mean $0.3841$, \texttt{var} $=0.001027$, quantiles 2.5\%: 0.327, 97.5\%: 0.449.\\
+Bias $=0.0004$; $\widehat\SE = \sqrt{0.001027} = 0.032$ (take the square root!); MSE $\approx0.00103$.\\
+Normal 95\%: $0.3837\pm1.96\cdot0.032 = [0.321,\ 0.447]$. Percentile: $[0.327,\ 0.449]$.
+\end{example}
+
+For a \textbf{90\%} interval use $z = 1.645$ and the 5\% and 95\% quantiles (v24).
+
+\begin{traps}
+\textbf{Wrong bootstrap codes (v25):}
+\begin{itemize}
+  \item \texttt{sample(data, size=length(data), replace=FALSE)}: just a permutation, every $\hat\theta^*$ equals $\hat\theta$.
+  \item \texttt{for(i in 1:length(data)) ... sample(data, size=nrep, replace=TRUE)}: loop length and sample size swapped.
+  \item \texttt{mean(sample(...))} when the estimator is not the mean: wrong estimator.
+\end{itemize}
+\textbf{Wrong formulas:} MSE as \texttt{var - bias\^{}2} or \texttt{sd + bias\^{}2} (correct: \texttt{var(est) + bias\^{}2}); a 95\% normal interval with \texttt{qnorm(0.95)} or with \texttt{var} instead of \texttt{sd}; ``\texttt{1-quantile(...)}'' is not any interval.
+\end{traps}
+
+%=====================================================================
+\section{Density estimation: histograms and kernel density estimates}
+%=====================================================================
+\textit{Lecture notes: chap12. R: KDE.R. Appeared in h23, h24.}
+
+\begin{idea}
+Given a sample, estimate the density $f$ it came from (to present results or to check simulation code). Both the histogram and the kernel density estimate (KDE) have a \textbf{smoothing parameter}. Too little smoothing gives a noisy estimate (high variance), too much hides real features (high bias). This is the \textbf{bias--variance trade-off}.
+\end{idea}
+
+\subsection{Histogram}
+Split the axis into bins of width $h$. For $x$ in bin $k$, $\hat f(x) = \frac{\nu_k}{nh}$, where $\nu_k$ is the number of observations in that bin (\texttt{hist(x, probability=TRUE)}). It integrates to 1.
+\begin{itemize}
+  \item \textbf{Bias} grows with $h$: wide bins average $f$ over a big interval (too few bins: too smooth).
+  \item \textbf{Variance} $\approx\frac{f(x)}{nh}$ grows as $h\to0$: each bin holds few points (too many bins: spiky).
+  \item Choose $h$ to minimise the mean integrated squared error (MISE $=$ integrated variance $+$ squared bias).
+  \item \textbf{Scott's rule} $\hat h = 3.49\,\hat\sigma\,n^{-1/3}$: derived \textbf{assuming normal data}.
+  \item \textbf{Sturges' rule} $\hat h = \frac{\max x-\min x}{1+\log_2n}$: R's default.
+\end{itemize}
+\textbf{h24:} is Scott's rule good for a Pareto sample? No. It assumes normality; with a heavy right tail, $\hat\sigma$ is inflated by extreme values, so the bins are too wide for the dense region near $a$.
+
+\subsection{Kernel density estimate (KDE)}
+Put a small smooth bump (the \textbf{kernel} $K$, e.g.\ a standard normal density) on top of every observation and add them up:
+\[
+\hat f_K(x) = \frac1{nh}\sum_{i=1}^n K\left(\frac{x-X_i}{h}\right).
+\]
+$h$ is the \textbf{bandwidth}: the width of each bump. With a normal kernel, each term is the $\N(X_i,h^2)$ density at $x$.
+\begin{itemize}
+  \item Small $h$: low bias, high variance (wiggly, \textbf{undersmoothing}).
+  \item Large $h$: low variance, high bias (too flat, hides modes, \textbf{oversmoothing}).
+  \item Rule of thumb (normal reference): $\hat h = 1.06\,\hat\sigma\,n^{-1/5}$.
+\end{itemize}
+
+\subsection{Histogram vs KDE (h23)}
+\begin{center}
+\begin{tabularx}{\textwidth}{lXX}
+\toprule
+ & Histogram & KDE \\
+\midrule
+Pros & simple, robust, no shape assumption & smooth, continuous, no dependence on bin positions \\
+Cons & discontinuous; depends on bin width \emph{and} bin origin & problems at the \textbf{boundary of the support} (e.g.\ for exponential data it puts mass below 0), struggles far from normality and with multimodal data \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\newpage

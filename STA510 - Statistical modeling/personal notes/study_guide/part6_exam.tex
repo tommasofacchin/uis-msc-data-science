@@ -1,0 +1,28 @@
+\part{Exam preparation}
+
+%=====================================================================
+\section{Exam strategy}
+%=====================================================================
+
+\subsection{Reading R code: a checklist}
+``Which implementation is correct? Justify'' questions are worth many points. Check, in this order:
+\begin{enumerate}
+  \item \textbf{Distribution and parameters.} \texttt{rexp(n, rate)} uses the rate ($=1/\beta$). In \texttt{rgamma(n, a, b)} the third positional argument is the \textbf{rate}. \texttt{rnorm(n, mean, sd)} wants the standard deviation, not the variance.
+  \item \textbf{Interval of \texttt{runif}.} Inverse transform needs \texttt{runif(n)} on $(0,1)$; AR candidates must cover the support.
+  \item \textbf{Formula $\leftrightarrow$ code.} Exponents (\texttt{\^{}(1/b)} vs \texttt{\^{}b}), signs, \texttt{log} vs \texttt{exp}, the factor $(b-a)$ in crude MC.
+  \item \textbf{Ratios the right way up.} IS: $g/f$. AR: $f/(c\,g)$. MH: target(new)/target(old).
+  \item \textbf{Antithetic partner} for $\Unif(a,b)$ is \texttt{a+b-u}.
+  \item \textbf{Bootstrap:} \texttt{replace=TRUE}, \texttt{size=length(data)}, loop over \texttt{1:B}, same estimator.
+  \item \textbf{MSE and intervals:} \texttt{var} vs \texttt{sd}, plus vs minus, \texttt{qnorm(0.975)} for 95\%.
+  \item \textbf{MCMC type:} proposal depends on \texttt{x[t-1]} (random walk)? fixed (independence)? blocks drawn from conditionals without accept step (Gibbs)? Is the support constraint handled? Is it \texttt{runif(1) < alpha}?
+  \item \textbf{Loop vs vectorised:} same result, different speed. That is not an error.
+\end{enumerate}
+
+\subsection{How to write answers}
+\begin{itemize}
+  \item \textbf{Algorithms as numbered steps with formulas}: this is literally what ``with words and formulas, not code'' means. Templates: Chapter~4 (inverse), 5 (AR), 8 (Poisson/thinning), 10 (MC), 12 (bootstrap), 15 (MH), 16 (Gibbs).
+  \item \textbf{Always justify} (``Reason your answer!''). Much of the credit is for the \emph{why}: ``$h$ is monotone, so $\Cov<0$, so the variance is reduced''.
+  \item For numerical questions write the formula first, then the numbers: you keep partial credit after an arithmetic slip.
+  \item If a sub-question blocks you, the next one often states the result (``Show that\ldots''): take it as given and continue.
+\end{itemize}
+

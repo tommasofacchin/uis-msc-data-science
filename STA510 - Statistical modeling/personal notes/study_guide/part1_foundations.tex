@@ -1,0 +1,253 @@
+\part{Foundations}
+
+%=====================================================================
+\section{Random variables and probability distributions}
+%=====================================================================
+\textit{Lecture notes: chap2\_part1. Appears in every exam as Problem 1(a)--(c): easy points you should never lose.}
+
+\begin{idea}
+A \textbf{random variable} $X$ is a number whose value is decided by chance (a lifetime, a rainfall depth, the number of storms in a month). Its \textbf{distribution} tells you how likely each value is. Almost every question in the course is about computing or estimating some property of a distribution: a probability, a mean, a variance.
+\end{idea}
+
+\subsection{Discrete and continuous random variables}
+A \textbf{discrete} random variable takes countably many values (0, 1, 2, \ldots), for example the number of births in a day. It is described by a \textbf{probability mass function} (pmf)
+\[
+p(x) = P(X = x), \qquad p(x)\ge 0,\qquad \sum_x p(x) = 1 .
+\]
+A \textbf{continuous} random variable can take any value in an interval, for example a lifetime. For continuous variables $P(X = x) = 0$ for every single $x$: only intervals have positive probability. They are described by a \textbf{probability density function} (pdf) $f(x)$, and probabilities are \emph{areas under the density}:
+\[
+P(a \le X \le b) = \int_a^b f(x)\,dx .
+\]
+Think of $f(x)$ as ``probability per unit length'': where $f$ is high, values of $X$ are common. Note that $f(x)$ itself is not a probability and can be larger than 1.
+
+\subsection{Proper density}
+A function $f$ is a \textbf{proper pdf} if
+\[
+\text{(1)}\ f(x) \ge 0 \text{ for all } x, \qquad \text{(2)}\ \int_{-\infty}^{\infty} f(x)\,dx = 1 .
+\]
+If a density is given as $f(x) = c\,h(x)$ with an unknown constant $c$ (the \textbf{normalising constant}), condition (2) gives $c = 1/\int h(x)\,dx$. The function $h$ alone is called the \textbf{kernel} of the density: it has the right \emph{shape} but does not integrate to 1. Kernels come back in Bayesian statistics (Chapter~14).
+
+\subsection{Cumulative distribution function (cdf)}
+\[
+F(x) = P(X \le x) = \int_{-\infty}^{x} f(t)\,dt .
+\]
+Properties: $F$ increases from 0 to 1; $F'(x) = f(x)$. It turns probability questions into subtractions:
+\[
+P(X \le a) = F(a),\qquad P(X > a) = 1 - F(a),\qquad P(a < X \le b) = F(b) - F(a).
+\]
+Always write $F$ ``piecewise'': $F(x) = 0$ to the left of the support, the formula inside, and $F(x) = 1$ to the right.
+
+\subsection{Expectation and variance}
+The \textbf{expectation} (mean) is the long-run average value of $X$, i.e.\ the ``centre of mass'' of the density:
+\[
+\E(X) = \int x f(x)\,dx, \qquad \E\big(g(X)\big) = \int g(x) f(x)\,dx .
+\]
+The second formula is the key to the whole course: \emph{the expectation of any function of $X$ is an integral against the density}. Monte Carlo integration (Chapter~10) uses it backwards: an integral is an expectation, so we can estimate it by an average.
+
+The \textbf{variance} measures spread around the mean:
+\[
+\Var(X) = \E\big[(X-\E X)^2\big] = \E(X^2) - \big(\E X\big)^2,
+\]
+and the \textbf{standard deviation} is $\mathrm{sd}(X) = \sqrt{\Var(X)}$.
+Rules (also on the formula sheet): for constants $a,b$,
+\[
+\E(aX+b) = a\E(X)+b,\qquad \Var(aX+b) = a^2\Var(X),
+\]
+\[
+\E(X+Y) = \E X + \E Y \text{ (always)},\qquad \Var(X+Y) = \Var X + \Var Y + 2\Cov(X,Y),
+\]
+so $\Var(X+Y) = \Var X + \Var Y$ if $X$ and $Y$ are independent.
+The \textbf{covariance} $\Cov(X,Y) = \E[(X-\E X)(Y-\E Y)]$ is positive when $X$ and $Y$ tend to be large together and negative when one tends to be large when the other is small. The \textbf{correlation} $\Cor(X,Y) = \Cov(X,Y)/(\mathrm{sd}X\,\mathrm{sd}Y)$ is the same thing scaled to $[-1,1]$. Negative covariance is the trick behind antithetic variables (Chapter~11).
+
+\subsection{Conditional probability and memorylessness}
+\[
+P(A \mid B) = \frac{P(A \cap B)}{P(B)}, \qquad\text{so}\qquad P(X > a+s \mid X > a) = \frac{P(X > a+s)}{P(X > a)} .
+\]
+For the exponential distribution, $P(X > x) = e^{-x/\beta}$, so
+\[
+P(X > a+s \mid X > a) = \frac{e^{-(a+s)/\beta}}{e^{-a/\beta}} = e^{-s/\beta} = P(X > s).
+\]
+This is the \textbf{memoryless property}: having already waited (or rained) $a$ units does not change the distribution of the remaining amount.
+
+\subsection{The distributions you meet most often}
+\begin{center}
+\begin{tabularx}{\textwidth}{lX}
+\toprule
+Distribution & Typical use / key fact \\
+\midrule
+$\Unif(a,b)$ & ``No preference'' inside $[a,b]$. $\Unif(0,1)$ is the raw material of all simulation. \\
+$\Exp$ (mean $\beta$) & Waiting times, lifetimes without ageing. Memoryless. $F(x) = 1-e^{-x/\beta}$. \\
+$\Gam(\alpha,\beta)$ & Sum of $\alpha$ independent exponentials (when $\alpha$ is an integer). Positive, skewed. \\
+Weibull & Lifetimes with ageing ($\beta>1$: failure rate increases). $\beta = 1$ gives the exponential. \\
+Normal & Sums and averages of many things (CLT). \\
+Lognormal & $e^{Y}$ with $Y$ normal: positive, right-skewed. \\
+Pareto & Heavy right tail (oil reserve sizes, incomes). \\
+Beta & Values in $[0,1]$ (proportions). \\
+Poisson$(\lambda)$ & Number of events in a fixed time when events happen ``at random''. Mean $=$ variance $=\lambda$. \\
+Binomial$(n,p)$ & Number of successes in $n$ independent trials. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\subsection{Useful integrals}
+\begin{itemize}
+  \item $\int_0^\infty x^{\alpha-1}e^{-x/\beta}\,dx = \Gamma(\alpha)\beta^\alpha$ (this is just ``the Gamma density integrates to 1''). With $\Gamma(n) = (n-1)!$ for integers, $\Gamma(1/2) = \sqrt{\pi}$, $\Gamma(\alpha+1) = \alpha\Gamma(\alpha)$.
+  \item $\int_0^\infty \frac{1}{\beta}e^{-x/\beta}\,dx = 1$, so $\int_0^\infty e^{-x/\beta}\,dx = \beta$; and $\int_0^\infty x e^{-x/\beta}\,dx = \beta^2$.
+  \item Integration by parts: $\int_a^b u\,v'\,dx = [uv]_a^b - \int_a^b u'v\,dx$.
+  \item $\int_0^\pi \sin x\,dx = [-\cos x]_0^\pi = 2$.
+\end{itemize}
+
+\begin{example}{a polynomial density (h23)}
+$f(x) = c\,x(1-x)$ for $0 \le x \le 1$.
+\begin{itemize}
+  \item \emph{Find $c$.} $\int_0^1 (x - x^2)\,dx = \frac12-\frac13 = \frac16$, so $c = 6$. Also $x(1-x)\ge 0$ on $[0,1]$, so $f\ge 0$: $f$ is a proper pdf.
+  \item \emph{Mean.} $\E X = 6\int_0^1 (x^2 - x^3)\,dx = 6\left(\frac13-\frac14\right) = \frac12$.
+  \item \emph{Variance.} $\E X^2 = 6\left(\frac14-\frac15\right) = 0.3$, so $\Var X = 0.3 - 0.25 = 0.05$.
+  \item \emph{cdf.} $F(x) = \int_0^x 6(t-t^2)\,dt = 3x^2 - 2x^3$ for $0\le x\le 1$ (0 below, 1 above).
+  \item \emph{Probabilities.} $P(X > 0.5) = 1 - F(0.5) = 1 - (0.75 - 0.25) = 0.5$.
+\end{itemize}
+\end{example}
+
+\begin{example}{exponential rainfall (h25)}
+Rain per storm $X \sim \Exp$ with $\beta = 8$\,mm, so $P(X > x) = e^{-x/8}$.
+\begin{itemize}
+  \item $P(X > 12) = e^{-12/8} = e^{-1.5} \approx 0.223$.
+  \item Given it has already rained 5\,mm: $P(X > 12 \mid X > 5) = P(X > 7) = e^{-7/8} \approx 0.417$ (memoryless).
+\end{itemize}
+\end{example}
+
+\begin{example}{a trigonometric density (v26)}
+$f(x) = \frac{1+\sin x}{\pi+2}$ on $[0,\pi]$. Since $\sin x \ge 0$ on $[0,\pi]$, $f \ge 0$. And
+$\int_0^\pi (1+\sin x)\,dx = \pi + [-\cos x]_0^\pi = \pi + 2$, so the integral of $f$ is 1. The cdf is
+$F(x) = \frac{x - \cos x + 1}{\pi+2}$.
+\end{example}
+
+\begin{traps}
+\begin{itemize}
+  \item Showing only that the integral is 1 and forgetting $f(x)\ge 0$.
+  \item Forgetting the pieces of the cdf outside the support.
+  \item Confusing $\E(g(X))$ with $g(\E X)$. They are different unless $g$ is linear (e.g.\ $\E\sqrt X \neq \sqrt{\E X}$).
+\end{itemize}
+\end{traps}
+
+%=====================================================================
+\section{Estimation: estimators, the CLT, confidence intervals and maximum likelihood}
+%=====================================================================
+\textit{Lecture notes: chap2\_part2.}
+
+\begin{idea}
+In practice we do not know the parameters of a distribution (the mean $\mu$, the scale $\beta$, \ldots). We observe data $x_1,\dots,x_n$ and compute an \textbf{estimate}. Because the data are random, the estimate is random too, so we need to describe how wrong it can be: its bias, its variance, a confidence interval. The same tools describe the error of every simulation estimate later in the course.
+\end{idea}
+
+\subsection{Estimators, bias, variance and MSE}
+An \textbf{estimator} $\hat\theta$ is a formula that turns the data into a guess for the unknown parameter $\theta$ (for example $\hat\mu = \bar X = \frac1n\sum X_i$).
+\begin{itemize}
+  \item \textbf{Bias}: $\mathrm{bias}(\hat\theta) = \E(\hat\theta) - \theta$. The estimator is \textbf{unbiased} if the bias is 0: on average it hits the target.
+  \item \textbf{Variance} $\Var(\hat\theta)$: how much it jumps around from sample to sample. Its square root is the \textbf{standard error} $\SE(\hat\theta)$.
+  \item \textbf{Mean squared error}: the average squared distance from the truth,
+  \[
+  \mathrm{MSE}(\hat\theta) = \E\big[(\hat\theta-\theta)^2\big] = \Var(\hat\theta) + \mathrm{bias}(\hat\theta)^2 .
+  \]
+  To compare two estimators, compare their MSE: smaller is better. A slightly biased estimator with much smaller variance can win.
+\end{itemize}
+For the sample mean of iid data with mean $\mu$ and variance $\sigma^2$:
+\[
+\E(\bar X) = \mu \text{ (unbiased)}, \qquad \Var(\bar X) = \frac{\sigma^2}{n}, \qquad \SE(\bar X) = \frac{\sigma}{\sqrt n}.
+\]
+The $\sqrt n$ in the denominator is the most important fact of the course: \textbf{to halve the error you need four times as much data} (or four times as many simulations).
+
+\subsection{Law of large numbers and central limit theorem}
+\textbf{Law of large numbers (LLN):} if $X_1, X_2,\dots$ are iid with mean $\mu$, then $\bar X \to \mu$ as $n\to\infty$. More generally $\frac1n\sum g(X_i) \to \E(g(X))$. This is \emph{why simulation works}: averages of simulated values converge to the expectations we want.
+
+\textbf{Central limit theorem (CLT):} if the $X_i$ are iid with finite variance $\sigma^2$, then for large $n$ (rule of thumb $n > 30$)
+\[
+\bar X \approx \N\left(\mu, \frac{\sigma^2}{n}\right), \qquad\text{equivalently}\qquad \frac{\bar X - \mu}{\sigma/\sqrt n} \approx \N(0,1),
+\]
+whatever the distribution of the $X_i$ is. This tells us \emph{how far} the average typically is from the truth.
+
+\subsection{Confidence intervals}
+Since $Z = \frac{\bar X - \mu}{\sigma/\sqrt n}\approx \N(0,1)$ and $P(-1.96 \le Z \le 1.96) = 0.95$, rearranging gives
+\[
+P\left(\bar X - 1.96\frac{\sigma}{\sqrt n} \le \mu \le \bar X + 1.96\frac{\sigma}{\sqrt n}\right) \approx 0.95 .
+\]
+So an approximate \textbf{95\% confidence interval (CI)} for $\mu$ is
+\[
+\bar x \pm z_{\alpha/2}\,\frac{s}{\sqrt n},
+\]
+where $s$ is the sample standard deviation (used in place of the unknown $\sigma$) and $z_{\alpha/2}$ is the normal quantile: $z = 1.645$ for 90\%, $1.96$ for 95\%, $2.326$ for 98\%, $2.576$ for 99\%. Interpretation: if we repeated the experiment many times, 95\% of such intervals would contain the true $\mu$.
+
+\textbf{Estimating something other than the mean.} To estimate $\theta = \E(g(X))$, apply the same recipe to $Y_i = g(X_i)$: estimate $\bar y$, CI $\bar y \pm 1.96\, s_y/\sqrt n$, where $s_y$ is the standard deviation \emph{of the $Y_i$}.
+
+\textbf{How large must $n$ be?} We want $|\bar X - \mu| \le e$ (a margin of error $e$) with 95\% probability:
+\[
+1.96\,\frac{\sigma}{\sqrt n} \le e \quad\Longleftrightarrow\quad n \ge \left(\frac{1.96\,\sigma}{e}\right)^2 \approx \frac{4\sigma^2}{e^2}.
+\]
+
+\begin{example}{sample size (h25)}
+The rainfall data have $s = 3.53$\,mm. To be 95\% sure the estimate is within $e=1$\,mm: $n \ge 4\cdot 3.53^2/1^2 = 4\cdot 12.46 \approx 50$ storms.
+\end{example}
+
+\begin{example}{estimating $\E(\sqrt X)$ from data in R (h22)}
+Data in a vector \texttt{x}; we want $\theta = \E(\sqrt X)$.
+\begin{itemize}
+  \item \texttt{mean(sqrt(x))} is \textbf{unbiased}: it is the average of $Y_i = \sqrt{X_i}$, and $\E(\bar Y) = \E(\sqrt X)$.
+  \item \texttt{sqrt(mean(x))} is \textbf{biased}: $\sqrt{\E X} \ne \E\sqrt X$ (for a concave function like $\sqrt{\cdot}$, Jensen's inequality gives $\sqrt{\E X} \ge \E\sqrt X$).
+  \item \texttt{mean(sqrt(x>0))} averages an indicator that is always 1: wrong.
+  \item The correct 95\% CI is \texttt{mean(sqrt(x)) $\pm$ 1.96*sd(sqrt(x))/sqrt(n)}. Versions using \texttt{sd(x)}, missing \texttt{/sqrt(n)}, or dividing by \texttt{n} are wrong.
+\end{itemize}
+\end{example}
+
+\subsection{Maximum likelihood estimation (MLE)}
+\textbf{Idea.} Choose the parameter value under which the observed data would have been \emph{most probable}. If the data are iid with density $f(x;\theta)$, the probability (density) of seeing exactly our data is
+\[
+L(\theta) = \prod_{i=1}^n f(x_i;\theta) \qquad\text{(the \textbf{likelihood}, a function of } \theta\text{ with the data fixed)}.
+\]
+Products are awkward, so we maximise the \textbf{log-likelihood} instead (the log is increasing, so the maximiser is the same):
+\[
+\ell(\theta) = \log L(\theta) = \sum_{i=1}^n \log f(x_i;\theta).
+\]
+
+\begin{algo}{finding the MLE}
+\begin{enumerate}
+  \item Write the likelihood $L(\theta) = \prod f(x_i;\theta)$ and simplify (products of exponentials become sums in the exponent).
+  \item Take logs: $\ell(\theta) = \sum \log f(x_i;\theta)$.
+  \item Differentiate and solve $\ell'(\theta) = 0$ for $\theta$. The solution is $\hat\theta$.
+  \item Check it is a maximum: $\ell''(\hat\theta) < 0$.
+  \item (If asked) approximate the variance: $\Var(\hat\theta) \approx 1/J(\hat\theta)$ with $J(\theta) = -\ell''(\theta)$ (formula sheet \S5).
+\end{enumerate}
+\end{algo}
+
+\begin{example}{MLE of the exponential scale (h25)}
+$f(x;\beta) = \frac1\beta e^{-x/\beta}$.
+\begin{enumerate}
+  \item $L(\beta) = \prod \frac1\beta e^{-x_i/\beta} = \beta^{-n}\exp\left(-\frac1\beta\sum x_i\right)$.
+  \item $\ell(\beta) = -n\log\beta - \frac1\beta\sum x_i$.
+  \item $\ell'(\beta) = -\frac n\beta + \frac{\sum x_i}{\beta^2} = 0 \Rightarrow \hat\beta = \frac1n\sum x_i = \bar x$.
+  \item $\ell''(\hat\beta) = \frac{n}{\bar x^2} - \frac{2n\bar x}{\bar x^3} = -\frac{n}{\bar x^2} < 0$: a maximum.
+\end{enumerate}
+\emph{Unbiased?} $\E(\hat\beta) = \E(\bar X) = \E(X) = \beta$: yes. \emph{Variance:} $\Var(\hat\beta) = \Var(X)/n = \beta^2/n$ (and $1/J(\hat\beta) = \bar x^2/n$ agrees).
+\end{example}
+
+\begin{example}{MLE of the Pareto shape with $a$ known (v25)}
+$f(x;b) = b a^b x^{-(b+1)}$ for $x > a$.
+$\ell(b) = n\log b + nb\log a - (b+1)\sum\log x_i$, so
+$\ell'(b) = \frac nb + n\log a - \sum\log x_i = 0$, giving
+\[
+\hat b = \frac{n}{\sum_{i}\log(x_i/a)} .
+\]
+Given $\E(\hat b) = \frac{n}{n-1}b \ne b$, it is \textbf{biased}. The rescaled $b^* = \frac{n-1}{n}\hat b = \frac{n-1}{\sum\log(x_i/a)}$ has $\E(b^*) = b$ (unbiased) and $\Var(b^*) = \frac{b^2}{n-2}$. One can check that $\mathrm{MSE}(\hat b) = \frac{(n+2)b^2}{(n-1)(n-2)} > \frac{b^2}{n-2} = \mathrm{MSE}(b^*)$, so $b^*$ is the better estimator.
+\end{example}
+
+\begin{exam}
+Derive a likelihood and MLE; say whether it is unbiased; compute its variance; compute the $n$ needed for a margin of error; recognise which R expression is a correct estimate or CI; compare two estimators by MSE.
+\end{exam}
+
+\begin{traps}
+\begin{itemize}
+  \item A 95\% interval uses $1.96 = $ \texttt{qnorm(0.975)}, not \texttt{qnorm(0.95)} (that gives a 90\% interval).
+  \item The standard error of a mean is $s/\sqrt n$, not $s$, not $s^2/\sqrt n$.
+  \item Pair the estimator with \emph{its own} standard error (estimating $\E\sqrt X$ needs \texttt{sd(sqrt(x))}).
+\end{itemize}
+\end{traps}
+
+\newpage

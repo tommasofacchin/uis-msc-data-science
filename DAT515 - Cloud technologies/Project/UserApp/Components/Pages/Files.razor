@@ -1,0 +1,109 @@
+@page "/files"
+@inject HttpClient Http
+@inject IJSRuntime JS
+
+<h1>My files</h1>
+
+@if (loading)
+{
+    <p>Loading...</p>
+}
+else if (files.Count == 0)
+{
+    <p>No files yet.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr><th>Name</th><th>Size</th><th>Uploaded</th><th></th></tr>
+        </thead>
+        <tbody>
+            @foreach (var f in files)
+            {
+                <tr>
+                    <td>@f.Name</td>
+                    <td>@FormatSize(f.Size)</td>
+                    <td>@f.LastModified?.ToLocalTime().ToString("g")</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary" @onclick="() => Download(f)">Download</button>
+                        <button class="btn btn-sm btn-outline-danger" @onclick="() => Delete(f)">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@if (message is not null)
+{
+    <p class="mt-3 @(isError ? "text-danger" : "text-success")">@message</p>
+}
+
+@code {
+    private List<FileItem> files = new();
+    private bool loading = true;
+    private bool isError;
+    private string? message;
+
+    protected override async Task OnInitializedAsync() => await Load();
+
+    private async Task Load()
+    {
+        loading = true;
+        try
+        {
+            files = await Http.GetFromJsonAsync<List<FileItem>>("/files") ?? new();
+        }
+        catch (HttpRequestException)
+        {
+            isError = true;
+            message = "Could not load your files";
+        }
+        loading = false;
+    }
+
+    private async Task Download(FileItem f)
+    {
+        try
+        {
+            var bytes = await Http.GetByteArrayAsync($"/files/download?key={Uri.EscapeDataString(f.Key)}");
+            var dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads");
+            var path = Path.Combine(dir, f.Name);
+            await File.WriteAllBytesAsync(path, bytes);
+            isError = false;
+            message = $"Saved to {path}";
+        }
+        catch (Exception)
+        {
+            isError = true;
+            message = "Download failed";
+        }
+    }
+
+    private async Task Delete(FileItem f)
+    {
+        if (!await JS.InvokeAsync<bool>("confirm", $"Delete {f.Name}?")) return;
+
+        try
+        {
+            var res = await Http.DeleteAsync($"/files?key={Uri.EscapeDataString(f.Key)}");
+            isError = !res.IsSuccessStatusCode;
+            message = isError ? "Delete failed" : "File deleted";
+            if (!isError) await Load();
+        }
+        catch (HttpRequestException)
+        {
+            isError = true;
+            message = "Could not reach the server";
+        }
+    }
+
+
+    private static string FormatSize(long bytes) =>
+        bytes < 1024 ? $"{bytes} B" :
+        bytes < 1024 * 1024 ? $"{bytes / 1024.0:F1} KB" :
+        $"{bytes / 1024.0 / 1024.0:F1} MB";
+
+    private record FileItem(string Key, string Name, long Size, DateTime? LastModified);
+}

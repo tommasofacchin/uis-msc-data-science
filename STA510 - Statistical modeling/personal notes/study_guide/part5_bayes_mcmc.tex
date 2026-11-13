@@ -78,7 +78,7 @@ The $1/\beta$ term does not fit any recognition rule, so the posterior is not a 
 \begin{example}{two parameters with Gamma conditionals (v24)}
 Posterior $p(a,b\mid t)\propto(ab)^ne^{-ab\sum t_i}e^{-3(a+b)}$. As a function of $a$ alone (treat $b$ as a constant):
 $\log p = n\log a - a\left(b\sum t_i+3\right)+\text{const}$. This is the form $B\log a + Ca$, so
-$a\mid b,t\sim\Gam\left(n+1,\ \frac{1}{b\sum t_i+3}\right)$, and by symmetry the same holds for $b\mid a$. These ``full conditionals'' are what a Gibbs sampler needs (Chapter~16).
+$a\mid b,t\sim\Gam\left(n+1,\ \frac{1}{b\sum t_i+3}\right)$, and by symmetry the same holds for $b\mid a$.
 \end{example}
 
 \begin{traps}

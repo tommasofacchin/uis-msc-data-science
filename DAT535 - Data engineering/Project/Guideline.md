@@ -50,6 +50,14 @@ Define the project through the Medallion Architecture and the Data Engineering l
 
 **Outcome:** A functioning, repeatable data engineering project that another engineer can understand and operate.
 
+**Operating lifecycle (Part 4):**
+
+1. **Develop** – feature branches and pull requests
+2. **Validate** – automated checks and tests
+3. **Deploy** – development and production environments
+4. **Run** – regular schedule using GitHub Actions
+5. **Learn** – logs, failure handling, and performance reflection (detection of failures, delays, quality issues, and likely bottlenecks)
+
 ---
 
 ## Project definition – check-in
@@ -74,6 +82,18 @@ The report should explain the project through its main decisions, implementation
 - Focus the report on the most important design choices, implementation, results, limitations, and lessons learned.
 - Reflect meaningfully on your own work from technology perspective: what worked, what did not, why decisions were made, and what should be improved.
 - Provide enough code excerpts, models, quality measures, tests, and run evidence to support the claims without turning the report into a code listing.
+
+## 8. Deliverables
+
+Keep them concise. Each item should prove a project outcome. Spark is the processing engine; engineering outcomes are the assessment.
+
+| # | Deliverable | Content |
+|---|---|---|
+| 01 | Report | 8–10 pages: engineering decisions, implementation, and results |
+| 02 | Presentation (in person, in plenum) | 10 minutes: most important decisions and evidence, selected lessons learnt |
+| 03 | Cloud setup | Functioning development and production environments |
+| 04 | GitHub repository | Code, notebooks, workflows, and run instructions |
+| 05 | Demonstration (in person) | End-to-end run, deployment, schedule, Gold output |
 
 ### General UiS grading principle
 

@@ -1,0 +1,124 @@
+\documentclass[10pt]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[a4paper,top=1.5cm,bottom=1.6cm,left=1.6cm,right=1.6cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{xcolor}
+\usepackage{framed}
+
+\definecolor{trap}{RGB}{190,40,40}
+\definecolor{head}{RGB}{30,70,140}
+\newcommand{\R}[1]{\texttt{#1}}
+\newcommand{\trap}[1]{\textcolor{trap}{\textbf{Trappola:} #1}}
+
+\renewcommand{\section}[1]{\par\vspace{6pt}{\large\bfseries\color{head}#1}\par\vspace{2pt}}
+\setlength{\parindent}{0pt}
+\pagestyle{empty}
+\renewcommand{\part}[1]{\par\vspace{8pt}{\Large\bfseries #1}\par\vspace{1pt}\hrule\vspace{2pt}}
+
+\begin{document}
+
+{\LARGE\bfseries STA510 -- Codice R all'esame: l'essenziale}\\[2pt]
+{\small Basato sui temi h22--v26. All'esame il codice si \emph{legge}, non si scrive: ``quale implementazione è corretta? Giustifica''.}
+
+\section{Quanto valgono le domande con codice R}
+\begin{tabularx}{\textwidth}{@{}l r r r X@{}}
+\toprule
+Esame & Punti R & Totale & \% & Su cosa \\
+\midrule
+h22 & $\approx$4/21 sottodom. & -- & $\approx$19\% & AR (1e), intervalli di confidenza in R, bootstrap, RW-MH \\
+v23 & $\approx$4/22 sottodom. & -- & $\approx$18\% & 4 funzioni di inversione, stima MC con indicatore, independence sampler, Gibbs \\
+h23 & 14 & 88 & 16\% & 4 log-kernel della posterior (quali validi per RW-MH) \\
+h24 & 26 & 91 & 29\% & 4 funzioni Pareto (8P); MCMC.1 / MCMC.2: tipo, scelta, trace plot (18P) \\
+h25 & 20 & 88 & 23\% & Bootstrap da codice + output (14P); riconoscere e valutare un MCMC (6P) \\
+v24 & 22 & 73 & 30\% & 3 stimatori MC/IS/antitetico (11P); Gibbs vs MH dal codice (11P) \\
+v25 & 15 & 83 & 18\% & 4 implementazioni del bootstrap, MSE, intervalli normale/percentile \\
+v26 & 25 & 85 & 29\% & Random walk dal codice (9P); stima di $\pi$ con MC (16P) \\
+\midrule
+\multicolumn{3}{@{}l}{\textbf{Media}} & \textbf{$\approx$23\%} & cioè circa 15--25 punti a esame \\
+\bottomrule
+\end{tabularx}
+
+\part{A. Già chiesto all'esame}
+\section{1. Funzioni da riconoscere}
+\begin{tabularx}{\textwidth}{@{}l X@{}}
+\toprule
+\R{runif(n, min, max)} & Uniforme; senza argomenti è $U(0,1)$ \\
+\R{rnorm(n, mean, sd)} & Normale: il 3º argomento è la \textbf{sd}, non la varianza \\
+\R{rexp(n, rate)} & Esponenziale con \textbf{rate} $=1/\beta$ (il formulario usa la scala $\beta$) \\
+\R{rgamma(n, shape, rate)} & Il 3º argomento senza nome è il \textbf{rate}; con \R{scale=} esplicito è la scala \\
+\R{d*}, \R{p*}, \R{q*}, \R{r*} & densità, cdf, quantile, numeri casuali; \R{log=TRUE} restituisce il log della densità \\
+\R{sample(x, size, replace, prob)} & Ricampionamento; il bootstrap vuole \R{size=length(x), replace=TRUE} \\
+\R{mean(x > a)} & Proporzione = stima di $P(X>a)$ (TRUE/FALSE valgono 1/0) \\
+\R{sd(g)/sqrt(n)} & Errore standard dello stimatore MC; \R{var} $=$ \R{sd}$^2$ \\
+\R{quantile(x, probs)} & Quantili empirici (intervallo percentile) \\
+\R{numeric(n)}, \R{x[t-1]}, \R{for}, \R{replicate(B, ...)}, \R{cumsum} & Struttura dei cicli e delle simulazioni \\
+\bottomrule
+\end{tabularx}
+
+\section{2. Inversione \normalsize\normalfont (h24 1d, v23)}
+Corretto: \R{x <- Finv(runif(n))}. \R{runif(n)} e \R{1-runif(n)} vanno bene entrambi ($U \sim 1-U$).\\
+\trap{\R{runif(n,2,4)} al posto di $U(0,1)$, esponente o segno sbagliato in $F^{-1}$.} Esempio h24: Pareto$(a{=}4,b{=}2)$, $F^{-1}(u)=4/\sqrt{1-u}$, quindi \R{4/sqrt(runif(n))} e \R{4/sqrt(1-runif(n))} sono giuste.
+
+\section{3. Accept-reject \normalsize\normalfont (h22 1e)}
+Si estrae \R{x} dalla proposta $g$ e si accetta se \R{runif(1) < f(x)/(c*g(x))}, con $c=\max_x f(x)/g(x)$.\\
+\trap{denominatore senza $g(x)$ o senza $c$ (h22 1e), $c$ calcolato male, proposta che non copre il supporto di $f$.}
+
+\section{4. Monte Carlo, importance sampling, antitetiche \normalsize\normalfont (v24 3a, v23, v26 P3)}
+\begin{itemize}
+\item \textbf{Crude su $(a,b)$:} \R{(b-a)*mean(g(runif(n,a,b)))}. In generale \R{mean(h(x))} con \R{x} estratto dalla densità.
+\item \textbf{Importance sampling:} \R{mean(g(x)/f(x))} con \R{x} $\sim f$, più l'indicatore del dominio, es.\ \R{(x>1 \& x<6)}.\\ \trap{rapporto rovesciato $f/g$ (v24 Est2).}
+\item \textbf{Antitetiche:} su $U(0,1)$ si usano $U$ e $1-U$; su $U(a,b)$ si usano $x$ e $\mathbf{a+b-x}$.\\ \trap{v24 usa \R{5-x1} su $U(1,6)$: il valore giusto è \R{7-x1}.}
+\item \textbf{Stima di $\pi$:} \R{4*mean(u1\^{}2 + u2\^{}2 <= 1)} con $u_i\sim U(0,1)$. \trap{senza il 4 stimi $\pi/4$.}
+\end{itemize}
+
+\section{5. Bootstrap \normalsize\normalfont (v25 2d--f, h25 1d, h22)}
+Nel ciclo: \R{boot[i] <- stimatore(sample(data, size=length(data), replace=TRUE))}. Poi:
+\begin{center}
+\begin{tabular}{@{}ll@{\qquad}ll@{}}
+bias & \R{mean(boot) - stima} & SE & \R{sd(boot)} \\
+MSE & \R{var(boot) + bias\^{}2} & stima corretta & \R{2*stima - mean(boot)} \\
+IC normale 95\% & \R{stima $\pm$ qnorm(0.975)*sd(boot)} & IC percentile & \R{quantile(boot, c(.025,.975))} \\
+IC basic & $(2\hat\theta - q_{0.975},\; 2\hat\theta - q_{0.025})$ & & \\
+\end{tabular}
+\end{center}
+\trap{\R{replace=FALSE}, \R{size=nrep}, \R{mean} al posto dello stimatore richiesto, \R{sd} al posto di \R{var} nell'MSE, segno $-$ nell'MSE, \R{qnorm(0.95)} per un IC al 95\%, \R{1-quantile(...)} (tutte in v25 2d--f).}
+
+\section{6. MCMC \normalsize\normalfont (h24 P4, h25 1h, v24 P5, h23 1i, v23, h22)}
+\begin{tabularx}{\textwidth}{@{}l X@{}}
+\toprule
+\textbf{Random walk MH} & \R{rnorm(1, mean=x[t-1], sd=s)}: la proposta dipende dallo stato corrente; \R{alpha = min(1, target(prop)/target(old))} \\
+\textbf{Independence sampler} & la proposta \emph{non} dipende da \R{x[t-1]} (es.\ \R{rnorm(1, mean=5)}); pesi \R{wt = target/proposta}, \R{alpha = wt.star/wt.old} \\
+\textbf{MH in scala log} & \R{alpha = exp(min(0, lpost(prop) - lpost(old)))}; con proposta su $\log\theta$ serve lo Jacobiano $+\log\theta^* - \log\theta_{t-1}$ \\
+\textbf{Gibbs} & estrae a turno dalle condizionate (es.\ due \R{rgamma}), \emph{nessun} passo di accettazione \\
+\bottomrule
+\end{tabularx}\\[3pt]
+In caso di rifiuto deve esserci \R{x[t] <- x[t-1]} (la catena ripete il valore). Il log-kernel è log-verosimiglianza $+$ log-prior; per una prior Gamma con scala $b$: \R{(a-1)*log(theta) - theta/b} (h23). \\
+\textbf{Diagnostica dall'output R} (h24 4d, h25 1h): acceptance rate troppo alto (passi piccoli) o troppo basso (passi grandi); ESS basso significa forte autocorrelazione; partenza lontana dalla target (es.\ \R{theta1=100}) richiede burn-in; il thinning riduce l'autocorrelazione.
+
+\section{7. Random walk \normalsize\normalfont (v26 P2)}
+\R{x[t] <- x[t-1] + sample(c(-1,1), 1)}: random walk simmetrico, è un processo di Markov (dipende solo da \R{x[t-1]}); con \R{prob=c(0.4,0.6)} ha una deriva verso l'alto.
+
+\begin{framed}
+\textbf{Come rispondere.} (1) Prima scrivi tu la formula giusta ($F^{-1}$, stimatore, $\alpha$). (2) Confronta il codice con la formula riga per riga. (3) Per ogni funzione: \emph{corretta/sbagliata} più \emph{una frase} che indica l'argomento preciso. Es.: ``sbagliata: \R{replace=FALSE} restituisce sempre lo stesso campione permutato, quindi la distribuzione bootstrap è degenere''.
+\end{framed}
+
+\part{B. Potrebbe chiedere (codice negli R-examples, mai uscito all'esame)}
+{\small
+\begin{tabularx}{\textwidth}{@{}p{3.1cm} X@{}}
+\toprule
+\textbf{Poisson omogeneo} & (a) \R{cumsum(rexp(N, lambda))}, poi si tengono i tempi \R{< T}; (b) \R{N <- rpois(1, lambda*T)} e poi \R{sort(runif(N, 0, T))}. Entrambe corrette. \trap{\R{rexp(n, 1/lambda)}, \R{sort} dimenticato.} \\
+\textbf{Poisson non omogeneo (thinning)} & Si simula un processo omogeneo con $\lambda_{\max} \ge \max_t \lambda(t)$ e si tiene il tempo $t$ se \R{runif(1) < lambda(t)/lambdamax}. \trap{$\lambda_{\max}$ troppo piccolo, rapporto rovesciato.} \\
+\textbf{Catena di Markov} & \R{state <- sample(1:k, 1, prob=P[state,])}: la \textbf{riga} dello stato corrente. Distribuzione stazionaria: $\pi = \pi P$ (\R{pi \%*\% P}); stima: \R{table(sim)/n} dopo il burn-in. \trap{\R{P[,state]} (colonna), \R{*} al posto di \R{\%*\%}.} \\
+\textbf{AR(1)} & \R{x[t] <- g + phi*x[t-1] + rnorm(1, 0, s)}: processo di Markov, stazionario se $|\phi|<1$. \trap{\R{x[t-1]} sostituito da \R{x[1]} o da \R{x[t]}; \R{rnorm} con la varianza al posto della sd.} \\
+\textbf{Mistura} & \R{w <- runif(n) < p}, \R{Y <- w*X1 + (1-w)*X2}. \trap{\R{p*X1 + (1-p)*X2} è una combinazione lineare, non una mistura.} \\
+\textbf{Normale multivariata} & \R{rmvnorm(n, mean=mu, sigma=Sigma)}: \R{sigma} è la \textbf{matrice di covarianza}. Una combinazione lineare si calcola con \R{X \%*\% a}. Cholesky: $X = \mu + LZ$ con $\Sigma = LL^T$; in R \R{L <- t(chol(Sigma))}, perché \R{chol} restituisce la triangolare superiore. \\
+\textbf{Test di permutazione} & \R{sample(alldata, replace=FALSE)}: qui \R{replace=FALSE} è \textbf{corretto} (è il contrario del bootstrap). p-value bilaterale: \R{mean(abs(diffP) >= abs(diff0))}. \\
+\textbf{KDE} & \R{density(x, bw=h)}: $h$ piccolo dà una curva frastagliata (sottosmussata), $h$ grande la appiattisce troppo (sovrasmussata). \\
+\bottomrule
+\end{tabularx}}
+
+\end{document}

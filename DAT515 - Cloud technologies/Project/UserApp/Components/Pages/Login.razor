@@ -1,0 +1,129 @@
+@page "/"
+@layout LoginLayout
+@using System.ComponentModel.DataAnnotations
+@using MyBlazorApp.Services
+@inject NavigationManager Nav
+@inject HttpClient Http
+@inject AuthService Auth
+@inject GoogleAuthService Google
+
+
+<h1>Login</h1>
+
+<EditForm Model="model" OnValidSubmit="DoLogin" FormName="login">
+    <DataAnnotationsValidator />
+
+    <div class="mb-3">
+        <label class="form-label">Email</label>
+        <InputText type="email" class="form-control" @bind-Value="model.Email" />
+        <ValidationMessage For="() => model.Email" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Password</label>
+        <InputText type="password" class="form-control" @bind-Value="model.Password" />
+        <ValidationMessage For="() => model.Password" />
+    </div>
+
+    <button class="btn btn-primary" type="submit" disabled="@loading">Log in</button>
+</EditForm>
+
+<hr />
+<button class="btn btn-outline-dark w-100" type="button" disabled="@loading" @onclick="DoGoogleLogin">
+    Sign in with Google
+</button>
+
+
+@if (error is not null)
+{
+    <p class="text-danger mt-3">@error</p>
+}
+
+<p class="mt-3">No account? <a href="register">Register</a></p>
+
+@code {
+    private LoginModel model = new();
+    private string? error;
+    private bool loading;
+
+    private record LoginResponse(string? Message, string? Token);
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (await Auth.IsLoggedInAsync())
+            Nav.NavigateTo("/home");
+    }
+
+    private async Task DoLogin()
+    {
+        error = null;
+        loading = true;
+        try
+        {
+            var res = await Http.PostAsJsonAsync("/login", new { email = model.Email, password = model.Password });
+            LoginResponse? body = null;
+            try { body = await res.Content.ReadFromJsonAsync<LoginResponse>(); }
+            catch (Exception) { }
+
+            if (res.IsSuccessStatusCode && !string.IsNullOrEmpty(body?.Token))
+            {
+                await Auth.SaveTokenAsync(body.Token);
+                Nav.NavigateTo("/home");
+            }
+            else
+            {
+                error = body?.Message ?? "Login failed";
+            }
+        }
+        catch (HttpRequestException)
+        {
+            error = "Could not reach the server";
+        }
+        catch (Exception)
+        {
+            error = "Login failed";
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+    private async Task DoGoogleLogin()
+    {
+        error = null;
+        loading = true;
+        try
+        {
+            var token = await Google.SignInAsync();
+            if (string.IsNullOrEmpty(token))
+            {
+                error = "Google sign-in was cancelled or failed";
+            }
+            else
+            {
+                await Auth.SaveTokenAsync(token);
+                Nav.NavigateTo("/home");
+            }
+        }
+        catch (Exception)
+        {
+            error = "Google sign-in failed";
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+
+    public class LoginModel
+    {
+        [Required(ErrorMessage = "Insert email")]
+        [EmailAddress(ErrorMessage = "Invalid email")]
+        public string Email { get; set; } = "";
+
+        [Required(ErrorMessage = "Insert password")]
+        public string Password { get; set; } = "";
+    }
+}

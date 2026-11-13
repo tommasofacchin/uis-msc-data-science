@@ -1,0 +1,18 @@
+﻿@page "/home"
+@using MyBlazorApp.Services
+@inject AuthService Auth
+
+<h1>Welcome@(userName is null ? "" : $", {userName}")</h1>
+
+<p>Store and retrieve your files in the cloud.</p>
+
+<div class="d-flex gap-2">
+    <a class="btn btn-primary" href="upload">Upload a file</a>
+    <a class="btn btn-outline-primary" href="files">My files</a>
+</div>
+
+@code {
+    private string? userName;
+
+    protected override async Task OnInitializedAsync() => userName = await Auth.GetUserNameAsync();
+}

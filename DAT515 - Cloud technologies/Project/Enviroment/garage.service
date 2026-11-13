@@ -1,0 +1,12 @@
+[Unit]
+Description=Garage S3 object store
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+ExecStart=/usr/local/bin/garage -c /etc/garage.toml server
+Restart=on-failure
+Environment=RUST_LOG=garage=info
+
+[Install]
+WantedBy=multi-user.target

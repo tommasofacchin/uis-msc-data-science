@@ -1,0 +1,65 @@
+@page "/upload"
+@inject HttpClient Http
+
+<h1>Upload</h1>
+
+<InputFile class="form-control mb-3" OnChange="OnFileSelected" />
+
+<button class="btn btn-primary" @onclick="DoUpload" disabled="@(file is null || uploading)">
+    @(uploading ? "Uploading..." : "Upload")
+</button>
+
+@if (message is not null)
+{
+    <p class="mt-3 @(isError ? "text-danger" : "text-success")">@message</p>
+}
+
+@code {
+    private const long MaxSize = 25 * 1024 * 1024;
+
+    private IBrowserFile? file;
+    private bool uploading;
+    private bool isError;
+    private string? message;
+
+    private void OnFileSelected(InputFileChangeEventArgs e)
+    {
+        file = e.File;
+        message = null;
+    }
+
+    private async Task DoUpload()
+    {
+        if (file is null) return;
+
+        uploading = true;
+        message = null;
+
+        try
+        {
+            using var content = new MultipartFormDataContent();
+            var fileContent = new StreamContent(file.OpenReadStream(MaxSize));
+            fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(
+                string.IsNullOrEmpty(file.ContentType) ? "application/octet-stream" : file.ContentType);
+            content.Add(fileContent, "file", file.Name);
+
+            var res = await Http.PostAsync("/files", content);
+            isError = !res.IsSuccessStatusCode;
+            message = isError ? "Upload failed" : "File uploaded";
+        }
+        catch (IOException)
+        {
+            isError = true;
+            message = "File is too large (max 25 MB)";
+        }
+        catch (HttpRequestException)
+        {
+            isError = true;
+            message = "Could not reach the server";
+        }
+        finally
+        {
+            uploading = false;
+        }
+    }
+}

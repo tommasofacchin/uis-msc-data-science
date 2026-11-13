@@ -1,0 +1,9 @@
+
+# Secrets
+Enviroment/*.local
+Enviroment/k8s.env.local
+
+# Build output
+bin/
+obj/
+publish/

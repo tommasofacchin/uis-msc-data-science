@@ -1,0 +1,522 @@
+\documentclass[10pt]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[a4paper,top=1.4cm,bottom=1.5cm,left=1.5cm,right=1.5cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{xcolor}
+\usepackage{framed}
+\usepackage{enumitem}
+\usepackage{microtype}
+
+\definecolor{trap}{RGB}{190,40,40}
+\definecolor{head}{RGB}{30,70,140}
+\definecolor{boxbg}{RGB}{242,245,250}
+\definecolor{always}{RGB}{200,40,40}
+\definecolor{often}{RGB}{220,130,20}
+\definecolor{spare}{RGB}{40,150,70}
+
+\newcommand{\R}[1]{\texttt{#1}}
+\newcommand{\trap}[1]{\textcolor{trap}{\textbf{Trap:} #1}}
+\newcommand{\always}{\textcolor{always}{$\bullet$}}
+\newcommand{\often}{\textcolor{often}{$\bullet$}}
+\newcommand{\spare}{\textcolor{spare}{$\bullet$}}
+\newcommand{\Q}[1]{\textbf{``#1''}}
+\newcommand{\sub}[1]{\par\vspace{4pt}{\bfseries #1}\par\vspace{1pt}}
+\newcommand{\one}{\mathbb{1}}
+\newcommand{\iid}{\overset{\text{iid}}{\sim}}
+
+\renewcommand{\section}[1]{\par\vspace{8pt}{\large\bfseries\color{head}#1}\par\vspace{1pt}{\color{head}\hrule}\vspace{3pt}}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1.5pt}
+\setlist{nosep,leftmargin=1.2em}
+\pagestyle{empty}
+
+% answer box
+\colorlet{shadecolor}{boxbg}
+\newenvironment{answer}[1][Answer to write]{\par\vspace{2pt}\begin{shaded}\small\textbf{#1}\par\vspace{1pt}}{\end{shaded}\vspace{-2pt}}
+
+\begin{document}
+
+{\LARGE\bfseries STA510 -- Exam A4 sheet (v2)}\\[2pt]
+{\small Write it by hand. Priority: \always{} always on the exam \quad \often{} often \quad \spare{} if space is left.
+\textbf{How to use it:} read the question $\to$ find its words in the table $\to$ go to the section $\to$ copy the answer and plug in the numbers.}
+
+\vspace{4pt}
+{\small
+\begin{tabularx}{\textwidth}{@{}X l@{}}
+\toprule
+If the question says\dots & Section \\
+\midrule
+``find $c$ / proper density / show that $F(x)=\dots$ / $P(a<X<b)$ / $E(X)$'' & 0B \\
+``generate / simulate $n$ random variables \dots inverse transform'' $\cdot$ ``simulate $S=\min(X_1,X_2,X_3)$'' $\cdot$ ``estimate $P(Z<\dots)$ by simulation'' & 1 Inversion \\
+``accept-reject / rejection'' $\cdot$ ``proposal $g$'' $\cdot$ ``which proposal is better?'' $\cdot$ $F$ not invertible & 2 Accept-reject \\
+``estimate the integral \dots crude Monte Carlo'' $\cdot$ ``MC estimator based on draws from \dots'' $\cdot$ ``standard error'' $\cdot$ ``based on the R output, point estimate and 95\% CI'' $\cdot$ ``how many simulations so that SD $<$ \dots'' & 3 Crude MC \\
+``importance sampling'' $\cdot$ ``importance function / proposal $f$'' & 4 Importance sampling \\
+``improve \dots using antithetic variables'' $\cdot$ ``will the std be more or less?'' & 5 Antithetic \\
+``bootstrap'' $\cdot$ ``bias / MSE / bias-corrected'' $\cdot$ ``bootstrap interval'' & 6 Bootstrap \\
+``for large $n$ / approximately / CLT'' $\cdot$ ``how many measurements to be 95\% sure'' & 7 CLT \\
+``show that the likelihood \dots'' $\cdot$ ``MLE'' $\cdot$ ``unbiased?'' $\cdot$ ``which estimator is better?'' & 8 Likelihood \\
+``Bayesian approach / prior'' $\cdot$ ``show that the (log-)posterior kernel is \dots'' $\cdot$ ``conditional posterior'' $\cdot$ ``valid log-target?'' & 9 Bayes \\
+``which MCMC algorithm is this?'' $\cdot$ ``proposal / acceptance probability'' $\cdot$ trace plot, acceptance, ESS $\cdot$ ``Gibbs sampler'' & 10 MCMC \\
+``Poisson process'' $\cdot$ ``thinning / non-homogeneous'' $\cdot$ ``random walk'' $\cdot$ ``Markov?'' $\cdot$ ``which process does this R code simulate?'' & 11 Processes \\
+``histogram vs kernel density estimate / KDE / bandwidth / Scott rule'' & 12 KDE \\
+R code to judge (parameters of \R{rgamma}, \R{rnorm}, \dots) & 13 R \\
+\bottomrule
+\end{tabularx}}
+
+\vspace{3pt}
+{\small\textbf{Do NOT write (already in \R{tablesformulas.pdf}):} pmf/pdf, $E$ and Var of all distributions (\S1--2); MH with general $\alpha$, RWMH, independence sampler, Gibbs (\S9); log-kernel recognition rules (\S10); transformation formula, linear combinations (\S4); $\mathrm{Var}(\hat\theta)\approx 1/J(\hat\theta)$ (\S5); CLT statement, log rules, derivatives, Gamma function; integrals of \S7.}
+
+%=====================================================================
+\section{\always{} 0. Maths}
+
+\sub{A. Solve $u=F(x)$ for $x$ (used in 1 Inversion)}
+\begin{itemize}
+\item Order: isolate the block with $x$ $\to$ remove the exponential with $\ln$ $\to$ remove the power with $1/\beta$ $\to$ divide/multiply the constants.
+\item $e^A=B \Rightarrow A=\ln B$ \quad $\ln A=B \Rightarrow A=e^B$ \quad $x^\beta=c \Rightarrow x=c^{1/\beta}$ (no $\pm$ if $x\ge0$)
+\item $(a/x)^b=c \Rightarrow a/x=c^{1/b} \Rightarrow x=a\,c^{-1/b}$ \quad (recall $x^{-b}=1/x^b$, $c^{1/2}=\sqrt c$)
+\item For $u\in(0,1)$: $\ln(1-u)<0 \Rightarrow -\ln(1-u)>0$.
+\item Weibull: $1-e^{-\alpha x^\beta}=u \Rightarrow e^{-\alpha x^\beta}=1-u \Rightarrow -\alpha x^\beta=\ln(1-u) \Rightarrow x=\left(-\ln(1-u)/\alpha\right)^{1/\beta}$
+\end{itemize}
+
+\sub{B. Densities: constant $c$, cdf, probabilities, $E(X)$}
+\begin{itemize}
+\item Proper density: $f\ge0$ and $\int f=1$ on the support; find $c$ from $c\int(\dots)=1$.
+\item cdf: $F(x)=\int_a^x f(t)\,dt$, check $F(a)=0$, $F(b)=1$. \quad $P(X>a)=1-F(a)$, \quad $P(a<X<b)=F(b)-F(a)$.
+\item Polynomials: expand and integrate term by term.
+  \begin{itemize}
+  \item $\int_0^1 x(1-x)\,dx=\tfrac12-\tfrac13=\tfrac16 \Rightarrow c=6$, \quad $F(x)=6\left(\tfrac{x^2}{2}-\tfrac{x^3}{3}\right)=x^2(3-2x)$
+  \item $x(1-x)^3=x-3x^2+3x^3-x^4 \Rightarrow \int_0^1=\tfrac12-1+\tfrac34-\tfrac15=\tfrac1{20} \Rightarrow c=20$
+  \end{itemize}
+\item Substitution $\int f(g(y))\,g'(y)\,dy$: (1) $u=g(y)$ (inner part: exponent or bracket); (2) $du=g'(y)\,dy$, if a constant $k$ is missing use $(\text{rest})\,dy=du/k$; (3) change the limits; (4) integrate in $u$, do not go back to $y$.
+  \begin{itemize}
+  \item Signal: a function and its derivative both appear, e.g.\ $\alpha\beta y^{\beta-1}e^{-\alpha y^\beta}$.
+  \item $\int_0^2(x-2)^2dx$, $u=x-2 \Rightarrow \int_{-2}^0u^2du=\tfrac83 \Rightarrow k=\tfrac38$
+  \item Weibull: $u=\alpha y^\beta$, $du=\alpha\beta y^{\beta-1}dy$, limits $0\to\alpha x^\beta \Rightarrow \int_0^{\alpha x^\beta}e^{-u}du=1-e^{-\alpha x^\beta}$
+  \item $\int x e^{-x^2}dx$: $u=x^2$, $du=2x\,dx \Rightarrow \tfrac12\int e^{-u}du$
+  \end{itemize}
+\item Exponentials: $\int_0^x\lambda e^{-\lambda y}dy=1-e^{-\lambda x}$, \quad $\int_0^\infty=1$.
+  \begin{itemize}
+  \item $f=\dfrac{e^{x/4}}{4C}$, $0\le x\le4$, $C=e-1$: $\int_0^4e^{x/4}dx=4(e-1)=4C$ $\Rightarrow$ integrates to 1; \quad $E(X)=\dfrac{16\left[e^{x/4}(x/4-1)\right]_0^4}{4C}=\dfrac4C$
+  \end{itemize}
+\item Pareto: $\int_a^x b\,a^b\,t^{-b-1}dt=1-(a/x)^b$.
+\item \trap{forgotten $1/a$ in front of $\int e^{ax}$ $\cdot$ negative sign of $a$ $\cdot$ limits not changed $\cdot$ lost constant of $du$.}
+\end{itemize}
+
+\sub{C. Derivatives (for $c$ in Accept-reject and monotonicity in Antithetic)}
+\begin{itemize}
+\item Maximum on $[a,b]$: solve $h'(x)=0$, then compare with $h(a)$ and $h(b)$.
+\item Monotonicity: $h'(x)=0\Leftrightarrow x=\dots$; if that point is \textbf{outside} $(a,b)$ $\Rightarrow$ $h'$ has constant sign $\Rightarrow$ $h$ monotone.
+\item Weibull(4,2): $f=8xe^{-4x^2}$, $f'=8e^{-4x^2}(1-8x^2)=0\Rightarrow x=1/\sqrt8\approx0.35$ $\Rightarrow$ decreasing on $[0.5,2.5]$.
+\end{itemize}
+
+%=====================================================================
+\section{\always{} 1. Inversion (inverse transform)}
+
+\begin{answer}[Answer to write \quad (W = Weibull$(\alpha,\beta)$, P = Pareto$(a,b)$, E = Exp with scale $\beta$)]
+\textbf{CDF:} $F(x)=\int_a^x f(t)\,dt=\dots$ \ (or use $F$ derived earlier)\\
+\hspace*{1em} W: $1-e^{-\alpha x^\beta}$ \quad P: $1-(a/x)^b,\ x>a$ \quad E: $1-e^{-x/\beta},\ x\ge0$\\[2pt]
+\textbf{Inverse:} set $u=F(x)$ and solve for $x$:\\
+\hspace*{1em} W: $e^{-\alpha x^\beta}=1-u \Rightarrow -\alpha x^\beta=\ln(1-u) \Rightarrow F^{-1}(u)=\left(-\ln(1-u)/\alpha\right)^{1/\beta}$\\
+\hspace*{1em} P: $(a/x)^b=1-u \Rightarrow a/x=(1-u)^{1/b} \Rightarrow F^{-1}(u)=a(1-u)^{-1/b}$\\
+\hspace*{1em} E: $e^{-x/\beta}=1-u \Rightarrow F^{-1}(u)=-\beta\ln(1-u)$\\[2pt]
+\textbf{Algorithm (inverse transform), $n=10000$:}
+\begin{enumerate}
+\item Simulate $U_1,\dots,U_n \iid U(0,1)$.
+\item Compute $X_i=F^{-1}(U_i)$ \quad (W: $(-\ln(1-U_i)/\alpha)^{1/\beta}$ \ P: $a(1-U_i)^{-1/b}$ \ E: $-\beta\ln(1-U_i)$).
+\item Then $X_1,\dots,X_n$ are iid with density $f$.
+\end{enumerate}
+\textbf{Why:} $P(F^{-1}(U)\le x)=P(U\le F(x))=F(x)$.
+\end{answer}
+\begin{itemize}
+\item Keep the parameters symbolic if no numbers are given. $U$ or $1-U$ both work ($1-U\sim U(0,1)$).
+\end{itemize}
+
+\sub{Variants}
+\begin{itemize}
+\item \Q{Simulate $S=\min(X_1,X_2,X_3)$}: for $i=1,\dots,n$: (1) $U_{1i},U_{2i},U_{3i}\iid U(0,1)$ (one $U$ per $X$); (2) $X_{ji}=F_j^{-1}(U_{ji})$; (3) $S_i=\min(X_{1i},X_{2i},X_{3i})$.
+  \begin{itemize}
+  \item Exp with mean $1/\lambda$ = Weibull$(\alpha=\lambda,\beta=1)$ $\Rightarrow X=-\tfrac1\lambda\ln(1-U)$. \trap{if $\beta$ is already the Weibull shape, write the Exp scale as $1/\lambda$.}
+  \end{itemize}
+\item \Q{Estimate $P(Z<c)$ / $E(Z)$ by simulation}: simulate $Z_1,\dots,Z_n$ $\Rightarrow$ $\hat P=\#\{Z_i<c\}/n$, \ $\hat E=\bar Z$.
+\item Only $U(0,1)$ and $N(0,1)$: lognormal $=e^{\mu+\sigma Z}$; \ $\chi^2_2=Z_1^2+Z_2^2$.
+\item $F$ not invertible $\Rightarrow$ ``$F^{-1}$ has no closed form $\to$ use accept-reject''. Signal: $x$ stays in two terms of different type ($x-\cos x$, $xe^x$, $x+\log x$, degree $\ge3$, $\Phi$).
+\item \Q{Which R function is correct?}: \R{runif(n)} on $(0,1)$ not $(2,4)$ $\cdot$ correct $F^{-1}$ (sign, exponent $1/b$ not $b$, order of operations) $\cdot$ $U$ or $1-U$ both fine.
+\end{itemize}
+
+\sub{``Given that it has already \dots\ ($s$), find $P(\text{total}>c)$''}
+Exp $\Rightarrow$ memoryless: $P(X>c\mid X>s)=P(X>c-s)=e^{-(c-s)/\beta}$; \ other distributions: $P(X>c)/P(X>s)$.
+
+%=====================================================================
+\section{\always{} 2. Accept-reject}
+
+\begin{answer}
+\textbf{Proposal:} $g(x)=\dots$ \ (text names it $\to$ that; finite $[a,b]\to U(a,b)$, $g=\frac1{b-a}$; $(0,\infty)\to$ Exp; $\mathbb R\to N(0,1)$/Cauchy; \ $g>0$ where $f>0$, $f/g$ bounded).\\
+\textbf{Ratio:} $f(x)/g(x)=\dots$ (simplify), maximum at $x=\dots$ ($(f/g)'=0$ or endpoint; $g$ uniform $\Rightarrow f/g=(b-a)f$, max of $f$) $\Rightarrow c=\max_x f(x)/g(x)=\dots$ \ (check $c\ge1$)\\[2pt]
+\textbf{Algorithm (accept-reject):}
+\begin{enumerate}
+\item Simulate $X\sim g$.
+\item Simulate $U\sim U(0,1)$, independent of $X$.
+\item If $U\le \dfrac{f(X)}{c\,g(X)}=\dots$ (simplified), accept $X$; otherwise go to 1.
+\end{enumerate}
+Repeat until $n$ values are accepted.\\
+\textbf{Efficiency:} $P(\text{accept})=1/c$, expected number of tries $=c$ $\Rightarrow$ smaller $c$ is better.
+\end{answer}
+\sub{Worked examples}
+\begin{itemize}
+\item $6x(1-x)$ with $U(0,1)$: $c=1.5$ \quad $20x(1-x)^3$ with Beta(2,2): $c=10/3$ \quad $\dfrac{1+\sin x}{\pi+2}$ with $U(0,\pi)$: $c=\dfrac{2\pi}{\pi+2}$
+\item $f=Ce^{-x^2/2}$ on $[-2,2]$, $g=1/4$: $f/g=4Ce^{-x^2/2}$, max at 0 $\Rightarrow c=4C\approx1.672$ $\Rightarrow$ accept if $U\le e^{-X^2/2}$.
+\end{itemize}
+\sub{Variants}
+\begin{itemize}
+\item Single draw: ``repeat \{ $X\sim g$; $U\sim U(0,1)$; if $U\le f(X)/(c\,g(X))$ return $X$ \}''.
+\item \Q{Which proposal is better?}: compute $c$ for each $g$, choose the \textbf{smallest} $c$; $g$ shaped like $f$.
+\item \Q{Is the R code correct?}: $X$ from $g$ with the right support $\cdot$ new $U$ every attempt $\cdot$ test uses both $c$ and $g$ $\cdot$ repeats until accepted $\cdot$ returns $X$ (not $U$).
+\item AR $\ne$ independence sampler: AR gives iid values and retries; the independence sampler (MCMC, \R{wt.old}) gives dependent values and repeats $x_{i-1}$.
+\item \trap{denominator without $g(x)$ or without $c$.}
+\end{itemize}
+
+%=====================================================================
+\section{\always{} 3. Crude Monte Carlo (integrals)}
+
+\sub{Which distribution to use?}
+\begin{enumerate}
+\item The text names it (``draws from Exp / $N(0,1)$ / Pareto'') $\Rightarrow$ that one \hfill\textbf{D}
+\item Finite interval, none named $\Rightarrow$ $U(a,b)$ \hfill\textbf{U}
+\item Double/triple integral on a rectangle $\Rightarrow$ uniforms + volume \hfill\textbf{M}
+\item Infinite interval, none named $\Rightarrow$ find the density in the integrand: $e^{-\lambda x}$ on $(0,\infty)\to$ Exp(rate $\lambda$); $e^{-x^2/2}\to N(0,1)$; $x^{-(b+1)}$ on $(a,\infty)\to$ Pareto$(a,b)$; $x^{\alpha-1}e^{-x/\beta}\to$ Gamma$(\alpha,\beta)$ \hfill\textbf{D}
+\end{enumerate}
+Always: support $\supseteq$ domain of the integral; if larger, multiply by $\one(a<X<b)$.
+\textbf{$f$ in case D} = density of the named distribution: if the text writes it, copy it; otherwise formula sheet ``Some continuous distributions'' with its parameters plugged in. $N(\mu,\sigma^2)$: 1st number $=\mu$, 2nd $=\sigma^2$ $\Rightarrow$ $N(0,1)$: $f(x)=e^{-x^2/2}/\sqrt{2\pi}$.
+
+\begin{answer}[Answer to write \quad ($g$ = function to integrate)]
+\textbf{Integral as an expectation:} \\
+\hspace*{1em} U: $\theta=\int_a^b g(x)\,dx=(b-a)\,E[g(U)]$, $U\sim U(a,b)$\\
+\hspace*{1em} D: $\theta=\int \dfrac{g(x)}{f(x)}f(x)\,dx=E_f\!\left[\dfrac{g(X)}{f(X)}\right]$ \ (times $\one(a<X<b)$ when $f$ can give values outside $(a,b)$)\\
+\hspace*{1em} M: $\theta=\text{volume}\cdot E[g(U,V,\dots)]$, $U,V,\dots$ independent uniforms\\[2pt]
+\textbf{Algorithm (crude MC), $n=10000$:}
+\begin{enumerate}
+\item Simulate \ U: $U_1,\dots,U_n\iid U(a,b)$ \quad D: $X_1,\dots,X_n\iid f$ \quad M: $U_i\sim U(a_1,b_1)$, $V_i\sim U(a_2,b_2)$.
+\item Estimator:
+\[\text{U: } \hat\theta_{CMC}=\frac{b-a}{n}\sum_{i=1}^n g(U_i) \qquad \text{D: } \hat\theta_{CMC}=\frac1n\sum_{i=1}^n\frac{g(X_i)}{f(X_i)} \qquad \text{M: } \hat\theta_{CMC}=\frac{\text{volume}}{n}\sum_{i=1}^n g(U_i,V_i)\]
+\end{enumerate}
+\textbf{Standard error (only if asked):} \ U: \ $\displaystyle SE=\frac{b-a}{\sqrt n}\sqrt{\frac1{n-1}\sum_{i=1}^n\left(g(U_i)-\bar g\right)^2}$, \ $\bar g=\frac1n\sum g(U_i)$\\
+\hspace*{1em} (D: same with $g(X_i)/f(X_i)$ and no factor $b-a$; \ M: factor volume instead of $b-a$)\\[2pt]
+\textbf{Why:} law of large numbers $\Rightarrow \hat\theta_{CMC}\to\theta$.
+\end{answer}
+
+\sub{\Q{Based on the R output, give a point estimate and approx.\ 95\% CI} \ (R prints \R{mean(...)} and \R{sd(...)})}
+\begin{answer}[Answer to write]
+$k$ = what multiplies the mean in the estimator (U: $b-a$; \ D: 1; \ M: area/volume), \ $n$ = number of simulations in the code\
+Point estimate: $\hat\theta=k\cdot\text{mean}$ \qquad $SE=k\cdot\text{sd}/\sqrt n$ \qquad 95\% CI: $\hat\theta\pm1.96\,SE$ \ (90\%: 1.645; 99\%: 2.576)
+\end{answer}
+\begin{itemize}
+\item Example: $\hat A=\frac4n\sum\one(u_i,v_i)$, $n=10^6$, mean $=0.166846$, sd $=0.3728385$ $\Rightarrow \hat A=4\cdot0.166846=\mathbf{0.6674}$, \ $SE=4\cdot0.3728385/\sqrt{10^6}=0.00149$, \ CI $=0.6674\pm1.96\cdot0.00149=\mathbf{[0.6645,\ 0.6703]}$. Ignore median/quantiles of the indicator.
+\item \Q{It can be shown that $\sum\dots\sim$ [distribution]: how many simulations so that $SD(\hat\theta)<s_0$?} \ \textbf{Use the distribution from the text, NOT sd from R} (gives a different $n$).\\
+\hspace*{1em}1.\ $Y=\sum\dots\sim$ [distribution] $\Rightarrow Var(Y)$ from the formula sheet (with $n$ inside) \quad 2.\ $\hat\theta=kY/n\Rightarrow SD(\hat\theta)=\frac kn\sqrt{Var(Y)}$ \quad 3.\ $SD(\hat\theta)<s_0\Rightarrow$ solve for $n$, round up.\\
+\hspace*{1em}$Var(Y)$: Binomial$(n,p)\to np(1-p)$; Poisson$(n\lambda)\to n\lambda$; Gamma$(n,\beta)\to n\beta^2$. If the text gives one value $X_i\sim D$: $SD(\hat\theta)=k\sqrt{Var(D)}/\sqrt n$.\\
+\hspace*{1em}Example (Binomial): $k=4$, $p=\frac16$: $SD(Y)=\sqrt{5n/36}$, $SD(\hat A)=4\sqrt{5/36}/\sqrt n<0.01\Rightarrow n>22222.2\Rightarrow \mathbf{n=22223}$.
+\end{itemize}
+
+\sub{Worked examples}
+\begin{itemize}
+\item U: $\int_{0.5}^{2.5}f$, $f=8xe^{-4x^2}$ $\Rightarrow \hat\theta=\frac2n\sum f(U_i)$, \ $SE=\frac{2}{100}\sqrt{\frac1{9999}\sum(f(U_i)-\bar f)^2}$. \ On $U(-1,1)$: $k=2$; on $U(-\frac\pi2,\frac\pi2)$: $k=\pi$.
+\item D: $\int_0^\infty e^{-2x}x^{3/2}dx$, $X\sim$ Exp(mean $\tfrac12$), $f=2e^{-2x}$ $\Rightarrow h_i=X_i^{3/2}/2$.
+\item D: $\int_0^\infty \ln(1+4x^2)e^{-x/2}dx$, $X\sim$ Exp(scale 2), $f=\tfrac12e^{-x/2}$ $\Rightarrow h_i=2\ln(1+4X_i^2)$.
+\item D: $\int_{-\infty}^\infty e^{-x^2/2}\cos x\,dx$, $X\sim N(0,1)$ $\Rightarrow h_i=\sqrt{2\pi}\cos X_i$; \ only on $(-\frac\pi2,\frac\pi2)$: $h_i=\sqrt{2\pi}\cos X_i\,\one(|X_i|<\frac\pi2)$.
+\item D: $\int_a^\infty \dfrac{\ln x}{x^b}dx$, $X\sim$ Pareto$(a,b)$, $f=\dfrac{b\,a^b}{x^{b+1}}$ $\Rightarrow h_i=\dfrac{X_i\ln X_i}{b\,a^b}$.
+\item M: area $\int_{-1}^1\!\int_{-1}^1\one(x,y)\,dx\,dy \Rightarrow \hat A=\frac4n\sum\one(U_i,V_i)$; \ $\pi\approx 4\cdot\frac1n\sum\one(U_i^2+V_i^2\le1)$, $U,V\sim U(0,1)$.
+\item Mixed: $\int_1^3\!\int_{-2}^2\!\int_0^\infty xe^{-x^2/4}g(y,z)\,dx\,dy\,dz$ $\Rightarrow$ \textbf{split} $I=I_1\cdot I_2$:
+  $I_1=\int_0^\infty xe^{-x^2/4}dx$ (D: $X\sim N(0,\sigma^2=2)$, $h_i=\one(X_i\ge0)\,2\sqrt\pi X_i$); \
+  $I_2$ (M: $Y_i\sim U(-2,2)$, $Z_i\sim U(1,3)$, area 8, $\hat I_2=\frac8n\sum g(Y_i,Z_i)$). Uniforms + volume only if \textbf{all} limits are finite.
+\end{itemize}
+\sub{Related questions}
+\begin{itemize}
+\item \Q{How large $n$ so that $SE\le s_0$?} $\Rightarrow n\ge (k\,s/s_0)^2$, round up. \ $k$ = multiplier of the mean (U: $b-a$; D: 1; M: area); \ $s$: \textbf{if the text gives a distribution, use it (recipe above)}; only otherwise $s$ = \R{sd(...)} printed by R.
+\item \Q{For $n=\dots$, calculate (approximately) $P(\hat\theta<c)$ without using the simulation results} \ \textbf{Answer is a probability, NOT an interval; use nothing from the R output.}\\
+\hspace*{1em}1.\ CLT: $\hat\theta$ is a sum $\Rightarrow$ approx.\ Normal \quad 2.\ $E(\hat\theta)=\frac kn E(Y)$, $E(Y)$ from the formula sheet (Binomial: $np$) \quad 3.\ $SD(\hat\theta)=\frac kn\sqrt{Var(Y)}$ with the $n$ from the text\\
+\hspace*{1em}4.\ $P(\hat\theta<c)\approx\Phi\!\left(\frac{c-E(\hat\theta)}{SD(\hat\theta)}\right)$ (normal table; $P(\hat\theta>c)=1-\Phi(\cdot)$).\\
+\hspace*{1em}Example: $n=1000$, $c=0.67$: $E(\hat A)=\frac4n\cdot\frac n6=\frac23$, $SD(\hat A)=4\sqrt{5/36}/\sqrt{1000}=0.04714$ $\Rightarrow\Phi\!\left(\frac{0.67-2/3}{0.04714}\right)=\Phi(0.0707)\approx\mathbf{0.5279}$.\\
+\hspace*{1em}$\Phi(z)$ without table (calculator): $\mathbf{\Phi(z)\approx1/(1+e^{-1.6z-0.07z^3})}$; \ $\Phi(-z)=1-\Phi(z)$; \ e.g.\ $z=0.0707\to0.528$.
+\end{itemize}
+
+%=====================================================================
+\section{\always{} 4. Importance sampling}
+
+\begin{answer}
+$\displaystyle\theta=\int h(x)\,dx=\int\frac{h(x)}{f(x)}f(x)\,dx=E_f\!\left[\frac{h(X)}{f(X)}\right]$, \ $f$ = given proposal, support of $f\supseteq$ domain of $h$.\\[2pt]
+\textbf{Algorithm, $n=10000$:} (1) simulate $X_1,\dots,X_n\iid f$; \ (2) $\displaystyle\hat\theta_{IS}=\frac1n\sum_{i=1}^n\frac{h(X_i)}{f(X_i)}\,\one(X_i\in\text{domain})$; \ (3) $SE=\mathrm{sd}(h(X_i)/f(X_i))/\sqrt n$ (only if asked).
+\end{answer}
+\begin{itemize}
+\item Example: $\int_0^1x(1-x)^3dx$ with Beta(2,2), $f=6x(1-x)$ $\Rightarrow h/f=(1-x)^2/6$ $\Rightarrow \hat\theta=\frac1n\sum(1-X_i)^2/6$.
+\item \textbf{$f$} = density of the named proposal: formula sheet with its parameters plugged in (Gamma$(\alpha,\beta)$: $f=\dfrac{x^{\alpha-1}e^{-x/\beta}}{\Gamma(\alpha)\beta^\alpha}$, $\alpha$ = shape, $\beta$ = scale; $\Gamma$ values are given in the text) -- see ``$f$ in case D'', section 3.
+\item \Q{Does it work well?}: yes if $h/f\approx$ constant ($f$ shaped like $|h|$) and $f$ has heavier tails than $h$ ($h/f$ bounded); no if $h/f$ explodes in the tails or near 0 $\cdot$ $h/f$ \textbf{constant} $\Rightarrow$ ``perfect (variance-free) estimator, variance 0'' $\cdot$ $h/f\propto x$ (linear) $\Rightarrow$ ``works well''.
+\item \Q{Does it always reduce the variance?}: \textbf{no}, a bad $f$ can increase it (even to infinity).
+\item \Q{Which R code is correct?}: divides by the proposal density (\R{dgamma} with the same parameters as \R{rgamma}) and has the domain indicator.
+\item \trap{ratio upside down ($f/h$) $\cdot$ different parameters in \R{r...} and \R{d...} $\cdot$ missing indicator.}
+\end{itemize}
+
+%=====================================================================
+\section{\always{} 5. Antithetic variables}
+
+\begin{answer}[Answer to write \quad (U = uniforms on $(a,b)$, D = draws from $f$ by inversion, M = double/rectangle)]
+\textbf{0. First sentence (always):} ``$h$ is monotone on $(a,b)$ [from the plot $|$ $h'(x)=\dots=0\Leftrightarrow x=\dots$, outside $(a,b)$] $\Rightarrow$ we can improve crude MC with antithetic pairs.''\\[2pt]
+\textbf{Algorithm (antithetic), $n=10000$ evaluations $=n/2=5000$ pairs:}
+\begin{enumerate}
+\item Simulate $U_1,\dots,U_{n/2}$ iid \quad (U: $U(a,b)$ \quad D: $U(0,1)$ \quad M: $U_i\sim U(a_1,b_1)$, $V_i\sim U(a_2,b_2)$).
+\item Antithetic partner of each draw:\\
+U: $\tilde U_i=a+b-U_i$ \ [on $U(0,1)$: $1-U_i$; on $U(-c,c)$: $-U_i$] \quad D: $X_i=F^{-1}(U_i)$, $\tilde X_i=F^{-1}(1-U_i)$ \quad M: $(a_1+b_1-U_i,\ a_2+b_2-V_i)$
+\item Estimator:
+\[\hat\theta_{AT}=\frac{k}{n}\sum_{i=1}^{n/2}\left[h(X_i)+h(\tilde X_i)\right] \qquad (\text{U: } k=b-a,\ \text{D: } k=1,\ \text{M: } k=\text{volume};\ \ \text{D: } h=g/f)\]
+\item Only if asked: $Y_i=\tfrac12[h(X_i)+h(\tilde X_i)]$, \ $SE(\hat\theta_{AT})=k\cdot\mathrm{sd}(Y_1,\dots,Y_{n/2})/\sqrt{n/2}$.
+\end{enumerate}
+\textbf{``More or less std than crude?''} $\to$ \textbf{less}: $h$ monotone $\Rightarrow \mathrm{Cov}(h(X),h(\tilde X))<0$, i.e.\ $\rho<0$
+\[\mathrm{Var}(\hat\theta_{AT})=\frac{k^2\sigma^2(1+\rho)}{n}<\frac{k^2\sigma^2}{n}=\mathrm{Var}(\hat\theta_{CMC})\]
+\end{answer}
+\sub{Worked examples}
+\begin{itemize}
+\item U: $\int_{0.5}^{2.5}f$, $f$ = Weibull(4,2) pdf, peak at $0.35<0.5$ $\Rightarrow$ $f$ decreasing; $\tilde U_i=3-U_i$, \ $\hat\theta_{AT}=\frac2n\sum_{i=1}^{5000}[f(U_i)+f(3-U_i)]$ $\Rightarrow$ smaller std (0.0062 vs 0.0070).
+\item D: Exp scale $\beta$: $X_i=-\beta\ln U_i$, $\tilde X_i=-\beta\ln(1-U_i)$ \quad Pareto: $X_i=a(1-U_i)^{-1/b}$, $\tilde X_i=aU_i^{-1/b}$.
+\item M: $\pi\approx\frac4n\sum\left[\one(U_i^2+V_i^2\le1)+\one((1-U_i)^2+(1-V_i)^2\le1)\right]$.
+\end{itemize}
+\sub{``Does it work?''}
+\begin{itemize}
+\item Yes if $h$ is \textbf{monotone} on the domain (check with $h'$, section 0C, or the plot).
+\item No if $h$ is \textbf{even} ($\cos x$, $x^2$, $e^{-x^2}$) and $\tilde X=-X$ on a symmetric interval: $h(\tilde X)=h(X)$, correlation $+1$, worse than crude.
+\item Not monotone $\Rightarrow$ ``not guaranteed, since $h$ is not monotone on the interval''.
+\item \trap{$n$ pairs instead of $n/2$ $\cdot$ SE with $\sqrt n$ $\cdot$ $1-U$ used on $U(a,b)$ instead of $a+b-U$.}
+\end{itemize}
+
+%=====================================================================
+\section{\always{} 6. Bootstrap}
+
+\begin{answer}
+\textbf{Algorithm (non-parametric bootstrap), $B$ samples:}
+\begin{enumerate}
+\item For $b=1,\dots,B$: draw $x^*_b$ = $n$ values from $x_1,\dots,x_n$ \textbf{with replacement}.
+\item Compute $\hat\theta^*_b=$ estimator$(x^*_b)$.
+\item From $\hat\theta^*_1,\dots,\hat\theta^*_B$:
+\end{enumerate}
+\begin{tabular}{@{}ll@{}}
+bias $=\overline{\hat\theta^*}-\hat\theta$ & $SE=\mathrm{sd}(\hat\theta^*)$, \quad MSE $=\mathrm{var}(\hat\theta^*)+\text{bias}^2$\\
+bias-corrected $=\hat\theta-\text{bias}=2\hat\theta-\overline{\hat\theta^*}$ & \\
+95\% normal: $\hat\theta\pm1.96\,\mathrm{sd}(\hat\theta^*)$ (90\%: 1.645) & 95\% percentile: $(q_{0.025},\,q_{0.975})$ of $\hat\theta^*$ (90\%: $q_{0.05},q_{0.95}$)\\
+95\% basic: $(2\hat\theta-q_{0.975},\ 2\hat\theta-q_{0.025})$ & \\
+\end{tabular}
+\end{answer}
+\begin{itemize}
+\item From the quantile table: var $=$ sd$^2$.
+\item \Q{Is the R code correct?}: \R{sample(data, size=length(data), replace=TRUE)} inside the loop, then the estimator.
+\item \trap{\R{replace=FALSE} $\cdot$ \R{size=nrep} $\cdot$ \R{mean} instead of the estimator $\cdot$ \R{sd} instead of \R{var} in the MSE $\cdot$ wrong sign $\cdot$ \R{1-quantile}.}
+\end{itemize}
+
+%=====================================================================
+\section{\often{} 7. CLT (statement in the formula sheet)}
+\begin{itemize}
+\item \textbf{Answer:} ``$X_1,\dots,X_n$ iid with finite $\mu,\sigma^2$ $\Rightarrow$ by the CLT, for large $n$: $\bar X\approx N(\mu,\sigma^2/n)$''. Compute $\mu,\sigma^2$ from $f$.
+\item \Q{$P(\bar X<a)$ approximately} $\Rightarrow \Phi\!\left(\dfrac{a-\mu}{\sigma/\sqrt n}\right)$.
+\item \Q{How many measurements to be 95\% sure the error is at most $m$?} $\Rightarrow 1.96\,\sigma/\sqrt n\le m \Rightarrow n\ge(1.96\,\sigma/m)^2$, round up.
+\item Confidence interval: $\bar X\pm z\,\sigma/\sqrt n$, \ $z=1.96$ (95\%), 1.645 (90\%), 2.576 (99\%). \quad \trap{$\mathrm{Var}(\bar X)=\sigma^2/n$, not $\sigma^2$.}
+\end{itemize}
+
+%=====================================================================
+\section{\often{} 8. Likelihood, MLE, estimators}
+
+\sub{\Q{Show that the likelihood is \dots}}
+Constants $c_1,c_2$ given in the text are only \textbf{names} for the product and the sum that come out; do not compute them. Write $L(\theta)=\prod_{i=1}^n f(x_i;\theta)$, then simplify:
+\begin{itemize}
+\item $\prod(A\cdot B\cdot C)=\prod A\cdot\prod B\cdot\prod C$ \quad and \quad $\sum\theta b_i=\theta\sum b_i$.
+\item $\theta$ in every factor $\to\theta^n$ ($\theta^{-1}\to\theta^{-n}$) \quad parts with only $x_i$ $\to\prod_i(\dots)=c_1$ \quad $\prod_i e^{a_i}=e^{\sum_i a_i}$ $\to$ the sum is $c_2$.
+\item Example: $c_1=\prod(1+3x_i^{1/2})$, $c_2=\sum(x_i+2x_i^{3/2})$:
+\[L(\theta)=\prod_{i=1}^n\theta(1+3x_i^{1/2})e^{-\theta(x_i+2x_i^{3/2})}=\theta^n\prod_{i=1}^n(1+3x_i^{1/2})\cdot e^{-\theta\sum_{i}(x_i+2x_i^{3/2})}=\theta^n c_1e^{-\theta c_2}\]
+\end{itemize}
+\sub{\Q{Show / find the MLE}}
+(1) $L$ as above; (2) $\ell=\ln L$ \ ($\ln\prod=\sum\ln$, $\ln\theta^n=n\ln\theta$, $\ln e^a=a$); (3) $\ell'(\theta)=0$, solve for $\theta$; (4) check $\ell''<0$.
+\begin{itemize}
+\item Exp scale $\theta$: $\ell=-n\ln\theta-\sum x_i/\theta \Rightarrow \hat\theta=\bar x$. \quad Pareto ($a$ known): $\ell=n\ln b+nb\ln a-(b+1)\sum\ln x_i \Rightarrow \hat b=\dfrac{n}{\sum\ln(x_i/a)}$.
+\end{itemize}
+\sub{\Q{Unbiased? / which estimator is better?}}
+bias $=E(\hat\theta)-\theta$ (unbiased if 0), \ MSE $=\mathrm{Var}+\text{bias}^2$, lower MSE is better.
+
+%=====================================================================
+\section{\always{} 9. Bayes: prior, posterior, conditionals}
+
+\begin{answer}[\Q{Show that the posterior / log-posterior kernel is \dots}]
+$p(\theta\mid x)\propto L(\theta)\,p(\theta)$ \qquad ($\log p(\theta\mid x)=\log L(\theta)+\log p(\theta)+\text{const}$)
+\begin{enumerate}
+\item Likelihood: $L(\theta)=\prod_i f(x_i\mid\theta)$, simplify (section 8).
+\item Prior: write $p(\theta)$ and drop the constants without $\theta$:\\
+Gamma$(a,\text{scale }b)$: $\theta^{a-1}e^{-\theta/b}$ \quad Exp(rate $\lambda$): $e^{-\lambda\theta}$ \quad $N(m,s^2)$: $e^{-(\theta-m)^2/(2s^2)}$ \quad flat: $\one(\theta>0)$\\
+$\log\sigma^2\sim N(0,1)$: $(\sigma^2)^{-1}e^{-(\log\sigma^2)^2/2}$
+\item Multiply $L\cdot p$, collect equal powers of $\theta$ and the exponents $\Rightarrow$ the kernel in the text.
+\end{enumerate}
+\end{answer}
+\begin{itemize}
+\item Exp scale $\theta$, prior Gamma$(a_0,b_0)$: $\theta^{-n}e^{-\sum x_i/\theta}\cdot\theta^{a_0-1}e^{-\theta/b_0}$ $\Rightarrow \log=(a_0-n-1)\log\theta-\theta/b_0-\sum x_i/\theta$.
+\item Exp(rate $ab$), $a,b\sim$ Exp(3): $(ab)^ne^{-ab\sum t_i}\cdot9e^{-3a-3b}\propto(ab)^ne^{-ab\sum t_i}e^{-3(a+b)}$.
+\item Pareto$(a,b)$, prior $\one(a,b>0)$: $\prod\one(a<x_i)=\one(a<x_{(1)})$ $\Rightarrow \dfrac{b^na^{nb}}{(\prod x_i)^{b+1}}\one(a<x_{(1)})\one(a,b>0)$.
+\item Normal $y_i\sim N(\mu,\sigma^2)$: $L\propto(\sigma^2)^{-n/2}e^{-S(\mu)/(2\sigma^2)}$, $S(\mu)=\sum(y_i-\mu)^2$;\newline prior $\mu\mid\sigma^2\sim N(m_0,\sigma^2/\kappa_0)$: $(\sigma^2)^{-1/2}e^{-\kappa_0(\mu-m_0)^2/(2\sigma^2)}$.
+\newline $\Rightarrow$ joint with prior $\sigma^2\sim\log N(0,1)$: powers $-\tfrac n2-\tfrac12-1=-\tfrac{n+3}2$, exponents add: $(\sigma^2)^{-\frac{n+3}2}e^{-\frac{S(\mu)+\kappa_0(\mu-m_0)^2}{2\sigma^2}-\frac{(\log\sigma^2)^2}2}$.
+\end{itemize}
+
+\begin{answer}[\Q{Find the conditional posterior $\theta_1\mid\theta_2,x$}]
+\begin{enumerate}
+\item From the joint posterior keep only the factors containing $\theta_1$ (everything else is a constant).
+\item Take the log and write it as $a+b\log\theta_1+c\,\theta_1$ \ or \ $a+b\,\theta_1+c\,\theta_1^2$.
+\item Match (formula sheet \S10 / hint in the text):\\
+$a+b\log x+cx \Rightarrow x\sim\text{Gamma}(\text{shape } b+1,\ \text{scale } -1/c)$ \qquad $a+bx+cx^2\Rightarrow x\sim N\!\left(-\dfrac{b}{2c},\ -\dfrac1{2c}\right)$\\
+$a+b\log x+c\log(1-x),\ 0<x<1\Rightarrow x\sim\text{Beta}(b+1,c+1)$ (not in formula sheet)
+\item No standard form (e.g.\ an extra $(\log\sigma^2)^2$ term) $\Rightarrow$ ``not a standard distribution, cannot sample directly $\to$ use a Metropolis--Hastings step''.
+\end{enumerate}
+\end{answer}
+\begin{itemize}
+\item $\log p(a\mid b,t)=n\log a-(b\sum t_i+3)a \Rightarrow a\mid b,t\sim\text{Gamma}\!\left(n+1,\ \dfrac1{b\sum t_i+3}\right)$; same prior $\Rightarrow$ $b\mid a$ identical with $a$ in place of $b$.
+\item Pareto: $b\mid a,x\propto b^ne^{-b(\sum\ln x_i-n\ln a)}\Rightarrow\text{Gamma}\!\left(n+1,\dfrac1{\sum\ln x_i-n\ln a}\right)$; \ $a\mid b,x\propto a^{nb}\one(0<a<x_{(1)})$.
+\item Distribution $\Psi$ defined in the text (``show $a\mid b\propto\Psi(a\mid nb+1,x^*)$'') $\Rightarrow$ write your conditional next to its density and match: exponent $=\alpha-1\Rightarrow\alpha=nb+1$; indicator bound $=\beta\Rightarrow\beta=x_{(1)}$.
+\item $\mu\mid\sigma^2,y\sim N(m_n,\sigma^2/\kappa_n)$, \ $\kappa_n=n+\kappa_0$, \ $m_n=\dfrac{n\bar y+\kappa_0m_0}{n+\kappa_0}$.
+\item $\mu\mid\sigma^2,y$: expand, keep terms with $\mu$: $c=-\dfrac{n+\kappa_0}{2\sigma^2}$ (coeff.\ of $\mu^2$), $b=\dfrac{n\bar y+\kappa_0m_0}{\sigma^2}$ (coeff.\ of $\mu$) $\Rightarrow$ mean $-\tfrac b{2c}=m_n$, var $-\tfrac1{2c}=\sigma^2/\kappa_n$.
+\item $\sigma^2\mid\mu,y$: $\log p=-\tfrac{n+3}2\log\sigma^2-\dfrac{K(\mu)}{2\sigma^2}-\dfrac{(\log\sigma^2)^2}2$, $K(\mu)=S(\mu)+\kappa_0(\mu-m_0)^2$ $\Rightarrow$ without the last term an Inverse-Gamma; with it not standard $\Rightarrow$ MH step.
+\end{itemize}
+
+\sub{\Q{Which R functions are valid log-target kernels?}}
+\begin{itemize}
+\item Valid if $=\log L+\log p$ up to constants: \R{log(prod(f(x,theta)))} ok $\cdot$ \R{dgamma(theta,shape=a,scale=b,log=TRUE)} ok $\cdot$ $(a-1)\log\theta-\theta/b$ ok.
+\item \trap{$-\log(\theta/b)$ instead of $-\theta/b$ $\cdot$ prior parameters different from the text.}
+\end{itemize}
+\sub{\Q{E and Var of the prior}} Formula sheet \S1--2. Gamma$(a,\text{scale }b)$: $E=ab$, $\mathrm{Var}=ab^2$ \ (if $b$ is a rate: $a/b$, $a/b^2$).
+
+%=====================================================================
+\section{\always{} 10. MCMC (definitions in the formula sheet \S9)}
+
+\sub{\Q{Which (MCMC) algorithm is this? Why?} (from the code) -- find the clue, copy the sentence (type + proposal + $\alpha$)}
+\begin{itemize}
+\item \textbf{RWMH} -- clue: proposal uses the previous state: \R{rnorm(1, mean=x[t-1], sd=sigma)} or \R{x[t-1] + sigma*rnorm(1)} (2-dim: \R{x[,i-1] + rnorm(2)}), then \R{alpha} + \R{runif} $\Rightarrow$ ``Random walk MH: the proposal $\theta^*\sim N(\theta_{t-1},\sigma^2)$ ($\sigma$ = sd in the code; 2-dim: $N(x_{t-1},\sigma^2 I)$) depends on the previous state and is symmetric, so $\alpha=\min\!\left(1,\frac{g(\theta^*)}{g(\theta_{t-1})}\right)$''.
+\item \textbf{Independence MH} -- clue: proposal does NOT use the previous state (\R{rnorm(1, mean=5, sd=sigma)}, \R{runif(1,-2,2)}) + weights \R{wt.star/wt.old} $\Rightarrow$ ``Independence MH: the proposal $\theta^*\sim r=N(5,\sigma^2)$ does not depend on $\theta_{t-1}$; weights $w=g/r$, $\alpha=\min\!\left(1,\frac{w(\theta^*)}{w(\theta_{t-1})}\right)$''.
+\item \textbf{Gibbs} -- clue: one component at a time, drawn from a named distribution that uses the other component (\R{rnorm(1, mean=rho*x2, ...)}, \R{rgamma(1, ...lambda[2]...)}), NO \R{alpha}, NO \R{runif} $\Rightarrow$ ``Gibbs sampler: each component is updated from its conditional distribution $p(x_1\mid x_2)$, $p(x_2\mid x_1)$; every draw is accepted''.
+\item \textbf{iid (not MCMC)} -- clue: \R{chol(Sigma)} and \R{x[,i] <- L \%*\% rnorm(2)}, no draw uses the previous one $\Rightarrow$ ``iid simulation: $x_i=Lz$, $z\sim N(0,I)$, $LL^T=\Sigma$ $\Rightarrow$ uncorrelated samples''.
+\item \textbf{Target} (if asked): the function inside \R{alpha} (\R{dnorm(., mean=2, sd=2)} $\Rightarrow N(2,2^2)$; \R{gx}/\R{lpost} $\Rightarrow g$) $\cdot$ \R{if(thetaStar>=1 \& ...)} $\Rightarrow$ proposals outside the support are rejected.
+\end{itemize}
+
+\sub{\Q{Write down a proposal / derive the acceptance probability} -- choose the case from the question}
+\small ($g$ = target kernel, $\theta^*$ = proposal, $\theta_{t-1}$ = current state)\normalsize
+
+\begin{answer}[Case A -- ``random walk'' / ``RWMH'' / ``write down a proposal for RWMH'']
+Proposal: $\theta^*=\theta_{t-1}+\varepsilon$, \ $\varepsilon\sim N(0,\sigma^2)$, \ i.e.\ $\theta^*\sim N(\theta_{t-1},\sigma^2)$\\
+\hspace*{1em}{\footnotesize (symmetric proposal $\Rightarrow$ $q$ cancels -- write it only if they ask for $\alpha$ / why $\alpha$ has this form)}\\
+$\log\alpha=\min\left(0,\ \log g(\theta^*)-\log g(\theta_{t-1})\right)$
+\end{answer}
+
+\begin{answer}[Case B -- ``log-scale proposal'' / ``$\log\theta^*=\log\theta_{t-1}+\varepsilon$'' / ``lognormal'' / $\theta>0$]
+Proposal: $\log\theta^*=\log\theta_{t-1}+\varepsilon$, \ $\varepsilon\sim N(0,\sigma^2)$ \ $\Rightarrow$ \ $\theta^*\sim\text{Lognormal}(\log\theta_{t-1},\sigma^2)$ \ (only positive values, \textbf{not} symmetric)\\
+$\log\alpha=\min\left(0,\ \log g(\theta^*)-\log g(\theta_{t-1})+\log\theta^*-\log\theta_{t-1}\right)$\\
+\hspace*{1em}{\footnotesize (the extra term $\log\theta^*-\log\theta_{t-1}$ comes from the non-symmetric $q$)}
+\end{answer}
+
+\begin{answer}[Case C -- ``independent proposal'' / ``Gamma proposal centred near the MLE'']
+Proposal: $\theta^*\sim\text{Gamma}(a_p,b_p)$, does \textbf{not} depend on $\theta_{t-1}$; \ mean $=$ MLE: $a_pb_p=\hat\theta$, \ variance: $a_pb_p^2=\mathrm{Var}(\hat\theta)$\\
+\hspace*{1em}(e.g.\ $\mathrm{Var}(\hat\theta)=\hat\theta^2/n \Rightarrow a_p=n$, $b_p=\hat\theta/n$)\\
+$\log\alpha=\min\left(0,\ \log g(\theta^*)-\log q(\theta^*)-\log g(\theta_{t-1})+\log q(\theta_{t-1})\right)$, \ $q$ = Gamma$(a_p,b_p)$ density
+\end{answer}
+
+\begin{answer}[Always, after every case (accept step)]
+Draw $U\sim U(0,1)$: if $\log U<\log\alpha$ accept, $\theta_t=\theta^*$; otherwise $\theta_t=\theta_{t-1}$.
+\end{answer}
+\begin{itemize}
+\item None of A, B, C: general $\log\alpha=\min\left(0,\ \log g(\theta^*)+\log q(\theta_{t-1}\mid\theta^*)-\log g(\theta_{t-1})-\log q(\theta^*\mid\theta_{t-1})\right)$.
+\item \Q{Why is the RWMH not suitable?}: $\theta>0$ but the normal proposal can give negative values $\Rightarrow$ they must be rejected ($\alpha=0$), symmetry breaks and mixing worsens near 0 $\Rightarrow$ use the log-scale or a positive-only proposal.
+\end{itemize}
+
+\sub{Performance: trace plot, acceptance rate, ESS}
+\begin{itemize}
+\item \Q{Difference between these plots?} $\to$ first sentence: ``The plots use different proposal variances $\sigma^2$.'' Then one line per plot:
+  \begin{itemize}
+  \item slow waves, moves slowly across the support $\Rightarrow$ small $\sigma^2$: almost all accepted but tiny steps, high autocorrelation, low ESS;
+  \item dense, fills the band, good mixing $\Rightarrow$ good $\sigma^2$;
+  \item flat stretches, few points, stays still $\Rightarrow$ large $\sigma^2$: most proposals rejected, low acceptance.
+  \end{itemize}
+\item Good RWMH: acceptance \textbf{20\%--40\%} and high ESS; other checks: Geweke, Gelman--Rubin.
+\item Starting value far away $\Rightarrow$ remove the burn-in (first 100--200) or choose a better start; thinning reduces autocorrelation.
+\item \Q{Average of MCMC vs iid?} $\Rightarrow$ larger variance, samples are positively autocorrelated.
+\item \Q{Which algorithm do you prefer? Why?} $\Rightarrow$ best $\to$ worst: \textbf{iid} (uncorrelated samples) $\cdot$ \textbf{Gibbs} (conditionals known, no rejections) or \textbf{independence MH} with a good proposal (almost uncorrelated, high acceptance) $\cdot$ \textbf{RWMH} last (correlated samples, only 20--40\% accepted, rejects proposals outside the support) $\Rightarrow$ answer = the best algorithm among those shown + its reason.
+\end{itemize}
+
+\begin{answer}[\Q{Describe the Gibbs sampler}]
+State $\theta=(\theta_1,\theta_2)$. Choose initial values $\theta^{(0)}=(\theta_1^{(0)},\theta_2^{(0)})$. For $t=1,\dots,N$:
+\begin{enumerate}
+\item Draw $\theta_1^{(t)}\sim p(\theta_1\mid\theta_2^{(t-1)},x)$ \ (its conditional posterior, e.g.\ Gamma$(\dots)$).
+\item Draw $\theta_2^{(t)}\sim p(\theta_2\mid\theta_1^{(t)},x)$.
+\end{enumerate}
+If a conditional is not standard, replace that draw with an MH step. Output $\theta^{(1)},\dots,\theta^{(N)}$ (discard the burn-in).
+\end{answer}
+\begin{itemize}
+\item \Q{Three points for an efficient Gibbs sampler}: blocks as large as possible (multivariate rather than many univariate updates) $\cdot$ keep strongly dependent variables in the same block $\cdot$ if a block has no closed-form conditional, use efficient low-dimensional Metropolis updates.
+\end{itemize}
+
+%=====================================================================
+\section{\often{} 11. Stochastic processes}
+
+\sub{Homogeneous Poisson: $N(t)\sim\text{Poisson}(\lambda t)$, $E=\mathrm{Var}=\lambda t$, inter-arrival times $\sim$ Exp(rate $\lambda$)}
+\begin{answer}[{Simulate on $[0,T]$}]
+(1) $t=0$; \ (2) $t\leftarrow t+E$, $E\sim$ Exp(rate $\lambda$); \ (3) if $t<T$ record the event and go to 2, else stop.\\
+Or: $N\sim\text{Poisson}(\lambda T)$, then event times $=$ sort$(U_1,\dots,U_N)$, $U_i\sim U(0,T)$.
+\end{answer}
+\begin{itemize}
+\item E.g.\ $\lambda=6$ per day, 30 days $\Rightarrow T=30$, rate 6 (or $N\sim$ Poisson(180)). \ R: \R{cumsum(rexp(., lambda))} up to $T$, or \R{sort(runif(N,0,T))}.
+\end{itemize}
+
+\sub{Non-homogeneous Poisson (thinning): $\Lambda(t)=\int_0^t\lambda(s)\,ds$, \ $N(t)\sim\text{Poisson}(\Lambda(t))$}
+\begin{answer}[Thinning]
+$\lambda_{\max}\ge\max_{t\in[0,T]}\lambda(t)$.
+(1) Simulate a homogeneous Poisson process with rate $\lambda_{\max}$ on $[0,T]$ $\to$ times $t_1,t_2,\dots$; \
+(2) for each $t_i$: $U\sim U(0,1)$, keep $t_i$ if $U\le\lambda(t_i)/\lambda_{\max}$.
+\end{answer}
+\begin{itemize}
+\item $\lambda(t)=at^2+bt+c$, $a<0$ $\Rightarrow$ max at $t^*=-b/(2a)$ (outside $[0,T]$ $\Rightarrow$ endpoint); \ $E[N(T)]=\Lambda(T)=\int_0^T\lambda(t)\,dt$.
+\item E.g.\ $\lambda=-30t^2+350t+3950$: $t^*\approx5.83$, $\lambda_{\max}\approx4971$; \ $\Lambda(12)=-10\cdot12^3+175\cdot12^2+3950\cdot12=55320$.
+\end{itemize}
+
+\sub{Random walk $\pm1$ with $P(+1)=p$, starting at 0}
+\begin{itemize}
+\item $E(X_t)=t(2p-1)$, \ $\mathrm{Var}(X_t)=4tp(1-p)$; \ $p=0.5\Rightarrow E=0$, $\mathrm{Var}=t$. \ \trap{if the code starts from \R{x[1]=0}, \R{x[T]} has $T-1$ steps.}
+\item Markov property: the future depends only on the present state.
+\end{itemize}
+
+%=====================================================================
+\section{\often{} 12. Histogram vs KDE}
+\begin{itemize}
+\item In common: both estimate the unknown pdf from the sample $\cdot$ both used to present results $\cdot$ both have a smoothing parameter (number of bins / bandwidth $h$).
+\item Histogram: + simple, easy to interpret; $-$ shape changes a lot with the bins, step function. \ KDE: + smooth, suited for continuous distributions; $-$ more computationally intensive, depends on $h$.
+\item Large $h$ $\Rightarrow$ oversmoothing, high bias, low variance $\cdot$ small $h$ $\Rightarrow$ wiggly, low bias, high variance $\cdot$ best = bias--variance trade-off (min MISE).
+\item Scott rule: assumes normal data (min MISE vs a normal) $\Rightarrow$ not suited for skewed / heavy-tailed distributions (Pareto).
+\end{itemize}
+
+%=====================================================================
+\section{\spare{} 13. R}
+\begin{itemize}
+\item \R{rnorm(n, mean, sd)}: sd, not variance $\cdot$ \R{rexp(n, rate)} $\cdot$ \R{rgamma(n, shape, rate)}: the 3rd unnamed argument is the rate, \R{scale=} must be written $\cdot$ \R{dgamma(..., log=TRUE)} = log density.
+\item Markov chain: \R{prob=P[state,]} (row of the current state) $\cdot$ stationary $\pi=\pi P$ with \R{\%*\%}.
+\item Mixture: $w=\one(U<p)$, $Y=wX_1+(1-w)X_2$ (not $pX_1+(1-p)X_2$). \ Permutation test: \R{replace=FALSE} is \textbf{correct}.
+\item \R{rmvnorm}: \R{sigma} = covariance matrix $\cdot$ Cholesky \R{t(chol(Sigma))} $\cdot$ AR(1) stationary if $|\phi|<1$.
+\end{itemize}
+
+%=====================================================================
+\section{$\triangle$ Scale vs rate (Gamma, Exp)}
+Check whether the text says ``scale'' or ``rate'': same distribution, scale $=1/$rate.
+\begin{itemize}
+\item The formula sheet uses the \textbf{scale} $\beta$: Gamma $f=\dfrac{x^{\alpha-1}e^{-x/\beta}}{\Gamma(\alpha)\beta^\alpha}$ $\cdot$ Exp $f=\frac1\beta e^{-x/\beta}$.
+\item Text gives the \textbf{scale} $\Rightarrow$ $\beta$ = that number $\cdot$ text gives the \textbf{rate} $\Rightarrow$ $\beta=1/\text{rate}$ (Exp(rate $\lambda$): $f=\lambda e^{-\lambda x}$).
+\item E.g.\ ``rate 2'' $\Rightarrow$ $\beta=1/2$ $\Rightarrow$ $e^{-2x}$ \checkmark{} $\cdot$ using $\beta=2$ $\Rightarrow$ $e^{-x/2}$ \texttimes.
+\end{itemize}
+
+%=====================================================================
+\section{$\triangle$ Support vs domain}
+\textbf{Domain} = interval of the integral (limits of $\int_a^b$) $\cdot$ \textbf{support} = values the distribution $f$ you simulate from can generate (written next to $f$, e.g.\ ``$x>0$'').
+\begin{itemize}
+\item support = domain $\Rightarrow$ no indicator $\cdot$ support \textbf{larger} $\Rightarrow$ multiply by $\one(a<X_i<b)$ $\cdot$ support \textbf{smaller} $\Rightarrow$ that $f$ is wrong (never covers part of the integral).
+\item E.g.\ $\int_1^6$ with Gamma $(0,\infty)$ $\Rightarrow\ \cdot\one(1<X_i<6)$ $\cdot$ $\int_0^1$ with Beta(2,2) $[0,1]$ $\Rightarrow$ nothing $\cdot$ $\int_0^4$ with $U(0,2)$ \texttimes.
+\end{itemize}
+
+\end{document}

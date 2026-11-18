@@ -395,7 +395,7 @@ $$\hat\theta_{AT} = \frac{1}{n}\sum_{i=1}^{n/2}\big[h(X_i) + h(Y_i)\big]$$
 **Esempi:**
 - h25: $h(x) = 2\ln(1+4x^2)$ è crescente per $x \ge 0$ ⇒ l'antitetico funziona.
 - v26: l'indicatrice di $x^2 + y^2 \le 1$ è decrescente in $x$ e in $y$ ⇒ le coppie $(U, 1-U)$ aiutano.
-- h23: $\int_0^{2.5}$ della pdf Weibull(4,2), che **non** è monotona (ha un picco) ⇒ la riduzione di varianza non è garantita, va motivato.
+- h23: $\int_{0.5}^{2.5}$ della pdf Weibull(4,2). Il picco è in $x = 1/\sqrt{8} \approx 0.35 < 0.5$, quindi su $[0.5, 2.5]$ la pdf è **monotona (decrescente)** ⇒ l'antitetico funziona ($U_i$ e $V_i = 3 - U_i$; std 0.0062 contro 0.0070 del crude).
 - **Caso peggiore: funzione pari con antitetico simmetrico** (h22 3f, v23 4f). Su $U(-1,1)$ l'antitetico è $-U$:
   - $1 + x^3$ è **monotona** ⇒ funziona (anzi $g(U) + g(-U) = 2$ costante ⇒ varianza zero!).
   - $1 + x^4$ (o $e^{-x^2}\cos x$) è **pari** ⇒ $g(-U) = g(U)$, correlazione $+1$ ⇒ di fatto solo $n/2$ valori distinti ⇒ **peggio** del crude MC con $n$ valutazioni.

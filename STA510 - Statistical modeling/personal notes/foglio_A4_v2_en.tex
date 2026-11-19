@@ -241,6 +241,8 @@ Point estimate: $\hat\theta=k\cdot\text{mean}$ \qquad $SE=k\cdot\text{sd}/\sqrt 
 \hspace*{1em}4.\ $P(\hat\theta<c)\approx\Phi\!\left(\frac{c-E(\hat\theta)}{SD(\hat\theta)}\right)$ (normal table; $P(\hat\theta>c)=1-\Phi(\cdot)$).\\
 \hspace*{1em}Example: $n=1000$, $c=0.67$: $E(\hat A)=\frac4n\cdot\frac n6=\frac23$, $SD(\hat A)=4\sqrt{5/36}/\sqrt{1000}=0.04714$ $\Rightarrow\Phi\!\left(\frac{0.67-2/3}{0.04714}\right)=\Phi(0.0707)\approx\mathbf{0.5279}$.\\
 \hspace*{1em}$\Phi(z)$ without table (calculator): $\mathbf{\Phi(z)\approx1/(1+e^{-1.6z-0.07z^3})}$; \ $\Phi(-z)=1-\Phi(z)$; \ e.g.\ $z=0.0707\to0.528$.
+\item \Q{Which algorithm has been implemented? Write the estimator.} (code with \R{runif} + \R{k*mean(...)}) $\Rightarrow$ ``Crude MC'' + estimator, e.g.\ $\hat\pi=\frac4n\sum 1(X_i^2+Y_i^2\le1)$, $X_i,Y_i\sim U(0,1)$.
+\item \Q{Do both R functions return a correct estimate?} (same $k$, same condition, same distributions) $\Rightarrow$ ``Both correct, same estimator; one is a loop, the other vectorized $\Rightarrow$ the vectorized one is faster.'' \ \Q{How can we improve it?} $\Rightarrow$ antithetic (sec.\ 5).
 \end{itemize}
 
 %=====================================================================
@@ -308,6 +310,7 @@ bias-corrected $=\hat\theta-\text{bias}=2\hat\theta-\overline{\hat\theta^*}$ & \
 \end{tabular}
 \end{answer}
 \begin{itemize}
+\item \textbf{Legend:} $B$ = no.\ of bootstrap samples (\R{B <- 4000}) $\cdot$ $n$ = no.\ of data $\cdot$ $\hat\theta$ = estimator on the \textbf{original data} (given in the text, else compute it from the data; \textbf{not} \R{mean(estB)}) $\cdot$ $\hat\theta^*$ = vector filled in the loop (\R{estB}) $\cdot$ $\overline{\hat\theta^*}$ = \R{mean(estB)}, sd$(\hat\theta^*)$ = \R{sd(estB)}, $q_p$ = \R{quantile(estB)} at $p$, all from the R output.
 \item From the quantile table: var $=$ sd$^2$.
 \item \Q{Is the R code correct?}: \R{sample(data, size=length(data), replace=TRUE)} inside the loop, then the estimator.
 \item \trap{\R{replace=FALSE} $\cdot$ \R{size=nrep} $\cdot$ \R{mean} instead of the estimator $\cdot$ \R{sd} instead of \R{var} in the MSE $\cdot$ wrong sign $\cdot$ \R{1-quantile}.}
@@ -320,6 +323,11 @@ bias-corrected $=\hat\theta-\text{bias}=2\hat\theta-\overline{\hat\theta^*}$ & \
 \item \Q{$P(\bar X<a)$ approximately} $\Rightarrow \Phi\!\left(\dfrac{a-\mu}{\sigma/\sqrt n}\right)$.
 \item \Q{How many measurements to be 95\% sure the error is at most $m$?} $\Rightarrow 1.96\,\sigma/\sqrt n\le m \Rightarrow n\ge(1.96\,\sigma/m)^2$, round up.
 \item Confidence interval: $\bar X\pm z\,\sigma/\sqrt n$, \ $z=1.96$ (95\%), 1.645 (90\%), 2.576 (99\%). \quad \trap{$\mathrm{Var}(\bar X)=\sigma^2/n$, not $\sigma^2$.}
+\item \Q{Sample of size $n$ from $f$: how can we estimate $E(X)$? Given $Var(X)=\sigma^2$, 95\% CI} $\Rightarrow$ ``$\hat\mu=\bar X=\frac1n\sum x_i$; by the CLT $\bar X\approx N(\mu,\sigma^2/n)$ $\Rightarrow$ 95\% CI: $\mu\pm1.96\,\sigma/\sqrt n$'' ($\mu=E(X)$ computed from $f$ if no data are given).
+\item \Q{$\theta=E(g(X))$: which point estimate is unbiased / which CI.k is an approx.\ 95\% CI?} (R code) $\Rightarrow$ point $=$ \R{mean(g(x))} (unbiased; \R{g(mean(x))} is not); CI $=$ \R{mean(g(x)) +- 1.96*sd(g(x))/sqrt(n)}: \textbf{same} $g$ in mean and sd, divide by $\sqrt n$. \trap{\R{sd(x)} instead of \R{sd(g(x))} $\cdot$ missing $/\sqrt n$ $\cdot$ $/n$ $\cdot$ \R{g(x>0)}.}
+\item \Q{$P(X_1+\dots+X_n>c)$ approximately} (sum) $\Rightarrow S\approx N(n\mu,\,n\sigma^2)$, \ $P(S>c)\approx1-\Phi\!\left(\frac{c-n\mu}{\sqrt{n\sigma^2}}\right)$. E.g.\ die 50 times, $P(S>200)$: $\mu=3.5$, $\sigma^2=35/12$ $\Rightarrow E=175$, $SD=12.07$, $1-\Phi(2.07)\approx0.019$.
+\item \Q{Estimate a probability $p$ by simulation, 95\% CI} $\Rightarrow \hat p=\#\text{successes}/n$, \ CI: $\hat p\pm1.96\sqrt{\hat p(1-\hat p)/n}$. \ \Q{How many simulations?} $\Rightarrow n\ge1.96^2\,p(1-p)/m^2$ ($p$ unknown: $p(1-p)=0.25$), round up.
+\item $\sigma$ unknown (data or R output given) $\Rightarrow$ use the sample sd $s$: \ $\bar X\pm1.96\,s/\sqrt n$.
 \end{itemize}
 
 %=====================================================================
@@ -387,6 +395,12 @@ $a+b\log x+c\log(1-x),\ 0<x<1\Rightarrow x\sim\text{Beta}(b+1,c+1)$ (not in form
 \item \trap{$-\log(\theta/b)$ instead of $-\theta/b$ $\cdot$ prior parameters different from the text.}
 \end{itemize}
 \sub{\Q{E and Var of the prior}} Formula sheet \S1--2. Gamma$(a,\text{scale }b)$: $E=ab$, $\mathrm{Var}=ab^2$ \ (if $b$ is a rate: $a/b$, $a/b^2$).
+\begin{itemize}
+\item \Q{Find the posterior distribution} (1 parameter) $\Rightarrow$ same recipe as the conditionals: $\log$ kernel $=a+b\log\theta+c\theta\Rightarrow$ Gamma$(b+1,-1/c)$. E.g.\ $L\propto\theta^ne^{-\theta c}$, prior Gamma$(a,\text{scale }b)$ $\Rightarrow\theta\mid x\sim$ Gamma$(n+a,\ 1/(c+1/b))$; posterior mean $=$ shape$\cdot$scale.
+\item From MCMC samples (after burn-in): estimate $=$ \R{mean(theta)} $\cdot$ 95\% credible interval $=$ \R{quantile(theta, c(0.025,0.975))} $\cdot$ $P(\theta>c\mid x)=$ \R{mean(theta>c)} $\cdot$ for $k(\theta)$: apply $k$ to the samples, then summarize.
+\item \Q{Interpret the credible interval} $\Rightarrow$ ``Given the data, $\theta$ lies in the interval with probability 0.95'' (no repeated-sampling story, unlike a frequentist CI).
+\item \Q{Large $n$ / vague prior?} $\Rightarrow$ posterior dominated by the data ($\approx$ likelihood); few or noisy data $\Rightarrow$ posterior close to the prior.
+\end{itemize}
 
 %=====================================================================
 \section{\always{} 10. MCMC (definitions in the formula sheet \S9)}
@@ -490,6 +504,7 @@ $\lambda_{\max}\ge\max_{t\in[0,T]}\lambda(t)$.
 \item In common: both estimate the unknown pdf from the sample $\cdot$ both used to present results $\cdot$ both have a smoothing parameter (number of bins / bandwidth $h$).
 \item Histogram: + simple, easy to interpret; $-$ shape changes a lot with the bins, step function. \ KDE: + smooth, suited for continuous distributions; $-$ more computationally intensive, depends on $h$.
 \item Large $h$ $\Rightarrow$ oversmoothing, high bias, low variance $\cdot$ small $h$ $\Rightarrow$ wiggly, low bias, high variance $\cdot$ best = bias--variance trade-off (min MISE).
+\item \Q{Difference between the KDEs in the figure? Which is best?} $\Rightarrow$ ``Different bandwidths $h$ $\Rightarrow$ different smoothing: the flat/smooth one = large $h$, oversmoothing (high bias); the wiggly one = small $h$ (high variance); the one that follows the histogram without wiggles is best: good bias--variance trade-off.''
 \item Scott rule: assumes normal data (min MISE vs a normal) $\Rightarrow$ not suited for skewed / heavy-tailed distributions (Pareto).
 \end{itemize}
 

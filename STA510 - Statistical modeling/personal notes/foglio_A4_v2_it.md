@@ -201,6 +201,8 @@ SE            :  SE = k · sd / √n          (n = numero di simulazioni nel cod
   4. P(θ̂ < c) ≈ Φ((c − E(θ̂))/SD(θ̂)) → tabella normale standard   (P(θ̂ > c) = 1 − Φ(…))
   Esempio: n = 1000, c = 0.67 ⇒ E(Â) = (4/n)·(n/6) = 2/3 · SD(Â) = 4·√(5/36)/√1000 = 0.04714 ⇒ Φ((0.67 − 2/3)/0.04714) = Φ(0.0707) ≈ **0.5279**
   Φ(z) senza tabella (calcolatrice): **Φ(z) ≈ 1/(1 + e^(−1.6·z − 0.07·z³))** · Φ(−z) = 1 − Φ(z) · es. z = 0.0707 → 0.528
+- **"Which algorithm has been implemented? Write the estimator."** (codice con `runif` + `k*mean(...)`) ⇒ "Crude MC" + stimatore, es. π̂ = 4/n · Σ 1(Xᵢ² + Yᵢ² ≤ 1), Xᵢ, Yᵢ ~ U(0,1)
+- **"Do both R functions return a correct estimate?"** (stesso k, stessa condizione, stesse distribuzioni) ⇒ "Both correct, same estimator; one is a loop, the other vectorized ⇒ the vectorized one is faster." · "How can we improve it?" ⇒ antitetiche (sez. 5)
 
 ---
 

@@ -51,20 +51,24 @@ Write it **by hand** on the single A4 sheet allowed. Priority: 🔴 always on th
 - Polynomials: expand and integrate term by term
   - ∫₀¹ x(1−x) = 1/2 − 1/3 = 1/6 ⇒ c = 6 · F(x) = 6(x²/2 − x³/3) = x²(3 − 2x)
   - x(1−x)³ = x − 3x² + 3x³ − x⁴ ⇒ ∫₀¹ = 1/2 − 1 + 3/4 − 1/5 = 1/20 ⇒ c = 20
-- Substitution ∫ f(g(y))·g′(y) dy: **1)** u = g(y) (the "inner" part: exponent or bracket) **2)** du = g′(y)dy; if a constant k is missing use (rest)dy = du/k **3)** change the limits **4)** integrate in u, do not go back to y
-  - Signal: a function and its derivative both appear (e.g. αβ·y^(β−1)·e^(−αy^β))
-  - ∫₀² (x−2)² dx, u = x−2 ⇒ ∫₋₂⁰ u² du = 8/3 ⇒ k = 3/8
-  - Weibull: u = αy^β, du = αβ·y^(β−1)dy, limits 0 → αx^β ⇒ ∫₀^(αx^β) e^(−u)du = **1 − e^(−αx^β)**
-  - ∫ x·e^(−x²) dx, u = x², du = 2x dx ⇒ ½∫e^(−u)du
+- ∫₀² (x−2)² dx = [(x−2)³/3]₀² = 0 − (−8/3) = 8/3 ⇒ k = 3/8
+- Weibull cdf (formula sheet §7, ∫u′eᵘ = eᵘ with u = −αy^β): ∫₀ˣ αβ·y^(β−1)·e^(−αy^β) dy = [−e^(−αy^β)]₀ˣ = **1 − e^(−αx^β)**
+- sin: f = (1+sin x)/(π+2) on [0,π]: ∫₀^π (1+sin x) dx = π + [−cos x]₀^π = π + 2 ⇒ proper · F(x) = (x − cos x + 1)/(π+2)
 - Exponentials: ∫₀ˣ λe^(−λy) dy = 1 − e^(−λx) · ∫₀^∞ = 1
   - f = e^(x/4)/(4C), 0≤x≤4, C = e−1: ∫₀⁴ e^(x/4) dx = 4(e−1) = 4C ⇒ integrates to 1 · E(X) = 16·[e^(x/4)(x/4 − 1)]₀⁴/(4C) = 4/C
 - Pareto: ∫ₐˣ b·aᵇ·t^(−b−1) dt = 1 − (a/x)^b
-- ⚠ forgotten 1/a in front of ∫eᵃˣ · negative sign of a · limits not changed · lost constant of du
+- ⚠ forgotten 1/a in front of ∫eᵃˣ · negative sign of a
 
 **C. Derivatives** (needed for c in 2 Accept-reject and for monotonicity in 5 Antithetic)
 - Maximum on [a,b]: solve h′(x) = 0, then compare with h(a) and h(b)
 - Monotonicity: h′(x) = 0 ⇔ x = … ; if the point is **outside** (a,b) ⇒ h′ has constant sign ⇒ h monotone
 - Weibull(4,2) example: f = 8x·e^(−4x²), f′ = 8e^(−4x²)(1 − 8x²) = 0 ⇒ x = 1/√8 ≈ 0.35 ⇒ decreasing on [0.5, 2.5]
+
+**D. Rules NOT in the formula sheet** (the rest of derivatives/integrals/logs is in §7–8)
+- ∫sin x dx = −cos x · ∫cos x dx = sin x · (sin x)′ = cos x · (cos x)′ = −sin x · cos 0 = 1, cos π = −1, sin 0 = sin π = 0
+- ∫(x−a)ⁿ dx = (x−a)ⁿ⁺¹/(n+1) · e⁰ = 1, ln 1 = 0
+- eᵃ·eᵇ = e^(a+b) ⇒ Π e^(aᵢ) = e^(Σaᵢ) · ln Π = Σ ln
+- x^(−b) = 1/xᵇ · (xᵃ)ᵇ = x^(ab) · xᵃ·xᵇ = x^(a+b) · x^(1/2) = √x
 
 ---
 

@@ -1,0 +1,100 @@
+\newpage
+\section{Plotting: Matplotlib and Seaborn}
+
+\begin{idea}
+In Matplotlib, a \textbf{Figure} is the whole window and the \textbf{Axes} are the individual plots inside it. You create a figure, add subplots (axes), and draw on each axes.
+Seaborn is built on top of Matplotlib and makes statistical plots straight from a DataFrame.
+\end{idea}
+
+\subsection{Matplotlib}
+\begin{codebox}
+\begin{Verbatim}
+import matplotlib.pyplot as plt
+fig = plt.figure()
+ax1 = fig.add_subplot(2, 2, 1)   # grid of 2 rows x 2 cols, this is plot number 1
+ax2 = fig.add_subplot(2, 2, 2)   #   numbering goes left->right, top->bottom
+fig, axes = plt.subplots(2, 3)   # create a figure + a 2x3 array of axes at once
+axes[0, 1].plot(x, y)
+plt.plot(x, y, 'g--', label='line')  # colour/linestyle: 'k-' black solid, 'ro' red dots
+plt.scatter(x, y)                # scatter plot: relationship between two variables
+plt.hist(data, bins=20, color='blue', edgecolor='black')   # histogram
+plt.bar(categories, heights), plt.barh(...)                  # bar chart (horizontal)
+ax.set_title('T'), ax.set_xlabel('x'), ax.set_ylabel('y')
+ax.set_xlim(0, 10), ax.set_xticks([...]), ax.set_xticklabels([...])
+ax.legend(), plt.legend(loc='best')
+ax.annotate('text', xy=(x, y))         # text / arrow at a point
+ax.add_patch(plt.Rectangle((0.2,0.75), 0.4, 0.15, color='k'))  # add SHAPES
+plt.Circle(...), plt.Polygon(...)      # other patches
+plt.subplots_adjust(wspace=0, hspace=0)   # spacing between subplots
+plt.savefig('fig.png', dpi=400);  plt.show()
+\end{Verbatim}
+\end{codebox}
+\begin{exam}
+\begin{itemize}
+  \item Four calls \code{fig.add\_subplot(2,2,1)} to \code{(2,2,4)} $\to$ \textbf{four plots in a 2$\times$2 grid, arranged like a square} (25H Q12).
+  \item ``What does \code{add\_patch()} do?'' $\to$ \textbf{it plots shapes like a rectangle or a circle}.
+  \item ``To show the distribution of \code{Speed} instead of \code{Intelligence}, what do you change?'' $\to$ \textbf{replace 'Intelligence' with 'Speed'}. Colour, bins and edgecolor are only styling.
+  \item ``Change a scatter plot to show Strength vs Durability'' $\to$ replace \emph{both} variables (``Both a) and b)'').
+\end{itemize}
+\end{exam}
+
+\subsection{Pandas plotting}
+\begin{codebox}
+\begin{Verbatim}
+s.plot()                         # line plot (index on the x axis)
+df.plot(kind='bar')  /  df.plot.bar()      # one group of bars per row
+df.plot(kind='bar', stacked=True)          # bars stacked: total height = SUM
+df.plot.barh(), df.plot.hist(bins=20), df.plot.density(), df.plot.scatter('a','b')
+df.plot(subplots=True, figsize=(8,6)), df['x'].hist()
+\end{Verbatim}
+\end{codebox}
+\code{df.groupby(\textquotesingle{}Alignment\textquotesingle{})[[\textquotesingle{}Intelligence\textquotesingle{},\textquotesingle{}Strength\textquotesingle{},\textquotesingle{}Speed\textquotesingle{}]].mean().plot(kind=\textquotesingle{}bar\textquotesingle{}, stacked=True)} gives one bar per Alignment. Each bar has one coloured segment per attribute, and the bar's total height is the sum of the segments.
+
+\subsection{Seaborn}
+\begin{codebox}
+\begin{Verbatim}
+import seaborn as sns
+sns.barplot(x='day', y='tip', data=df)       # bar = MEAN of y per category (+ error bar)
+sns.histplot(df['x'], bins=30, kde=True)     # histogram (+ smooth density)
+sns.kdeplot(df['x'])                          # smooth density curve
+sns.boxplot(x='Alignment', y='Power', data=df) # SPREAD of Power for each Alignment
+sns.scatterplot(x='a', y='b', hue='c', data=df)
+sns.regplot(x='a', y='b', data=df)            # scatter + regression line
+sns.pairplot(df, hue='class')                 # scatter of EVERY pair of variables
+sns.heatmap(df.corr(), annot=True, cmap='coolwarm')   # correlation matrix as colours
+g = sns.FacetGrid(df, col='Alignment')        # one panel per Alignment value
+g.map(plt.hist, 'Speed')                      # in each panel: a histogram of Speed
+sns.catplot(x=..., y=..., col=..., kind='bar', data=df)
+\end{Verbatim}
+\end{codebox}
+
+\subsection{Which plot for which question}
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.5\linewidth}>{\raggedright\arraybackslash}p{0.44\linewidth}}
+\toprule
+Goal & Plot \\ \midrule
+Distribution of \textbf{one numeric} variable & \textbf{Histogram} (or KDE / density) \\
+Relationship between \textbf{two numeric} variables & \textbf{Scatter plot} \\
+Spread / median / outliers of a numeric variable \textbf{per category} & \textbf{Boxplot} \\
+Compare one value (mean, count) across categories & Bar chart \\
+Parts of a total, per category & Stacked bar chart \\
+Trend over time & Line plot \\
+Correlations between many variables & \textbf{Heatmap} of \code{df.corr()} \\
+All pairwise relationships & Pairplot \\
+The same plot repeated for each category & FacetGrid (\code{col=} or \code{row=}) \\ \bottomrule
+\end{longtable}
+
+\textbf{Correlation} ranges from $-1$ to $+1$.
+\begin{itemize}
+  \item \textbf{Positive} (close to $+1$): when one variable increases, the other \textbf{tends to increase} too.
+  \item \textbf{Negative}: when one increases, the other tends to decrease.
+  \item Close to 0: there is no linear relationship.
+\end{itemize}
+Never judge positive or negative from the colour alone. Check the colour scale first (in \code{coolwarm}, red is high and blue is low).
+
+\begin{traps}
+\begin{itemize}
+  \item In FacetGrid, \code{col=} takes the \textbf{category} and \code{map(plt.hist, ...)} takes the \textbf{numeric} variable. The 23H answer was \code{sns.FacetGrid(df, col=\textquotesingle{}Alignment\textquotesingle{}).map(plt.hist,\textquotesingle{}Speed\textquotesingle{})}.
+  \item The options swap the variables (\code{col=\textquotesingle{}Speed\textquotesingle{}} with \code{hist \textquotesingle{}Alignment\textquotesingle{}}) or use \code{plt.bar} instead of \code{plt.hist}. Both are wrong.
+  \item \code{sns.boxplot} shows spread (a distribution), not the average. \code{sns.barplot} shows the mean.
+\end{itemize}
+\end{traps}

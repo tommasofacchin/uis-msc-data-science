@@ -1,0 +1,70 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[a4paper,top=2cm,bottom=2.2cm,left=2.1cm,right=2.1cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb}
+\usepackage{xcolor}
+\usepackage{framed}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{fancyvrb}
+\usepackage{enumitem}
+\usepackage[colorlinks=true,linkcolor=blue!50!black,urlcolor=blue!50!black]{hyperref}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt plus 1pt}
+\renewcommand{\arraystretch}{1.25}
+\setcounter{tocdepth}{2}
+\setlength{\emergencystretch}{3em}
+\setlist{itemsep=1pt,topsep=3pt}
+
+\definecolor{ideabg}{RGB}{232,240,252}
+\definecolor{exambar}{RGB}{200,60,40}
+\definecolor{trapbg}{RGB}{253,236,230}
+\definecolor{codebg}{RGB}{243,243,243}
+\definecolor{exbar}{RGB}{40,120,60}
+
+% inline code
+\usepackage{textcomp}
+\newcommand{\code}[1]{\texttt{\color{black!80!blue}#1}}
+\fvset{fontsize=\footnotesize,xleftmargin=4pt}
+
+\newenvironment{idea}{%
+  \def\FrameCommand{\fboxsep=6pt\colorbox{ideabg}}%
+  \MakeFramed{\advance\hsize-\width\FrameRestore}%
+  \textbf{\color{blue!45!black}Key idea.}\ }{\endMakeFramed}
+\newenvironment{exam}{%
+  \def\FrameCommand{{\color{exambar}\vrule width 3pt}\hspace{8pt}}%
+  \MakeFramed{\advance\hsize-\width\FrameRestore}%
+  \textbf{\color{exambar}Asked in past exams.}\par}{\endMakeFramed}
+\newenvironment{traps}{%
+  \def\FrameCommand{\fboxsep=6pt\colorbox{trapbg}}%
+  \MakeFramed{\advance\hsize-\width\FrameRestore}%
+  \textbf{\color{exambar}Traps.}\par}{\endMakeFramed}
+\newenvironment{codebox}{%
+  \def\FrameCommand{\fboxsep=5pt\colorbox{codebg}}%
+  \MakeFramed{\advance\hsize-\width\FrameRestore}}{\endMakeFramed}
+
+\title{\textbf{DAT540 -- Introduction to Data Science}\\[4pt]
+\Large Complete exam study guide}
+\author{Python $\cdot$ NumPy $\cdot$ Pandas $\cdot$ Plotting $\cdot$ Time series $\cdot$ Machine learning\\[2pt]
+\small Built from the lectures (weeks 34--43) and the exams 25H, 23H, 22H resit, 2022 sample}
+\date{}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+
+\input{part0_exam}
+\input{part1_python}
+\input{part2_numpy}
+\input{part3_pandas}
+\input{part4_plotting}
+\input{part5_timeseries}
+\input{part6_ml}
+\input{part7_tricks}
+
+\end{document}

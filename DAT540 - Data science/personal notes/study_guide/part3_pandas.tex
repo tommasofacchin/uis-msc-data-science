@@ -1,0 +1,263 @@
+\newpage
+\section{Pandas}
+
+\begin{idea}
+A \textbf{Series} is one column: values plus an \textbf{index} (the labels). A \textbf{DataFrame} is a table: several Series that share the same row index, with each column having a name.
+Pandas aligns data \textbf{by label}, not by position.
+\end{idea}
+
+\subsection{Creating Series and DataFrames}
+\begin{codebox}
+\begin{Verbatim}
+import pandas as pd
+s = pd.Series([10, 20, 30], index=['a', 'b', 'c'])
+s = pd.Series({'a': 10, 'b': 20, 'c': 30})      # same Series (dict keys -> index)
+s['a']      # 10   (by label)
+s.values    # array([10, 20, 30]);   s.index -> Index(['a','b','c'])
+df = pd.DataFrame({'A': [1, 2, 3], 'B': [4, 5, 6]})   # dict of columns
+df = pd.DataFrame(np.arange(6).reshape(2, 3), columns=['x','y','z'], index=['r1','r2'])
+df.shape, df.columns, df.index, df.dtypes, df.info(), df.describe()
+df.head()    # first 5 rows;  df.head(10);  df.tail(5) last 5 rows
+\end{Verbatim}
+\end{codebox}
+\code{pd.DataFrame([10,20,30], index=[...])} builds a \emph{DataFrame}, not a Series.
+For 25H Q9 the answer is \textbf{1\&3}.
+
+\textbf{Last 5 elements of a Series:} \code{s.tail(5)}, \code{s[-{}5:]} and \code{s[len(s)-{}5:]} all work, so the answer is ``All of the options''.
+
+\subsection{Selecting data: [], loc, iloc}
+\begin{codebox}
+\begin{Verbatim}
+df['A']             # one column -> Series
+df[['A', 'B']]      # several columns -> DataFrame (note the double brackets)
+df.A                # attribute access (only for existing, simple names)
+df[0:2]             # rows by position (slicing rows)
+df[df['A'] > 1]     # boolean filtering of rows
+df[(df.A > 1) & (df.B < 6)]   # combine conditions with & | ~ and brackets
+df[df['col'].isin(['x', 'y'])]
+df.loc['r1', 'x']           # by LABEL
+df.loc['r1':'r2', 'x':'y']  # label slicing: the END IS INCLUDED
+df.iloc[0, 1]               # by integer POSITION
+df.iloc[0:2, 0:2]           # position slicing: the end is EXCLUDED
+df.at['r1','x'], df.iat[0,1]   # single value (fast)
+\end{Verbatim}
+\end{codebox}
+
+\textbf{Adding, removing and renaming}
+\begin{codebox}
+\begin{Verbatim}
+df['cn'] = np.random.random(5)     # NEW COLUMN: the correct syntax
+df('cn') = ...   # INVALID (parentheses)    df[cn] = ...  # INVALID (cn undefined)
+df.drop('A', axis=1)               # drop a column (returns a new df)
+df.drop(['r1'])                    # drop a row (axis=0 is the default)
+df.drop(columns=['A'], inplace=True)   # inplace=True modifies df itself
+df.rename(columns={'A': 'a'}), df.rename(index=str.upper)
+df.set_index('col'), df.reset_index()   # column <-> index
+df.reindex(['c','a','b'])          # reorder / add labels (new labels get NaN)
+\end{Verbatim}
+\end{codebox}
+
+\subsection{Arithmetic, alignment, apply/map}
+\textbf{Alignment:} \code{s1 + s2} adds values that have the \textbf{same label}. Labels that exist in only one of them give \textbf{NaN}. Use \code{s1.add(s2, fill\_value=0)} to avoid the NaN.
+
+\begin{codebox}
+\begin{Verbatim}
+df.mean()              # mean of EACH COLUMN (axis=0 default) -> Series
+df.apply(np.mean)      # same as df.mean()  -> 25H Q4 answer "1&3"
+df.mean(axis=1)        # mean of each ROW
+df.apply(f)            # apply f to each COLUMN (axis=1 -> to each row)
+s.apply(f)             # f on each element of a Series
+s.map(f) / s.map({'apple': 1, 'banana': 0})   # element-wise function or dict lookup
+df.applymap(f)         # element-wise on a whole DATAFRAME (renamed df.map in pandas 2.1+)
+s.applymap(f)          # INVALID: a Series has no applymap
+df.pipe(np.sum)        # same as np.sum(df) -> a Series (sum per column)
+\end{Verbatim}
+\end{codebox}
+\textbf{Mapping categories to numbers:} \code{.replace(\{\textquotesingle{}apple\textquotesingle{}:1,\textquotesingle{}banana\textquotesingle{}:0\})}, \code{.map(\{...\})} and \code{.apply(lambda x: 1 if x==\textquotesingle{}apple\textquotesingle{} else 0)} all work (25H Q29: ``All above'').
+\code{df.replace([\textquotedbl{}Spam\textquotedbl{},\textquotedbl{}Ham\textquotedbl{}], [0,1])} and \code{df.replace(to\_replace=[...], value=[...])} also work.
+
+\subsection{Descriptive statistics, sorting, ranking}
+\begin{codebox}
+\begin{Verbatim}
+df.describe()     # count, mean, std, min, 25%, 50%, 75%, max  (numeric columns)
+df.sum(), df.count(), df.min(), df.max(), df.median(), df.std(), df.var()
+df.idxmax(), df.idxmin()    # LABEL of the max/min
+df.cumsum(), df.corr(), df.cov()
+s.unique()        # array of distinct values
+s.nunique()       # number of distinct values
+s.value_counts()  # frequency of each value (sorted, most frequent first)
+df.sort_index()                 # sort ROWS by INDEX labels (ascending)
+df.sort_index(axis=1)           # sort the COLUMNS by name
+df.sort_values('A', ascending=False)   # sort by the VALUES of a column
+s.rank()          # ranks (ties share the average rank: [3,1,3] -> [2.5,1,2.5])
+\end{Verbatim}
+\end{codebox}
+\code{df.sort()} \textbf{does not exist} in modern pandas.
+
+\subsection{Reading and writing data (I/O)}
+\begin{codebox}
+\begin{Verbatim}
+pd.read_csv('f.csv')                 # comma-separated;  pd.read_table -> tab-separated
+pd.read_csv('f.csv', sep=';')        # other delimiter (also delimiter=)
+pd.read_csv('f.csv', header=None)    # file has NO header: every row is data, cols 0,1,2..
+pd.read_csv('f.csv', names=['a','b'])   # give the column names yourself
+pd.read_csv('f.csv', index_col='id')    # use a column as the index
+pd.read_csv('f.csv', nrows=5)        # read ONLY the first 5 rows  (best for huge files)
+pd.read_csv('f.csv', skiprows=[0,2]), na_values=['NULL'], usecols=['a','b']
+pd.read_csv('f.csv', chunksize=1000) # returns an ITERATOR of pieces, not a DataFrame
+pd.read_json(s), pd.read_excel('f.xlsx'), pd.read_html(url) (list of tables),
+pd.read_pickle('f.pkl'), pd.read_sql(query, conn), pd.read_hdf
+df.to_csv('out.csv', index=False), df.to_json(), df.to_excel(), df.to_pickle('f.pkl')
+\end{Verbatim}
+\end{codebox}
+\begin{exam}
+\begin{itemize}
+  \item ``Converts a JSON string into a Pandas object'' $\to$ \code{pd.read\_json()}.
+  \item ``Save with Python's pickle format'' $\to$ \code{df.to\_pickle()}.
+  \item ``Purpose of \code{header=None}'' $\to$ \textbf{the file has no header row, so all rows are treated as data}.
+  \item ``Load 5 rows from a large csv'' $\to$ \code{pd.read\_csv(\textquotesingle{}filename.csv\textquotesingle{}, nrows=5)}.
+  \item ``Display the first 5 rows'' $\to$ \code{print(df.head())}. Note that \code{df.top(5)} and \code{df.read().head()} do not exist.
+\end{itemize}
+\end{exam}
+
+\subsection{Data cleaning: missing values, duplicates, transformation}
+Missing values are \code{NaN} (\code{np.nan}) or \code{None}.
+\begin{codebox}
+\begin{Verbatim}
+df.isnull() / df.isna()       # True where missing;  df.notnull()
+df.isnull().sum()             # number of missing values per column
+df.dropna()                   # drop rows with ANY NaN
+df.dropna(how='all')          # drop only rows where ALL values are NaN
+df.dropna(axis=1)             # drop COLUMNS with NaN
+df.dropna(thresh=2)           # keep rows with at least 2 non-NaN values
+df.dropna(subset=['a','b'])   # look for NaN only in these columns
+df.fillna(0), df.fillna(df.mean()), df.fillna({'a': 0}), df.ffill() / df.bfill()
+df.duplicated()               # True for rows that repeat an earlier row
+df.drop_duplicates()                              # remove duplicate rows
+df.drop_duplicates(subset=['Name'], keep='first') # keep the FIRST of each Name
+                         # keep='last' -> keep the last;  keep=False -> drop all copies
+df['col'].replace(-999, np.nan)
+\end{Verbatim}
+\end{codebox}
+
+\textbf{Discretization (binning)}
+\begin{codebox}
+\begin{Verbatim}
+pd.cut(df['x'], bins=3)               # 3 bins of EQUAL WIDTH (value range split evenly)
+pd.cut(df['x'], bins=[0, 50, 70, 100])# your own bin edges, (0,50], (50,70], (70,100]
+pd.qcut(df['x'], q=3)                 # 3 bins with an EQUAL NUMBER of observations
+                                      #   (quantiles) -> "equal-sized bins"
+labels=False -> returns the bin numbers 0,1,2 instead of intervals
+\end{Verbatim}
+\end{codebox}
+\textbf{23H Q19} asks for ``three equal-sized bins based on their values'' (meaning the same number of values in each bin). The answer is \code{pd.qcut(df[\textquotesingle{}scores\textquotesingle{}], q=3)}.
+
+\textbf{Dummy variables / one-hot encoding:} \code{pd.get\_dummies(df[\textquotesingle{}color\textquotesingle{}])} creates one 0/1 column per category. This process is called \textbf{One Hot Encoding} (not scaling, not standardization).
+
+\textbf{Other transformations:}
+\begin{itemize}
+  \item \code{df.sample(n=5)} or \code{df.sample(frac=0.1)} takes a random sample of rows.
+  \item \code{df.take(np.random.permutation(len(df)))} shuffles the rows.
+  \item Outliers: \code{df[(np.abs(df) \textgreater{} 3).any(axis=1)]} finds the rows with a value beyond 3 standard deviations.
+  \item \code{pd.Categorical(values)} and \code{astype(\textquotesingle{}category\textquotesingle{})} give a categorical type.
+\end{itemize}
+
+\textbf{Vectorized string methods} (use them through \code{.str}):
+\begin{codebox}
+\begin{Verbatim}
+s.str.lower(), s.str.upper(), s.str.strip(), s.str.split(','), s.str.len()
+s.str.contains('gmail'), s.str.startswith('A'), s.str.replace('a', 'b')
+s.str.extract(r'(\d+)'), s.str.findall(pattern), s.str[0:3]
+\end{Verbatim}
+\end{codebox}
+
+\subsection{Combining data: merge, join, concat}
+\begin{idea}
+\textbf{merge} = database-style join on \textbf{key columns}. Which keys are kept depends on \code{how}:
+\begin{center}
+\begin{tabular}{ll}
+\code{how=\textquotesingle{}inner\textquotesingle{}} (default) & only keys present in \textbf{both} \\
+\code{how=\textquotesingle{}left\textquotesingle{}} & \textbf{all keys of the left} df; NaN where the right has no match \\
+\code{how=\textquotesingle{}right\textquotesingle{}} & all keys of the right df \\
+\code{how=\textquotesingle{}outer\textquotesingle{}} & \textbf{all keys from both}; NaN where missing \\
+\end{tabular}
+\end{center}
+\end{idea}
+\begin{codebox}
+\begin{Verbatim}
+pd.merge(df1, df2)                    # no "on": uses the columns with the SAME NAME, inner
+pd.merge(df1, df2, on='key', how='left')
+pd.merge(df1, df2, left_on='lkey', right_on='rkey')   # key columns with different names
+pd.merge(df1, df2, left_index=True, right_index=True) # join on the index
+suffixes=('_x', '_y')                 # added to overlapping column names
+df1.join(df2)                         # merge on the INDEX (default how='left')
+pd.concat([df1, df2])                 # stack rows (axis=0, vertical)
+pd.concat([df1, df2], axis=1)         # side by side (horizontal), aligned on index
+df1.combine_first(df2)                # fill df1's NaN with values from df2
+\end{Verbatim}
+\end{codebox}
+\begin{exam}
+\begin{itemize}
+  \item ``All products from df\_left, NaN when there is no stock'' $\to$ \code{how=\textquotedbl{}left\textquotedbl{}} (25H Q11).
+  \item ``Every customer from customers is included even with no orders'' $\to$ \textbf{Left merge} (25H Q15).
+  \item ``Join two DataFrames horizontally'' $\to$ \code{pd.concat([a,b],axis=1)}, \code{a.combine\_first(b)} and \code{a.join(b)} are all valid, so the answer is \textbf{All of these}.
+  \item \code{pd.merge(df1, df2)} where df1 has a column \code{\textquotesingle{}kay\textquotesingle{}} and df2 has \code{\textquotesingle{}key\textquotesingle{}} (a typo): there is no common column, so you get a \textbf{MergeError}. The answer is ``None of the options''.
+  \item With the inner default, only the keys found in both tables are kept: for example b, a and d, while c disappears.
+\end{itemize}
+\end{exam}
+
+\subsection{Reshaping: hierarchical index, stack/unstack, pivot, melt}
+\begin{itemize}
+  \item \textbf{MultiIndex (hierarchical index):} an index with several levels, for example (Region, Team). Select the outer level with \code{s[\textquotesingle{}North\textquotesingle{}]} and an inner value with \code{s.loc[(\textquotesingle{}North\textquotesingle{},\textquotesingle{}A\textquotesingle{})]}. Use \code{swaplevel()} to exchange the levels and \code{sort\_index(level=...)} to sort by one.
+  \item \code{df.stack()} moves the columns into the row index (wide $\to$ long). \code{s.unstack()} moves the inner index level into columns (long $\to$ wide).
+  \item \code{df.pivot(index=\textquotesingle{}date\textquotesingle{}, columns=\textquotesingle{}item\textquotesingle{}, values=\textquotesingle{}value\textquotesingle{})} turns long data into wide data.
+  \item \code{pd.melt(df, id\_vars=[\textquotesingle{}key\textquotesingle{}])} is the inverse of pivot: wide $\to$ long.
+\end{itemize}
+
+\subsection{GroupBy: split -- apply -- combine}
+\begin{idea}
+\code{df.groupby(key)} \textbf{splits} the rows into groups by key, \textbf{applies} a function to each group (sum, mean, etc.), and \textbf{combines} the results. The group keys become the \textbf{index} of the result.
+\end{idea}
+\begin{codebox}
+\begin{Verbatim}
+df.groupby('Region')['Points'].sum()     # one value per Region (Series)
+df.groupby(['Region','Team']).sum()      # one value per (Region, Team) PAIR -> MultiIndex
+                                         #   in THIS order: Region outer, Team inner
+df.groupby('k').agg(['mean', 'max'])     # several functions at once
+df.groupby('k').agg({'a': 'sum', 'b': 'mean'})   # different function per column
+df.groupby('k').size()                   # number of rows per group (count counts non-NaN)
+df.groupby('k').describe()               # count, mean, std, min, quartiles, max
+df.groupby('k')['a'].transform('mean')   # same SHAPE as df: each row gets its group mean
+df.groupby('k').apply(func)              # any function on each sub-DataFrame
+df.groupby(lambda x: ...)                # the function is applied to the INDEX labels
+df.groupby(mapping_dict) / groupby(len)  # group the index by a dict / by a function
+df.groupby('k', as_index=False).sum()    # keep k as a column instead of the index
+\end{Verbatim}
+\end{codebox}
+
+\begin{exam}
+\begin{itemize}
+  \item 25H Q19: the result has Region and Team as a two-level index, with points summed $\to$ \code{df.groupby([\textquotesingle{}Region\textquotesingle{},\textquotesingle{}Team\textquotesingle{}]).sum()}.
+  \item 25H Q24: \code{df.groupby(lambda x: \textquotedbl{}Small\textquotedbl{} if x \textless{} 3 else \textquotedbl{}Large\textquotedbl{}).sum()} groups by the \textbf{index} values. Rows 0, 1, 2 become ``Small'' (sum 34) and rows 3, 4 become ``Large'' (sum 54). It does \emph{not} look at the values in ``Numbers''.
+  \item ``describe() for a grouped DataFrame reports\dots'' $\to$ \textbf{All of the options} (count, mean, std, min, max, \dots).
+\end{itemize}
+\end{exam}
+
+\textbf{Pivot tables and crosstab}
+\begin{codebox}
+\begin{Verbatim}
+df.pivot_table(values='tip', index='day', columns='smoker', aggfunc='mean',
+               margins=True)          # groupby + reshape in one call (default aggfunc=mean)
+pd.crosstab(df['sex'], df['survived'])   # frequency table: COUNTS of each combination
+\end{Verbatim}
+\end{codebox}
+
+\begin{traps}
+\begin{itemize}
+  \item \code{loc} includes the end of a slice and \code{iloc} does not.
+  \item \code{groupby([\textquotesingle{}Team\textquotesingle{},\textquotesingle{}Region\textquotesingle{}])} gives the \emph{opposite} index order to \code{groupby([\textquotesingle{}Region\textquotesingle{},\textquotesingle{}Team\textquotesingle{}])}.
+  \item \code{.mean()} is not \code{.sum()}. Read which aggregation the expected output uses.
+  \item \code{drop\_duplicates} with \code{keep=\textquotesingle{}first\textquotesingle{}} \emph{keeps one copy}. It does not remove every repeated row.
+  \item \code{df.sort()}, \code{df.top()}, \code{pd.load\_json()}, \code{pd.json\_to\_df()}, \code{df.save\_pickle()}, \code{df.write\_pickle()} and \code{df.to\_binary()} \textbf{do not exist}.
+\end{itemize}
+\end{traps}

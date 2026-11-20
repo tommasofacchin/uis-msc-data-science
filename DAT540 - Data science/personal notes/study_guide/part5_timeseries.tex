@@ -1,0 +1,91 @@
+\newpage
+\section{Time series}
+
+\begin{idea}
+A time series is data indexed by time. In pandas you put timestamps in the \textbf{index} (a \code{DatetimeIndex}). You can then slice by date strings, shift the values in time, change the frequency (resample), and compute moving-window statistics.
+\end{idea}
+
+\subsection{Dates, ranges and frequencies}
+\begin{codebox}
+\begin{Verbatim}
+pd.Timestamp('2025-01-01 08:00');  pd.to_datetime(['2025-01-01', '2025-02-01'])
+dates = pd.date_range(start="2025-01-01", periods=5, freq="D")
+# DatetimeIndex(['2025-01-01', '2025-01-02', '2025-01-03', '2025-01-04',
+#                '2025-01-05'], dtype='datetime64[ns]', freq='D')   <- 25H Q23
+pd.date_range('2025-01-01', '2025-01-31')          # start + end (daily by default)
+s = pd.Series(np.random.randn(5), index=dates)
+s['2025-01-02'], s['2025-01'], s['2025-01-02':'2025-01-04']   # select by date string
+\end{Verbatim}
+\end{codebox}
+The correct output keeps \code{freq=\textquotesingle{}D\textquotesingle{}} and shows the dates as \textbf{YYYY-MM-DD}, one day apart.
+
+\textbf{Frequency codes:}
+\begin{itemize}
+  \item \code{\textquotesingle{}D\textquotesingle{}} day, \code{\textquotesingle{}B\textquotesingle{}} business day, \code{\textquotesingle{}W\textquotesingle{}} week.
+  \item \code{\textquotesingle{}H\textquotesingle{}}/\code{\textquotesingle{}h\textquotesingle{}} hour, \code{\textquotesingle{}T\textquotesingle{}}/\code{\textquotesingle{}min\textquotesingle{}} minute, \code{\textquotesingle{}S\textquotesingle{}} second.
+  \item \code{\textquotesingle{}M\textquotesingle{}}/\code{\textquotesingle{}ME\textquotesingle{}} month end, \code{\textquotesingle{}MS\textquotesingle{}} month start, \code{\textquotesingle{}Q\textquotesingle{}} quarter, \code{\textquotesingle{}A\textquotesingle{}}/\code{\textquotesingle{}Y\textquotesingle{}} year.
+  \item Multiples work too: \code{\textquotesingle{}4H\textquotesingle{}} every 4 hours, \code{\textquotesingle{}15min\textquotesingle{}} every 15 minutes.
+\end{itemize}
+\textbf{Periods:} \code{pd.Period(\textquotesingle{}2025-{}01\textquotesingle{}, freq=\textquotesingle{}M\textquotesingle{})} is a whole time span. \code{asfreq} converts a period from one frequency to another.
+
+\subsection{Shifting (lag and lead)}
+\begin{codebox}
+\begin{Verbatim}
+s = pd.Series([5, 15, 25, 35], index=pd.date_range('2023-01-01 08:00', periods=4, freq='H'))
+s.shift(2)          # VALUES move FORWARD 2 steps: [NaN, NaN, 5, 15]   (index unchanged)
+s.shift(-2)         # VALUES move BACKWARD 2 steps: [25, 35, NaN, NaN]
+s.shift(2, freq='H')# the INDEX (timestamps) moves +2 hours; the values stay with them
+s / s.shift(1) - 1  # percentage change (also s.pct_change())
+\end{Verbatim}
+\end{codebox}
+\begin{exam}
+\begin{itemize}
+  \item ``Shift the values \textbf{backward} by 2 periods'' $\to$ \code{s.shift(-{}2)} (25H Q31).
+  \item ``Shift the values \textbf{forward} by 2'' $\to$ \code{s.shift(2)} (22H). Adding \code{freq=} would move the timestamps instead of the values.
+\end{itemize}
+\end{exam}
+
+\subsection{Resampling}
+\begin{itemize}
+  \item \textbf{Downsampling} goes from a high frequency to a low one (for example, daily to monthly). You must aggregate: \code{s.resample(\textquotesingle{}M\textquotesingle{}).mean()}, \code{.sum()}, or \code{.ohlc()} (open, high, low, close).
+  \item \textbf{Upsampling} goes from a low frequency to a high one. This creates gaps, which you fill with \code{.asfreq()}, \code{.ffill()} (forward fill) or \code{.interpolate()}.
+\end{itemize}
+\begin{codebox}
+\begin{Verbatim}
+df.resample('M').mean()                          # needs a DatetimeIndex
+df.resample('M', on='timestamp')['value'].mean() # or point to a datetime column
+df['value'].groupby(df['timestamp'].dt.to_period('M')).mean()  # also works, less standard
+\end{Verbatim}
+\end{codebox}
+For ``monthly mean'', the \textbf{standard} answer is \code{resample(\textquotesingle{}M\textquotesingle{}).mean()} (23H Q33).
+The option \code{resample(\textquotesingle{}monthly\textquotesingle{}).average()} is invalid.
+
+\subsection{Moving-window functions}
+\begin{codebox}
+\begin{Verbatim}
+s.rolling(window=3).mean()   # mean of the current value + the 2 previous ones
+                             # first 2 results are NaN.  [1,2,3,4] window 2 -> [NaN,1.5,2.5,3.5]
+s.rolling(10).max()          # maximum over the last 10 rows (previous 9 + current)
+s.rolling('7D').mean()       # window defined by time
+s.expanding().mean()         # cumulative mean from the start
+s.ewm(span=30).mean()        # exponentially weighted: recent values weigh more
+\end{Verbatim}
+\end{codebox}
+\begin{exam}
+\begin{itemize}
+  \item \code{rolling(window=3).mean()} $\to$ \textbf{computes the average of every three consecutive values, to smooth short-term fluctuations}.
+  \item ``Moving window operations use which function?'' $\to$ \code{rolling()}.
+  \item A simple moving average of 3 rows (previous 2 + current) $\to$ \code{df[\textquotesingle{}SMA\textquotesingle{}] = df[\textquotesingle{}Value\textquotesingle{}].rolling(window=3).mean()}.
+  \item 22H Q1: max over 10 rows, then 20 rows excluding the first 10. The answer is \code{rolling(10).max()} followed by \code{daily\_demand.head(30).tail(20)}. \code{daily\_demand[10:30]} would also give those rows, but the option that uses \code{rolling} is the one that matches.
+\end{itemize}
+\end{exam}
+
+\subsection{Time zones}
+\begin{codebox}
+\begin{Verbatim}
+s_utc = s.tz_localize('UTC')          # ATTACH a time zone to "naive" timestamps
+s_utc.tz_convert('Europe/Oslo')       # CONVERT already-aware timestamps to another zone
+\end{Verbatim}
+\end{codebox}
+``Convert a timezone to another timezone'' $\to$ \code{tz\_convert()}. The function \code{tz\_localize()} is only for timestamps that do not have a zone yet.
+Operations between two series in different zones give a result in \textbf{UTC}.

@@ -1,0 +1,202 @@
+\newpage
+\section{Machine learning}
+
+\subsection{Basic vocabulary}
+\begin{itemize}
+  \item \textbf{AI} $\supset$ \textbf{Machine learning} $\supset$ \textbf{Deep learning}. ML learns patterns from data instead of following hand-written rules.
+  \item \textbf{Features} ($X$) are the input columns. The \textbf{target / label} ($y$) is what we want to predict. A \textbf{sample} is one row.
+  \item \textbf{Supervised learning} learns from \textbf{labeled} data, meaning we know $y$.
+  \begin{itemize}
+    \item \textbf{Classification}: $y$ is a \textbf{discrete} category (spam/ham, cat/dog, digit 0--9).
+    \item \textbf{Regression}: $y$ is a \textbf{continuous} number (price, temperature, stock price).
+  \end{itemize}
+  \item \textbf{Unsupervised learning} has \textbf{no labels} and finds structure in the data: \textbf{clustering} (K-means, for example grouping customers by spending habits) and dimensionality reduction (PCA).
+\end{itemize}
+
+\subsection{The ML workflow}
+\begin{enumerate}
+  \item \textbf{Get the data and look at it:} \code{head}, \code{info}, \code{describe}, histograms, correlations.
+  \item \textbf{Split} into a training set and a test set, \emph{before} looking too closely at the data:
+\begin{Verbatim}
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+\end{Verbatim}
+  You train on one part and test on data the model has \textbf{never seen}. This separates the data used for training from the data used for testing.
+  \item \textbf{Preprocess:}
+  \begin{itemize}
+    \item handle missing values (drop them, or fill them: \code{SimpleImputer}, \code{fillna});
+    \item encode categories (\code{OneHotEncoder}, \code{get\_dummies});
+    \item scale the features: \textbf{standardization} (\code{StandardScaler}, giving mean 0 and std 1) or \textbf{normalization} (\code{MinMaxScaler}, giving the range [0,1]);
+    \item deal with class imbalance: oversample the minority class, or use data augmentation (synthetic data, for example from GANs).
+  \end{itemize}
+  \code{Pipeline} chains these steps together.
+  \item \textbf{Choose a model and train it:} \code{model.fit(X\_train, y\_train)}.
+  \item \textbf{Evaluate} it with cross-validation on the training set and fine-tune it (\code{GridSearchCV}, \code{RandomizedSearchCV}).
+  \item \textbf{Final evaluation} on the test set, done \emph{once}.
+\end{enumerate}
+
+\textbf{Scikit-learn API:}
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.3\linewidth}>{\raggedright\arraybackslash}p{0.64\linewidth}}
+\toprule
+Method & What it does \\ \midrule
+\code{fit(X, y)} & \textbf{trains the model} (learns its parameters from the data) \\
+\code{predict(X)} & gives predictions for new data \\
+\code{predict\_proba(X)} & gives class probabilities \\
+\code{transform(X)} & applies a preprocessing step (scaler, encoder) \\
+\code{fit\_transform(X)} & fit and transform in one call (use it on the training data only) \\
+\code{score(X, y)} & accuracy (classification) or $R^2$ (regression) \\ \bottomrule
+\end{longtable}
+
+\subsection{Overfitting, underfitting, bias and variance}
+\begin{idea}
+\begin{itemize}
+  \item \textbf{Underfitting / high bias:} the model is \textbf{too simple}, for example a straight line through a curve. Error is high on the \textbf{training and test sets alike}. Bias is high and variance is low.
+  \item \textbf{Overfitting / high variance:} the model is \textbf{too complex} and memorizes noise. Training error is \textbf{low} but test error is \textbf{high}. The model is very sensitive to new samples, and its decision boundary is very jagged.
+  \item \textbf{Good fit:} both errors are low and close to each other.
+\end{itemize}
+\end{idea}
+\begin{center}
+\begin{tabular}{lccp{6.3cm}}
+\toprule
+ & Train error & Test error & Fix \\ \midrule
+Underfitting (high bias) & high & high & more complex model, more features, less regularization \\
+Overfitting (high variance) & low & high & more data, simpler model, \textbf{regularization}, early stopping \\
+Good fit & low & low & -- \\ \bottomrule
+\end{tabular}
+\end{center}
+\textbf{Learning curves} plot the error against the training-set size.
+\begin{itemize}
+  \item Underfitting: the two curves plateau \emph{close together} at a \emph{high} error.
+  \item Overfitting: there is a \emph{large gap} between a low training error and a higher validation error.
+  \item Both of these are undesirable. In a ``which learning curves are not a good fit'' question, pick the underfit curve \emph{and} the overfit curve.
+\end{itemize}
+
+\textbf{Regularization} adds a penalty for large weights to the loss, which keeps the model simpler:
+\begin{itemize}
+  \item \textbf{Ridge (L2)} penalizes $\sum w_i^2$. It \textbf{penalizes large weights to reduce overfitting} by shrinking all the weights.
+  \item \textbf{Lasso (L1)} penalizes $\sum |w_i|$. It can set some weights \textbf{exactly to 0}, which works as feature selection.
+  \item \textbf{Elastic Net} mixes L1 and L2.
+  \item \textbf{Early stopping} stops training when the validation error starts to rise.
+\end{itemize}
+
+\subsection{Evaluation}
+\textbf{Cross-validation (k-fold):}
+\begin{enumerate}
+  \item Split the training data into $k$ folds.
+  \item Train on $k-1$ folds and validate on the fold that is left out.
+  \item Repeat $k$ times and average the scores.
+\end{enumerate}
+This gives a more reliable estimate than a single split.
+
+\textbf{Classification metrics}, from the \textbf{confusion matrix}:
+\begin{itemize}
+  \item TP = positives predicted positive, FN = positives predicted negative.
+  \item FP = negatives predicted positive, TN = negatives predicted negative.
+\end{itemize}
+\[
+\text{Accuracy}=\frac{TP+TN}{\text{all}},\qquad
+\text{Precision}=\frac{TP}{TP+FP},\qquad
+\text{Recall}=\frac{TP}{TP+FN},\qquad
+F_1=2\cdot\frac{P\cdot R}{P+R}
+\]
+\begin{itemize}
+  \item \textbf{Precision} answers: of the samples predicted positive, how many really are positive?
+  \item \textbf{Recall} (sensitivity, TPR) answers: of the real positives, how many did we find?
+  \item There is a \textbf{precision/recall trade-off}: raising the decision threshold increases precision and lowers recall.
+  \item The \textbf{ROC curve} plots TPR against FPR. \textbf{AUC} is the area under it: 1 is perfect and 0.5 is random guessing.
+  \item \textbf{Accuracy is misleading on imbalanced data.} On MNIST, a classifier that always says ``not a 5'' is already 90\% accurate.
+\end{itemize}
+\textbf{Regression metrics:}
+\begin{itemize}
+  \item MSE $=\frac1n\sum(y-\hat y)^2$.
+  \item RMSE $=\sqrt{\text{MSE}}$.
+  \item MAE $=\frac1n\sum|y-\hat y|$.
+  \item $R^2$: 1 is a perfect fit.
+\end{itemize}
+
+\subsection{Models}
+\textbf{Linear regression} predicts $\hat y = w_0 + w_1x_1 + \dots + w_nx_n$ and minimizes the \textbf{MSE}. It can be solved directly with the \emph{normal equation} $\hat w=(X^TX)^{-1}X^Ty$, or by gradient descent. \textbf{Polynomial regression} is linear regression on the features $x, x^2, \dots$: a higher degree means more risk of overfitting.
+
+\textbf{Gradient descent} repeats $w \leftarrow w - \eta \,\nabla_w \text{Loss}$, stepping downhill on the loss.
+\begin{itemize}
+  \item The \textbf{learning rate $\eta$} controls the step size. Too small and training is very slow; too large and it jumps around or \emph{diverges}.
+  \item \textbf{Batch GD} uses all the data at each step. \textbf{Stochastic GD} uses 1 random sample per step, which is fast and noisy. \textbf{Mini-batch GD} uses a small batch per step.
+  \item Feature scaling makes gradient descent converge faster.
+\end{itemize}
+
+\textbf{Logistic regression} is used for (binary) \emph{classification}, despite its name. It computes $p=\sigma(w^Tx)$ with the sigmoid $\sigma(z)=\frac{1}{1+e^{-z}}\in(0,1)$, predicts class 1 if $p\geq 0.5$, and is trained with the log-loss (cross-entropy). \textbf{Softmax regression} is the multi-class version: it outputs one probability per class, and the probabilities sum to 1.
+
+\textbf{K-Nearest Neighbors (KNN)} classifies a point by a \textbf{majority vote of its $k$ nearest neighbours} (for regression, it averages them).
+\begin{itemize}
+  \item There is no real training step (it is a ``lazy'' learner), and prediction is slow on large data.
+  \item It needs scaled features.
+  \item Small $k$ means a complex model that tends to overfit. Large $k$ means a smoother model that tends to underfit.
+\end{itemize}
+
+\textbf{Support Vector Machine (SVM)} finds the boundary with the \textbf{largest margin} between the classes. The points on the margin are the \emph{support vectors}.
+\begin{itemize}
+  \item \emph{Soft margin}: the hyperparameter \code{C} controls how many violations are allowed. A small C gives a wider margin and more regularization. A large C gives a narrower margin and more risk of overfitting.
+  \item The \textbf{kernel trick} handles non-linear data: polynomial kernel or Gaussian \textbf{RBF} kernel (with \code{gamma}; a large gamma means a more wiggly boundary). It works as if new features had been added, without actually computing them.
+  \item SVMs are sensitive to feature scaling. They also do regression (SVR).
+\end{itemize}
+
+\textbf{Decision tree} splits the data with one attribute at a time (``is $x_j \leq t$?''). It is easy to interpret but \textbf{overfits easily}, which you can limit with \code{max\_depth}.
+\begin{itemize}
+  \item \textbf{Entropy} measures impurity or uncertainty: $E=-\sum_i p_i\log_2 p_i$. A pure node has $E=0$. A 50/50 node with two classes has $E=1$.
+  \item \textbf{Information gain} $=$ (entropy before the split) $-$ (weighted average entropy after the split).
+  \item At each step, pick the attribute with the \textbf{highest information gain}, i.e.\ the lowest impurity after splitting. The lecture example compared Sex (IG $=0.151$) with Cholesterol (IG $=0.048$), so Sex is the better first split.
+  \item Gini impurity $1-\sum p_i^2$ is an alternative to entropy.
+\end{itemize}
+\textbf{Random forest} is an \emph{ensemble} of many decision trees, each trained on a random subset of the rows and features. They vote, which reduces overfitting.
+
+\textbf{Naive Bayes} is a probabilistic classifier that is very fast and works well on small datasets (for example spam filtering).
+
+\textbf{K-means clustering} (unsupervised):
+\begin{enumerate}
+  \item Choose $k$, the number of clusters.
+  \item Initialize $k$ centroids, for example at random points.
+  \item \textbf{Assign} each point to the nearest centroid (by Euclidean distance).
+  \item \textbf{Update} each centroid to the mean of its points.
+  \item Repeat steps 3--4 until the assignments stop changing.
+\end{enumerate}
+K-means is sensitive to the initial centroids and to feature scaling, and it needs $k$ in advance. To choose $k$, use the \emph{elbow method}: plot the inertia (within-cluster sum of squares) against $k$.
+
+\subsection{Artificial neural networks (ANN)}
+\begin{idea}
+A \textbf{neuron} computes a weighted sum of its inputs plus a \textbf{bias}, then applies an \textbf{activation function}: $a = f(w^Tx + b)$.
+The activation adds \textbf{non-linearity}. Without it, any number of layers would still be just one linear model.
+\end{idea}
+\begin{itemize}
+  \item \textbf{Layers:} an input layer (\textbf{one neuron per input feature}), one or more \textbf{hidden layers}, and an output layer.
+  \item \textbf{Activation functions in hidden layers:} \textbf{Sigmoid, tanh, ReLU} ($\max(0,z)$, the most common). MSE is a \emph{loss}, not an activation.
+  \item \textbf{Output layer:}
+  \begin{itemize}
+    \item regression: 1 neuron, linear (no activation);
+    \item \textbf{binary classification: 1 neuron with sigmoid} (the standard answer). Softmax would need 2 neurons;
+    \item multi-class classification with $K$ classes: $K$ neurons with \textbf{softmax}.
+  \end{itemize}
+  \item \textbf{Forward propagation:} the inputs go through the layers to produce the output.
+  \item \textbf{Cost (loss) function:} measures how wrong the output is. Use the quadratic loss (MSE) for regression and \textbf{cross-entropy} for classification.
+  \item \textbf{Backpropagation:} \textbf{computes the gradient of the loss with respect to every weight} (using the chain rule, from the output back to the input). \textbf{Gradient descent} then \textbf{updates the weights}. Backpropagation does not initialize the weights and does not normalize the inputs.
+  \item \textbf{Epoch:} one full pass over the training data. \textbf{Batch size:} the number of samples per weight update. \textbf{Learning rate:} the step size.
+  \item \textbf{Keras:}
+  \begin{itemize}
+    \item \code{Sequential([Dense(64, activation=\textquotesingle{}relu\textquotesingle{}), Dense(10, activation=\textquotesingle{}softmax\textquotesingle{})])} builds the network;
+    \item \code{model.compile(optimizer=\textquotesingle{}adam\textquotesingle{}, loss=\textquotesingle{}sparse\_categorical\_crossentropy\textquotesingle{}, metrics=[\textquotesingle{}accuracy\textquotesingle{}])} sets the optimizer, loss and metrics;
+    \item \code{model.fit(X, y, epochs=10, validation\_split=0.1)} trains it;
+    \item \code{model.evaluate(...)} and \code{model.predict(...)} test and use it.
+  \end{itemize}
+  \item \textbf{CNNs} (convolutional neural networks) are used for images (MNIST, CIFAR-10). Convolution layers apply small filters that detect local patterns, and pooling layers downsample.
+\end{itemize}
+\begin{exam}
+\begin{itemize}
+  \item 23H Q40: the dataset has 6 numeric feature columns, and the target Alignment is \{good, bad\} $\to$ \textbf{6 input neurons, 1 output neuron} (sigmoid).
+  \item ``Backpropagation does\dots'' $\to$ \textbf{computes the gradient of the loss function and updates the weights}.
+  \item ``Main sign of overfitting'' $\to$ \textbf{low training error but high test error}.
+  \item ``High bias results in'' $\to$ \textbf{poor performance on the training and test sets}. ``A model with high bias might have'' $\to$ \textbf{low variance}.
+  \item ``Purpose of L2 (Ridge)'' $\to$ \textbf{penalizes large weights to reduce overfitting}.
+  \item ``Unsupervised task'' $\to$ \textbf{grouping customers by spending habits}.
+  \item ``Supervised learning'' $\to$ \textbf{the algorithm learns from labeled training data}.
+  \item ``Purpose of \code{fit} in scikit-learn'' $\to$ \textbf{it trains the model on the input data}.
+\end{itemize}
+\end{exam}

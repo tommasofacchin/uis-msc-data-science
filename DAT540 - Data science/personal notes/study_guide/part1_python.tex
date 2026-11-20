@@ -1,0 +1,294 @@
+\newpage
+\section{Python basics}
+
+\subsection{Scalar types, operators, strings}
+\begin{itemize}
+  \item Types: \code{int}, \code{float}, \code{bool} (\code{True}/\code{False}), \code{str}, \code{None} (the ``nothing'' value, of type \code{NoneType}).
+  \item Arithmetic: \code{7/2} gives \code{3.5} (always a float), \code{7//2} gives \code{3} (floor division), \code{-{}7//2} gives \code{-{}4} (it rounds \emph{down}), \code{7\%3} gives \code{1} (the remainder), \code{2**3} gives \code{8} (power).
+  \item \code{i \% 2 == 0} means ``i is even''. \code{x \% 5 == 0} means ``x is a multiple of 5''.
+  \item Casting: \code{int(\textquotesingle{}12\textquotesingle{})} is \code{12}, \code{int(3.9)} is \code{3} (it truncates), \code{float(\textquotesingle{}2.5\textquotesingle{})} is \code{2.5}, \code{str(5)} is \code{\textquotesingle{}5\textquotesingle{}}.
+  \item \code{int(\textquotesingle{}12.e2\textquotesingle{})} and \code{int(\textquotesingle{}3.5\textquotesingle{})} raise \textbf{ValueError}, because \code{int()} only accepts a string of whole digits. \code{float(\textquotesingle{}abc\textquotesingle{})} also raises \textbf{ValueError}. Mixing incompatible types, as in \code{\textquotesingle{}a\textquotesingle{} + 1}, raises a \textbf{TypeError}.
+  \item \code{and}/\code{or} short-circuit: in \code{A or B}, if A is True then B is never evaluated.
+\end{itemize}
+
+\textbf{Strings} are immutable sequences of characters.
+\begin{codebox}
+\begin{Verbatim}
+s = "Data Science"
+s[0]        # 'D'          s[-1]   # 'e'  (negative index = counted from the end)
+s[0:4]      # 'Data'       (start included, stop EXCLUDED)
+s[::-1]     # 'ecneicS ataD'  (reversed)
+s.upper(), s.lower(), s.title()      # 'DATA SCIENCE', 'data science', 'Data Science'
+s.split(" ")        # ['Data', 'Science']
+"-".join(["a","b"]) # 'a-b'
+s.replace("Data","Big")  # 'Big Science'  (returns a NEW string)
+s.strip()           # removes spaces at both ends
+s.find("z")         # -1 if not found ;  s.count("e") -> 2
+s.isupper(), s.istitle(), s.startswith("Da")
+"ab" * 3            # 'ababab'
+\end{Verbatim}
+\end{codebox}
+
+\textbf{Formatting numbers:}
+\begin{codebox}
+\begin{Verbatim}
+loss = 0.123456
+f"{loss:.3f}"            # '0.123'   <- rounds to 3 decimals
+"{:.3f}".format(loss)    # '0.123'   <- same thing
+f"{loss}"                # '0.123456' (NO rounding)
+"{0:.2f} {1:s} {2:d}".format(3.14159, "ab", 7)   # '3.14 ab 7'
+\end{Verbatim}
+\end{codebox}
+
+\subsection{Control flow}
+\begin{codebox}
+\begin{Verbatim}
+for i in range(5):        # 0,1,2,3,4   (range(stop) starts at 0, stop excluded)
+range(2, 8, 2)            # 2,4,6
+range(10, 0, -3)          # 10,7,4,1
+list(range(5, -1))        # []   <- counts UP by default; 5 > -1, so it is empty
+list(range(5, -1, -1))    # [5,4,3,2,1,0]
+\end{Verbatim}
+\end{codebox}
+\begin{itemize}
+  \item \code{break} leaves the loop completely. \code{continue} skips to the next iteration. \code{pass} does nothing (it is a placeholder).
+  \item \code{while True:} runs until a \code{break} is reached.
+\end{itemize}
+
+\begin{exam}
+\begin{itemize}
+  \item The loop \code{for i in range(5): if i \% 2 == 0: BLANK else: print(i)} has to print only the odd numbers. Both \code{pass} and \code{continue} work, so the answer is \textbf{``Both pass and continue''}.
+  \item This code prints \textbf{[1, 2, 3, 4]}, because 5 triggers the \code{break} before it is appended:
+\begin{Verbatim}
+x = 1; lst = []
+while True:
+    if x % 5 == 0: break
+    lst.append(x); x += 1
+\end{Verbatim}
+  \item \code{list(range(5, -{}1))} gives \textbf{[]}.
+\end{itemize}
+\end{exam}
+
+\subsection{Data structures: list, tuple, dict, set}
+\begin{longtable}{p{1.3cm}p{2.3cm}p{1.6cm}p{2cm}p{6.8cm}}
+\toprule
+Type & Syntax & Mutable? & Ordered? & Notes \\ \midrule
+list & \code{[1, 2, 3]} & \textbf{yes} & yes & duplicates allowed \\
+tuple & \code{(1, 2, 3)} & \textbf{NO} & yes & ``a list you cannot change'' \\
+dict & \code{\{\textquotesingle{}a\textquotesingle{}: 1\}} & yes & yes (insertion) & key $\to$ value; keys are unique and immutable \\
+set & \code{\{1, 2, 3\}} & yes & \textbf{no} & \textbf{no duplicates}; \code{set()} is an empty set (\code{\{\}} is an empty dict!) \\
+str & \code{\textquotedbl{}abc\textquotedbl{}} & \textbf{NO} & yes & \\ \bottomrule
+\end{longtable}
+
+\begin{idea}
+\textbf{Mutable} means the object can be changed in place. \textbf{Immutable} means any ``change'' creates a new object.
+Immutable types: \textbf{tuple, str, int, float, frozenset}. Mutable types: \textbf{list, dict, set}.
+The classic question ``which is immutable?'' has the answer \textbf{Tuple}.
+\end{idea}
+
+\textbf{Lists}
+\begin{codebox}
+\begin{Verbatim}
+a = [1, 2, 3]
+a.append(4)        # [1,2,3,4]        adds ONE element
+a.append([5, 6])   # [1,2,3,4,[5,6]]  the list goes in as ONE nested element
+a = [1, 2, 3]
+a.extend([4, 5])   # [1,2,3,4,5]      adds EACH element
+a + [6]            # new list [1,2,3,4,5,6];   [*a, *b] also concatenates
+a.insert(0, 'x')   # insert at position 0
+a.pop()            # removes and returns the last element;  a.remove(v) removes value v
+a.sort()           # sorts IN PLACE and returns None;   sorted(a) returns a NEW list
+a.reverse(), a.index(v), a.count(v), len(a)
+b = a              # b is THE SAME object: changing b also changes a
+c = a.copy()       # independent copy (also a[:] or list(a))
+\end{Verbatim}
+\end{codebox}
+
+\textbf{Slicing} \code{seq[start:stop:step]}. Start is included and stop is excluded. A negative step walks backwards. Chained slices are applied left to right:
+\begin{codebox}
+\begin{Verbatim}
+a = [1,2,3,4,5,6,7,8,9]
+a[::-3]          # [9,6,3]   (start from the end, take every 3rd)
+a[::-3][::-1]    # [3,6,9]
+a[-3:]           # last 3 -> [7,8,9]
+my = [['Data','Science','Python'], [10,20,30,40]]
+my[0][2][::2]    # my[0][2] = 'Python' -> every 2nd char -> 'Pto'
+\end{Verbatim}
+\end{codebox}
+
+\textbf{Tuples}
+\begin{codebox}
+\begin{Verbatim}
+t = ([97, 56, 70], 'data science', (4, 20))
+t[0].append(12)     # OK: the list INSIDE the tuple is mutable
+t[0] = 5            # TypeError: 'tuple' object does not support item assignment
+t[2].append(12)     # AttributeError: tuple has no append  -> "It will throw an error"
+x, y = (1, 2)       # tuple unpacking;   a, b = b, a swaps two values
+\end{Verbatim}
+\end{codebox}
+
+\textbf{Dictionaries}
+\begin{codebox}
+\begin{Verbatim}
+d = {'name': 'Alice', 'age': 25}
+d['name']            # 'Alice'
+d['city']            # KeyError   <- missing key
+d.get('city')        # None (no error);  d.get('city', 'n/a') -> 'n/a'
+d['city'] = 'Oslo'   # adds a new key
+d.keys(), d.values(), d.items()   # keys / values / (key, value) pairs
+for k, v in d.items(): ...
+del d['age'];  d.pop('age')
+{k: v for k, v in zip(keys, values)}       # dict comprehension
+\end{Verbatim}
+\end{codebox}
+To get only the values, all three of these work: \code{[i[1] for i in d.items()]}, \code{d.values()} and \code{list(map(lambda x: x[1], d.items()))}.
+\code{d.items()} on its own gives (key, value) pairs, not only the values.
+
+\textbf{Counting characters} with a dict: \code{\{c: s.count(c) for c in s\}}. Upper and lower case are different keys, so \code{\textquotesingle{}E\textquotesingle{}} and \code{\textquotesingle{}e\textquotesingle{}} are counted separately. Spaces are counted too, unless they are removed first.
+
+\textbf{Sets}
+\begin{codebox}
+\begin{Verbatim}
+set("zzyxx")      # {'x','y','z'}   duplicates removed, order not guaranteed
+set("cbab")       # {'a','b','c'}
+s = {1, 2}; s.add(2)   # still {1, 2}: no error, no duplicate
+a | b, a & b, a - b    # union, intersection, difference
+\end{Verbatim}
+\end{codebox}
+\code{list(\textquotedbl{}abc\textquotedbl{})} gives \code{[\textquotesingle{}a\textquotesingle{},\textquotesingle{}b\textquotesingle{},\textquotesingle{}c\textquotesingle{}]} and \code{tuple(\textquotedbl{}abc\textquotedbl{})} gives \code{(\textquotesingle{}a\textquotesingle{},\textquotesingle{}b\textquotesingle{},\textquotesingle{}c\textquotesingle{})}. Only \code{set} produces curly braces.
+
+\textbf{zip, enumerate, comprehensions}
+\begin{codebox}
+\begin{Verbatim}
+list(zip([1,2], [3,4], [5,6,7]))     # [(1,3,5), (2,4,6)]  stops at the SHORTEST
+for i, v in enumerate(['a','b']):    # (0,'a'), (1,'b')
+[x**2 for x in range(5) if x % 2 == 0]     # [0, 4, 16]   the filter if goes at the end
+[x if x > 0 else 0 for x in data]          # if/else goes BEFORE the for
+keys = tuple(range(1,5)); values = tuple(range(11,15))[::-1]
+dict(zip(keys, values))              # {1: 14, 2: 13, 3: 12, 4: 11}
+\end{Verbatim}
+\end{codebox}
+\code{itertools}: \code{combinations(\textquotesingle{}abc\textquotesingle{}, 2)} gives the unordered pairs, \code{permutations} the ordered ones, and \code{product} the Cartesian product.
+
+\subsection{Functions, lambda, scope}
+\begin{codebox}
+\begin{Verbatim}
+def f(a, b=2, *args, **kwargs):   # b has a default; args = extra positional (tuple),
+    return a + b                  #   kwargs = extra keyword arguments (dict)
+def g(): print("hi")              # no return -> returns None
+square = lambda x: x**2           # anonymous one-line function
+list(map(lambda x: x*2, [1,2,3])) # [2,4,6]
+list(filter(lambda x: x > 1, [1,2,3]))   # [2,3]
+\end{Verbatim}
+\end{codebox}
+
+\begin{idea}
+\textbf{Scope (LEGB rule):} Python looks a name up in the \textbf{L}ocal function first, then the \textbf{E}nclosing function, then the \textbf{G}lobal module, then \textbf{B}uilt-ins.
+Assigning to a name inside a function creates a \emph{new local variable}, unless you declare it \code{global} or \code{nonlocal}.
+\end{idea}
+\begin{codebox}
+\begin{Verbatim}
+x = 5
+def outer():
+    x = 10                 # local to outer
+    def inner():
+        global x           # refers to the MODULE-level x, not outer's x
+        x = 15
+    inner()
+    print("Outer:", x)     # 10   (outer's own x did not change)
+outer()
+print("Global:", x)        # 15      -> 25H answer: "Outer: 10 and Global: 15"
+\end{Verbatim}
+\end{codebox}
+\code{nonlocal x} inside \code{inner} would have changed \emph{outer's} x instead.
+A variable created inside a function (for example \code{word}) does not exist outside it. Using it outside gives a \textbf{NameError}, so the right option is ``Error message''.
+
+\textbf{Mutability and function arguments:}
+\begin{codebox}
+\begin{Verbatim}
+def modify(lst, d, t):
+    lst[0] = 999          # changes the caller's list   (mutable)
+    d['k'] = 'new_value'  # changes the caller's dict   (mutable)
+    t = (9, 9)            # rebinds a LOCAL name only   (tuple is immutable)
+# after the call: the list and the dict are changed, the tuple is not
+\end{Verbatim}
+\end{codebox}
+23H Q14 uses exactly this pattern. The answer is \textbf{``999 4 new\_value''}: the list changed, the tuple did not, and the dict changed.
+
+\subsection{Exceptions: try / except / else / finally}
+\begin{codebox}
+\begin{Verbatim}
+try:
+    risky()
+except ValueError:        # runs only if a ValueError happened in try
+    ...
+except Exception as e:    # catches any other error
+    ...
+else:                     # runs ONLY if try raised NO exception
+    ...
+finally:                  # ALWAYS runs (even after return / an error)
+    ...
+\end{Verbatim}
+\end{codebox}
+\begin{itemize}
+  \item Only the \textbf{first} matching \code{except} runs. A generic \code{except Exception} placed first catches everything, so the specific handlers after it never run.
+  \item Common errors:
+  \begin{itemize}
+    \item \code{KeyError}: a missing dict key.
+    \item \code{IndexError}: a list index out of range.
+    \item \code{ValueError}: the right type but a wrong value, e.g.\ \code{int(\textquotesingle{}abc\textquotesingle{})}.
+    \item \code{TypeError}: a wrong type, e.g.\ \code{\textquotesingle{}a\textquotesingle{}+1}, or assigning into a tuple.
+    \item \code{NameError}: an undefined variable.
+    \item \code{AttributeError}: the object has no such method.
+    \item \code{ZeroDivisionError} and \code{FileNotFoundError}.
+  \end{itemize}
+  \item \code{raise ValueError(\textquotedbl{}msg\textquotedbl{})} raises an error yourself.
+\end{itemize}
+
+\subsection{Files, OS, CSV, JSON}
+\begin{codebox}
+\begin{Verbatim}
+with open("data.txt", "r") as f:   # 'r' read (default), 'w' write (OVERWRITES),
+    content = f.read()             # 'a' append, 'rb'/'wb' binary.  'rw' is NOT valid
+    # f.readline() -> one line;  f.readlines() -> list of lines
+with open("out.txt", "w") as f:
+    f.write("text\n");  f.writelines(["a\n", "b\n"])
+import os
+os.getcwd(); os.chdir(path); os.listdir(path); os.path.join("a","b")
+
+import csv
+with open("file.csv", "r") as csv_data:
+    next(csv_data)                  # skips the FIRST line (the header)
+    d = list(csv.reader(csv_data))  # list of rows (lists of strings), WITHOUT the header
+import json
+json.loads(string)   # JSON string -> python object
+json.dumps(obj)      # python object -> JSON string
+\end{Verbatim}
+\end{codebox}
+\code{with} closes the file automatically. The list \code{d} is only a copy in memory: changing it does not change the file.
+
+\subsection{datetime and regular expressions}
+\begin{codebox}
+\begin{Verbatim}
+from datetime import datetime, timedelta
+dt = datetime(2022, 12, 23, 14, 15)
+dt + timedelta(minutes=30)                    # 2022-12-23 14:45:00
+datetime.strptime("2022-12-23", "%Y-%m-%d")   # string -> datetime  (p = parse)
+dt.strftime("%d/%m/%Y")                       # datetime -> string  (f = format)
+import re
+re.findall(r"\d+", "a1b22")     # ['1','22']    \d digit, \w word char, \s space
+re.sub(r"\s+", " ", text)       # replace matches;  re.search / re.match find one match
+re.compile(pattern, flags=re.IGNORECASE)
+\end{Verbatim}
+\end{codebox}
+Datetimes are immutable, so \code{dt + timedelta(...)} without reassigning (\code{dt = dt + ...}) leaves \code{dt} \textbf{unchanged}.
+
+\begin{traps}
+\begin{itemize}
+  \item \code{b = a} does \textbf{not} copy. The 23H answer was ``a change in \code{a} reflects in \code{b}''.
+  \item The palindrome check \code{s == s[::-{}1]} is the standard answer. For \code{s=\textquotesingle{}aba\textquotesingle{}}, \code{s[-{}1::-{}1]} and \code{s[2::-{}1]} also work, so the answer is ``All of the options''.
+  \item \code{list.push()} and \code{list.insert(list2)} do not merge lists. Use \code{extend}.
+  \item \code{sort()} returns \code{None}, so \code{x = a.sort()} sets \code{x} to \code{None}.
+  \item A function with no \code{return} returns \textbf{None}.
+\end{itemize}
+\end{traps}

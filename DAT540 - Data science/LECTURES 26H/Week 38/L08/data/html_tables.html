@@ -1,0 +1,1190 @@
+<title> HTML tables, a tutorial by example </title>
+
+
+<center>
+<h1> HTML tables,<br>a tutorial by example </h1>
+</center>
+
+<p>
+Extensions to the &lt;TABLE&gt; tag,
+supported by Netscape, include BORDER,
+CELLPADDING, CELLSPACING, and WIDTH.
+You can assign a number to BORDER to specify
+the width, in pixels, of the outside table border.
+You can also assign a number to CELLPADDING
+defining the space (in pixels) between
+the cell contents and the cell borders,
+while CELLSPACING defines the space between
+the cells (the width of the borders).
+
+<p>
+Finally, the WIDTH attribute sets the width of
+the entire table. This can be expressed as an
+absolute number (in pixels) or as a percentage
+width of the entire display.
+
+<p>
+This page starts (section A)
+with a series of tables which demonstrate
+the available options.
+Then (section B) each table is shown together
+with the HTML source code which produces it.
+<p>
+Click on the label of any table to go to its
+counterpart in the other section.
+
+
+<hr width=80% size=9 noshade>
+
+
+<center>
+<h1> Section A: examples </h1>
+</center>
+
+
+<center><table cellpadding=12>
+<tr><th>
+
+<a name="Ex1"></a><a href="#ExSrc1">
+	Example 1: plain (no borders)
+	</a>
+<table>
+	<tr> <td>Item A1</td> <td>Item A2</td> <td>Item A3</td> </tr>
+	<tr> <td>Item B1</td> <td>Item B2</td> <td>(this is B3)</td> </tr>
+	<tr> <td>Item C1</td> <td>-C2-</td> <td>*C3*</td> </tr>
+	<tr> <td>Item number D1</td> <td>Item D2</td> <td>Item D3</td> </tr>
+</table><p>&nbsp;
+
+</th><th>
+
+<a name="Ex2"></a><a href="#ExSrc2">
+	Example 2: with border
+	</a>
+<table border=3>
+	<tr> <td>Item A1</td> <td>Item A2</td> <td>Item A3</td> </tr>
+	<tr> <td>Item B1</td> <td>Item B2</td> <td>(this is B3)</td> </tr>
+	<tr> <td>Item C1</td> <td>-C2-</td> <td>*C3*</td> </tr>
+	<tr> <td>Item number D1</td> <td>Item D2</td> <td>Item D3</td> </tr>
+</table><p>&nbsp;
+
+</th></tr><tr><th>
+
+&nbsp;<p>
+<a name="Ex3"></a><a href="#ExSrc3">
+	Example 3: with cellpadding
+	</a>
+<table cellpadding=5>
+	<tr> <td>Item A1</td> <td>Item A2</td> <td>Item A3</td> </tr>
+	<tr> <td>Item B1</td> <td>Item B2</td> <td>(this is B3)</td> </tr>
+	<tr> <td>Item C1</td> <td>-C2-</td> <td>*C3*</td> </tr>
+	<tr> <td>Item number D1</td> <td>Item D2</td> <td>Item D3</td> </tr>
+</table><p>&nbsp;
+
+</th><th>
+
+&nbsp;<p>
+<a name="Ex4"></a><a href="#ExSrc4">
+	Example 4: with border <i>and</i> cellpadding
+	</a>
+<table border=3 cellpadding=5>
+	<tr> <td>Item A1</td> <td>Item A2</td> <td>Item A3</td> </tr>
+	<tr> <td>Item B1</td> <td>Item B2</td> <td>(this is B3)</td> </tr>
+	<tr> <td>Item C1</td> <td>-C2-</td> <td>*C3*</td> </tr>
+	<tr> <td>Item number D1</td> <td>Item D2</td> <td>Item D3</td> </tr>
+</table><p>&nbsp;
+
+
+
+</th></tr><tr><th>
+
+&nbsp;<p>
+<a name="Ex5"></a><a href="#ExSrc5">
+	Example 5: with ``header cells''
+	</a>
+<table border=3 cellpadding=5>
+	<tr> <th>Item A1</th> <th>Item A2</th> <th>Item A3</th> </tr>
+	<tr> <td>Item B1</td> <td>Item B2</td> <td>(this is B3)</td> </tr>
+	<tr> <td>Item C1</td> <td>-C2-</td> <td>*C3*</td> </tr>
+	<tr> <td>Item number D1</td> <td>Item D2</td> <td>Item D3</td> </tr>
+</table><p>&nbsp;
+
+</th><th>
+
+&nbsp;<p>
+<a name="Ex6"></a><a href="#ExSrc6">
+	Example 6: Overriding cell style defaults
+	</a>
+<table border=7 cellpadding=5>
+	<tr>
+		<th align=right>Item A1</th>
+		<th>Item <i>A2</i></th>
+		<th>Item A3</th>
+		</tr>
+	<tr>
+		<td>Item B1</td>
+		<td>Item B2</td>
+		<td>(this is B3)</td>
+		</tr>
+	<tr>
+		<td align=center>Item C1</td>
+		<td>-C2-</td>
+		<td>*C3*</td>
+		</tr>
+	<tr>
+		<td>Item <b>number D1</b></td>
+		<td>Item D2</td>
+		<td align=right>Item D3</td>
+		</tr>
+</table><p>&nbsp;
+
+
+
+</th></tr><tr><th>
+
+&nbsp;<p>
+<a name="Ex7"></a><a href="#ExSrc7">
+	Example 7:  empty cells
+	</a>
+<table border=3 cellpadding=5>
+   <tr>
+      <td> </td>
+      <td>Item A2</td>
+      <td>Item A3</td>
+   </tr>
+   <tr>
+      <td>Item B1</td>
+      <td>Item B2</td>
+      <td> </td>
+   </tr>
+   <tr>
+      <td>Item C1</td>
+      <td>-C2-</td>
+      <td> </td>
+   </tr>
+   <tr>
+      <td>Item <b>number D1</b></td>
+      <td> </td>
+      <td> &nbsp; </td>
+   </tr>
+</table><p>&nbsp;
+
+</th><th>
+
+&nbsp;<p>
+<a name="Ex8"></a><a href="#ExSrc8">
+	Example 8: colspan
+	</a>
+<table border=3 cellpadding=5>
+   <tr>
+      <td colspan=2>Items A1, A2</td>
+      <td>Item A3</td>
+   </tr>
+   <tr>
+      <td>Item B1</td>
+      <td>Item B2</td>
+      <td>(this is B3)</td>
+   </tr>
+   <tr>
+      <td>Item C1</td>
+      <th colspan=2>Items C2 and C3</th>
+   </tr>
+   <tr>
+      <td colspan=3>The items labelled D1, D2, and D3</td>
+   </tr>
+</table><p>&nbsp;
+
+
+
+</th></tr><tr><th>
+
+&nbsp;<p>
+<a name="Ex9"></a><a href="#ExSrc9">
+	Example 9: rowspan
+	</a>
+<table border=3 cellpadding=5>
+   <tr>
+      <td>Item A1</td>
+      <td>Item A2</td>
+      <th rowspan=3>Items A3,
+		<br>B3,<br>C3 </th>
+   </tr>
+   <tr>
+      <td>Item B1</td>
+      <td>Item B2</td>
+   </tr>
+   <tr>
+      <td rowspan=2>Items C1 and D1</td>
+      <td>-C2-</td>
+   </tr>
+   <tr>
+      <td>Item D2</td>
+      <td>Item D3</td>
+   </tr>
+</table><p>&nbsp;
+
+</th><th>
+
+&nbsp;<p>
+<a name="Ex10"></a><a href="#ExSrc10">
+	Example 10: colspan <i>and</i> rowspan
+	</a>
+<table border=3 cellpadding=5>
+   <tr>
+      <td rowspan=2>Items A1,<br>B1</td>
+      <td colspan=2>Items A2, A3</td>
+   </tr>
+   <tr>
+      <th colspan=2>Items B2, B3</th>
+   </tr>
+   <tr>
+      <th>Item C1</th>
+      <td rowspan=2> C2,D2 </td>
+      <td>*C3*</td>
+   </tr>
+   <tr>
+      <td>Item number D1</td>
+      <td>Item D3</td>
+   </tr>
+</table><p>&nbsp;
+
+
+
+</th></tr><tr><th>
+
+&nbsp;<p>
+<a name="Ex11"></a><a href="#ExSrc11">
+	Example 11: tables within a table
+	</a>
+<table border=3 cellpadding=5>
+   <tr>
+      <td><table border>
+        <tr> <td>A1a1</td>
+        <td>A1a2</td> </tr>
+        <tr> <td>A1b1</td>
+        <td>A1b2</td> </tr>
+        </table></td>
+      <td>A2</td>
+      <td>A3</td>
+   </tr>
+   <tr>
+      <td>B1</td>
+      <td>B2</td>
+      <td>B3</td>
+   </tr>
+   <tr>
+      <td>C1</td>
+      <td><table cellpadding=4>
+        <tr> <td>A1a1</td>
+        <td>A1a2</td> </tr>
+        <tr> <td>A1b1</td>
+        <td>A1b2</td> </tr>
+        </table></td>
+      <td>C3</td>
+   </tr>
+</table><p>&nbsp;
+
+</th><th>
+
+&nbsp;<p>
+<a name="Ex12"></a><a href="#ExSrc12">
+	Example 12: <tt>&lt;pre&gt;preformatting&lt;/pre&gt;</tt>
+	</a>
+<p><table><tr><td><pre>
+
+ $ 10.98  $305.20  $ 29.95  $ 3.16
+   11.05   291.80    39.95    0.87
+   12.77   290.10    19.95    0.23
+   23.51   301.40     9.95    0.79
+    7.39   306.90    99.95    1.50
+   20.16   295.30    79.95    0.90
+</pre></td></tr></table><p>&nbsp;
+
+
+</th></tr>
+</table>
+</center>
+
+
+
+<a name="Ex13"></a>
+&nbsp;<p>
+
+<a href="#ExSrc13">
+	Example 13: the WIDTH attribute
+	</a>
+<table width=75% border=3 cellpadding=2>
+<tr>
+  <th width=50%>width=50%</th>
+  <th width=35%>width=35%</th>
+  <th> XXX </th>
+</tr>
+<tr>
+  <td>A</td>
+  <td>B</td>
+  <td>C</td>
+</tr>
+<tr>
+  <td>D</td>
+  <td>E</td>
+  <td>F</td>
+</tr>
+</table>
+<p>
+
+
+
+
+<hr size=9 noshade>
+
+
+<center>
+<h1> Section B: the HTML source code </h1>
+</center>
+
+
+
+
+<a name="ExSrc1"></a>
+<TABLE cellpadding=10><TR><TH>
+<a href="#Ex1">
+	Example 1: plain (no borders)
+	</a><p>
+<table>
+	<tr>
+		<td>Item A1</td>
+		<td>Item A2</td>
+		<td>Item A3</td>
+		</tr>
+	<tr>
+		<td>Item B1</td>
+		<td>Item B2</td>
+		<td>(this is B3)</td>
+		</tr>
+	<tr>
+		<td>Item C1</td>
+		<td>-C2-</td>
+		<td>*C3*</td>
+		</tr>
+	<tr>
+		<td>Item number D1</td>
+		<td>Item D2</td>
+		<td>Item D3</td>
+		</tr>
+</table>
+<p> &nbsp;
+   <table><tr><td>
+   The contents of each <b>cell</b> are
+   surrounded by<br>
+   the pair of tags
+   <tt>&lt;td&gt;</tt> and
+   <tt>&lt;/td&gt;</tt>.
+   <p>
+   Each <b>row</b> of cells (listed in
+   left-to-right order)<br>
+   is surrounded by the tags<br>
+   <tt>&lt;tr&gt;</tt> and
+   <tt>&lt;/tr&gt;</tt>.
+   <p>
+   The entire <b>table</b>,
+   consisting of one or more rows,<br>
+   is surrounded by the tags<br>
+   <tt>&lt;table&gt;</tt> and
+   <tt>&lt;/table&gt;</tt>.
+   </td></tr></table>
+</TH><TH>
+|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>
+</TH><TD><pre>
+<b>&lt;table&gt;</b>
+   &lt;tr&gt;
+      <b>&lt;td&gt;</b>Item A1<b>&lt;/td&gt;</b>
+      <b>&lt;td&gt;</b>Item A2<b>&lt;/td&gt;</b>
+      <b>&lt;td&gt;</b>Item A3<b>&lt;/td&gt;</b>
+   &lt;/tr&gt;
+   &lt;tr&gt;
+      &lt;td&gt;Item B1&lt;/td&gt;
+      &lt;td&gt;Item B2&lt;/td&gt;
+      &lt;td&gt;(this is B3)&lt;/td&gt;
+   &lt;/tr&gt;
+   <b>&lt;tr&gt;</b>
+      &lt;td&gt;Item C1&lt;/td&gt;
+      &lt;td&gt;-C2-&lt;/td&gt;
+      &lt;td&gt;*C3*&lt;/td&gt;
+   <b>&lt;/tr&gt;</b>
+   &lt;tr&gt;
+      &lt;td&gt;Item number D1&lt;/td&gt;
+      &lt;td&gt;Item D2&lt;/td&gt;
+      &lt;td&gt;Item D3&lt;/td&gt;
+   &lt;/tr&gt;
+<b>&lt;/table&gt;</b>
+</pre></TD></TABLE><P><HR><P>
+
+
+
+<a name="ExSrc2"></a>
+<TABLE cellpadding=10><TR><TH>
+<a href="#Ex2">
+	Example 2: with border
+	</a><p>
+<table border=3>
+	<tr>
+		<td>Item A1</td>
+		<td>Item A2</td>
+		<td>Item A3</td>
+		</tr>
+	<tr>
+		<td>Item B1</td>
+		<td>Item B2</td>
+		<td>(this is B3)</td>
+		</tr>
+	<tr>
+		<td>Item C1</td>
+		<td>-C2-</td>
+		<td>*C3*</td>
+		</tr>
+	<tr>
+		<td>Item number D1</td>
+		<td>Item D2</td>
+		<td>Item D3</td>
+		</tr>
+</table>
+</TH><TH>
+|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>
+</TH><TD><pre>
+&lt;table <b>border=3</b>&gt;
+   &lt;tr&gt;
+      &lt;td&gt;Item A1&lt;/td&gt;
+      &lt;td&gt;Item A2&lt;/td&gt;
+      &lt;td&gt;Item A3&lt;/td&gt;
+   &lt;/tr&gt;
+   &lt;tr&gt;
+      &lt;td&gt;Item B1&lt;/td&gt;
+      &lt;td&gt;Item B2&lt;/td&gt;
+      &lt;td&gt;(this is B3)&lt;/td&gt;
+   &lt;/tr&gt;
+   &lt;tr&gt;
+      &lt;td&gt;Item C1&lt;/td&gt;
+      &lt;td&gt;-C2-&lt;/td&gt;
+      &lt;td&gt;*C3*&lt;/td&gt;
+   &lt;/tr&gt;
+   &lt;tr&gt;
+      &lt;td&gt;Item number D1&lt;/td&gt;
+      &lt;td&gt;Item D2&lt;/td&gt;
+      &lt;td&gt;Item D3&lt;/td&gt;
+   &lt;/tr&gt;
+&lt;/table&gt;
+</pre></TD></TABLE><P><HR><P>
+
+
+
+
+
+
+
+<a name="ExSrc3"></a>
+<TABLE cellpadding=10><TR><TH>
+<a href="#Ex3">
+	Example 3: with cellpadding
+	</a><p>
+<table cellpadding=5>
+	<tr>
+		<td>Item A1</td>
+		<td>Item A2</td>
+		<td>Item A3</td>
+		</tr>
+	<tr>
+		<td>Item B1</td>
+		<td>Item B2</td>
+		<td>(this is B3)</td>
+		</tr>
+	<tr>
+		<td>Item C1</td>
+		<td>-C2-</td>
+		<td>*C3*</td>
+		</tr>
+	<tr>
+		<td>Item number D1</td>
+		<td>Item D2</td>
+		<td>Item D3</td>
+		</tr>
+</table>
+</TH><TH>
+|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>
+</TH><TD><pre>
+&lt;table <b>cellpadding=5</b>&gt;
+   &lt;tr&gt;
+      &lt;td&gt;Item A1&lt;/td&gt;
+      &lt;td&gt;Item A2&lt;/td&gt;
+      &lt;td&gt;Item A3&lt;/td&gt;
+   &lt;/tr&gt;
+   &lt;tr&gt;
+      &lt;td&gt;Item B1&lt;/td&gt;
+      &lt;td&gt;Item B2&lt;/td&gt;
+      &lt;td&gt;(this is B3)&lt;/td&gt;
+   &lt;/tr&gt;
+   &lt;tr&gt;
+      &lt;td&gt;Item C1&lt;/td&gt;
+      &lt;td&gt;-C2-&lt;/td&gt;
+      &lt;td&gt;*C3*&lt;/td&gt;
+   &lt;/tr&gt;
+   &lt;tr&gt;
+      &lt;td&gt;Item number D1&lt;/td&gt;
+      &lt;td&gt;Item D2&lt;/td&gt;
+      &lt;td&gt;Item D3&lt;/td&gt;
+   &lt;/tr&gt;
+&lt;/table&gt;
+</pre></TD></TABLE><P><HR><P>
+
+
+
+
+
+
+
+<a name="ExSrc4"></a>
+<TABLE cellpadding=10><TR><TH>
+<a href="#Ex4">
+	Example 4: with border <i>and</i> cellpadding
+	</a><p>
+<table border=3 cellpadding=5>
+	<tr>
+		<td>Item A1</td>
+		<td>Item A2</td>
+		<td>Item A3</td>
+		</tr>
+	<tr>
+		<td>Item B1</td>
+		<td>Item B2</td>
+		<td>(this is B3)</td>
+		</tr>
+	<tr>
+		<td>Item C1</td>
+		<td>-C2-</td>
+		<td>*C3*</td>
+		</tr>
+	<tr>
+		<td>Item number D1</td>
+		<td>Item D2</td>
+		<td>Item D3</td>
+		</tr>
+</table>
+</TH><TH>
+|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>
+</TH><TD><pre>
+&lt;table <b>border=3 cellpadding=5</b>&gt;
+   &lt;tr&gt;
+      &lt;td&gt;Item A1&lt;/td&gt;
+      &lt;td&gt;Item A2&lt;/td&gt;
+      &lt;td&gt;Item A3&lt;/td&gt;
+   &lt;/tr&gt;
+   &lt;tr&gt;
+      &lt;td&gt;Item B1&lt;/td&gt;
+      &lt;td&gt;Item B2&lt;/td&gt;
+      &lt;td&gt;(this is B3)&lt;/td&gt;
+   &lt;/tr&gt;
+   &lt;tr&gt;
+      &lt;td&gt;Item C1&lt;/td&gt;
+      &lt;td&gt;-C2-&lt;/td&gt;
+      &lt;td&gt;*C3*&lt;/td&gt;
+   &lt;/tr&gt;
+   &lt;tr&gt;
+      &lt;td&gt;Item number D1&lt;/td&gt;
+      &lt;td&gt;Item D2&lt;/td&gt;
+      &lt;td&gt;Item D3&lt;/td&gt;
+   &lt;/tr&gt;
+&lt;/table&gt;
+</pre></TD></TABLE><P><HR><P>
+
+
+
+
+
+<a name="ExSrc5"></a>
+<TABLE cellpadding=10><TR><TH>
+<a href="#Ex5">
+	Example 5: with ``header cells''
+	</a><p>
+<table border=3 cellpadding=5>
+	<tr>
+		<th>Item A1</th>
+		<th>Item A2</th>
+		<th>Item A3</th>	</tr>
+	<tr>
+		<td>Item B1</td>
+		<td>Item B2</td>
+		<td>(this is B3)</td>
+		</tr>
+	<tr>
+		<td>Item C1</td>
+		<td>-C2-</td>
+		<td>*C3*</td>
+		</tr>
+	<tr>
+		<td>Item number D1</td>
+		<td>Item D2</td>
+		<td>Item D3</td>
+		</tr>
+</table>
+<p>
+   <table><tr><td align=center>
+   text in &lt;td&gt;``data cells''&lt;/td&gt;
+   is (by<br>default) in plain text, and
+   left-justified;<p>
+   text in &lt;th&gt;``header cells''&lt;/th&gt;
+   is (by<br>default) in <b>boldface</b>, and
+   centered
+   </td></tr></table>
+</TH><TH>
+|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>
+</TH><TD><pre>
+&lt;table border=3 cellpadding=5&gt;
+   &lt;tr&gt;
+      &lt;<b>th</b>&gt;Item A1&lt;<b>/th</b>&gt;
+      &lt;<b>th</b>&gt;Item A2&lt;<b>/th</b>&gt;
+      &lt;<b>th</b>&gt;Item A3&lt;<b>/th</b>&gt;
+   &lt;/tr&gt;
+   &lt;tr&gt;
+      &lt;td&gt;Item B1&lt;/td&gt;
+      &lt;td&gt;Item B2&lt;/td&gt;
+      &lt;td&gt;(this is B3)&lt;/td&gt;
+   &lt;/tr&gt;
+   &lt;tr&gt;
+      &lt;td&gt;Item C1&lt;/td&gt;
+      &lt;td&gt;-C2-&lt;/td&gt;
+      &lt;td&gt;*C3*&lt;/td&gt;
+   &lt;/tr&gt;
+   &lt;tr&gt;
+      &lt;td&gt;Item number D1&lt;/td&gt;
+      &lt;td&gt;Item D2&lt;/td&gt;
+      &lt;td&gt;Item D3&lt;/td&gt;
+   &lt;/tr&gt;
+&lt;/table&gt;
+</pre></TD></TABLE><P><HR><P>
+
+
+
+
+
+<a name="ExSrc6"></a>
+<TABLE cellpadding=10><TR><TH>
+<a href="#Ex6">
+	Example 6: Overriding the defaults<br>
+		for <tt>&lt;td&gt;</tt> and
+		<tt>&lt;th&gt;</tt>
+	</a><p>
+<table border=7 cellpadding=5>
+	<tr>
+		<th align=right>Item A1</th>
+		<th>Item <i>A2</i></th>
+		<th>Item A3</th>
+		</tr>
+	<tr>
+		<td>Item B1</td>
+		<td>Item B2</td>
+		<td>(this is B3)</td>
+		</tr>
+	<tr>
+		<td align=center>Item C1</td>
+		<td>-C2-</td>
+		<td>*C3*</td>
+		</tr>
+	<tr>
+		<td>Item <b>number D1</b></td>
+		<td>Item D2</td>
+		<td align=right>Item D3</td>
+		</tr>
+</table>
+<p>
+   <table><tr><td align=center>
+   Cell style default values can be overridden
+   <br>with the <tt><b>ALIGN=</b></tt> option in
+   the <tt>&lt;td&gt;</tt> and
+   <br><tt>&lt;th&gt;</tt>
+   tags, and by using the usual<br>
+   &lt;b&gt;<b>boldface</b>&lt;/b&gt;
+   and
+   &lt;i&gt;<i>italics</i>&lt;/i&gt; tags.
+   <br>(Note that <tt>border=7</tt> in this example!)
+   </td></tr></table>
+</TH><TH>
+|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>
+</TH><TD><pre>
+&lt;table border=7 cellpadding=5&gt;
+   &lt;tr&gt;
+      &lt;th <b>align=right</b>&gt;Item A1&lt;/th&gt;
+      &lt;th&gt;Item <b>&lt;i&gt;</b>A2<b>&lt;/i&gt;</b>&lt;/th&gt;
+      &lt;th&gt;Item A3&lt;/th&gt;
+   &lt;/tr&gt;
+   &lt;tr&gt;
+      &lt;td&gt;Item B1&lt;/td&gt;
+      &lt;td&gt;Item B2&lt;/td&gt;
+      &lt;td&gt;(this is B3)&lt;/td&gt;
+   &lt;/tr&gt;
+   &lt;tr&gt;
+      &lt;td <b>align=center</b>&gt;Item C1&lt;/td&gt;
+      &lt;td&gt;-C2-&lt;/td&gt;
+      &lt;td&gt;*C3*&lt;/td&gt;
+   &lt;/tr&gt;
+   &lt;tr&gt;
+      &lt;td&gt;Item <b>&lt;b&gt;</b>number D1<b>&lt;/b&gt;</b>&lt;/td&gt;
+      &lt;td&gt;Item D2&lt;/td&gt;
+      &lt;td <b>align=right</b>&gt;Item D3&lt;/td&gt;
+   &lt;/tr&gt;
+</table>
+</pre></TD></TABLE><P><HR><P>
+
+
+
+
+
+
+
+<a name="ExSrc7"></a>
+<TABLE cellpadding=10><TR><TH>
+<a href="#Ex7">
+	Example 7: empty cells
+	</a><p>
+<table border=3 cellpadding=5>
+   <tr>
+      <td> </td>
+      <td>Item A2</td>
+      <td>Item A3</td>
+   </tr>
+   <tr>
+      <td>Item B1</td>
+      <td>Item B2</td>
+      <td> </td>
+   </tr>
+   <tr>
+      <td>Item C1</td>
+      <td>-C2-</td>
+      <td> </td>
+   </tr>
+   <tr>
+      <td>Item number D1</td>
+      <td> </td>
+      <td> &nbsp; </td>
+   </tr>
+</table>
+<p>
+   <table><tr><td align=center>
+   Empty cells don't even get a border<br>
+   -- unless you use the special
+   character<br>
+   <b><tt>&amp;nbsp;</tt></b>
+   (<b>n</b>on<b>b</b>reaking <b>sp</b>ace)
+   <br>as a placeholder in the cell.
+   </td></tr></table>
+</TH><TH>
+|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>
+</TH><TD><pre>
+&lt;table border=3 cellpadding=5&gt;
+   &lt;tr&gt;
+      <b>&lt;td&gt; &lt;/td&gt;</b>
+      &lt;td&gt;Item A2&lt;/td&gt;
+      &lt;td&gt;Item A3&lt;/td&gt;
+   &lt;/tr&gt;
+   &lt;tr&gt;
+      &lt;td&gt;Item B1&lt;/td&gt;
+      &lt;td&gt;Item B2&lt;/td&gt;
+      <b>&lt;td&gt; &lt;/td&gt;</b>
+   &lt;/tr&gt;
+   &lt;tr&gt;
+      &lt;td&gt;Item C1&lt;/td&gt;
+      &lt;td&gt;-C2-&lt;/td&gt;
+      <b>&lt;td&gt; &lt;/td&gt;</b>
+   &lt;/tr&gt;
+   &lt;tr&gt;
+      &lt;td&gt;Item number D1 &lt;/td&gt;
+      <b>&lt;td&gt; &lt;/td&gt;</b>
+      <b>&lt;td&gt; &amp;nbsp; &lt;/td&gt;</b>
+   &lt;/tr&gt;
+&lt;/table&gt;
+</pre></TD></TABLE><P><HR><P>
+
+
+
+
+
+
+
+
+
+<a name="ExSrc8"></a>
+<TABLE cellpadding=10><TR><TH>
+<a href="#Ex8">
+	Example 8: colspan
+	</a><p>
+<table border=3 cellpadding=5>
+   <tr>
+      <td colspan=2>Items A1, A2</td>
+      <td>Item A3</td>
+   </tr>
+   <tr>
+      <td>Item B1</td>
+      <td>Item B2</td>
+      <td>(this is B3)</td>
+   </tr>
+   <tr>
+      <td>Item C1</td>
+      <th colspan=2>Items C2 and C3</th>
+   </tr>
+   <tr>
+      <td colspan=3>The items labelled D1, D2, and D3</td>
+   </tr>
+</table>
+   <P><TABLE><TR><TD ALIGN=CENTER>
+   Using the option <b><tt>colspan=2</tt></b><br>
+   inside a <tt>&lt;td&gt;</tt> or
+   <tt>&lt;th&gt;</tt> tag<br>
+   makes the cell as wide as 2<br>
+   ``normal'' cells.  The value of
+   <br><b><tt>colspan</tt></b>
+   can be any number<br>
+   up to the full number of<br>
+   columns in the table.
+   </TD></TR></TABLE>
+</TH><TH>
+|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>
+</TH><TD><pre>
+&lt;table border=3 cellpadding=5&gt;
+   &lt;tr&gt;
+      &lt;td <b>colspan=2</b>&gt;Items A1, A2&lt;/td&gt;
+      &lt;td&gt;Item A3&lt;/td&gt;
+   &lt;/tr&gt;
+   &lt;tr&gt;
+      &lt;td&gt;Item B1&lt;/td&gt;
+      &lt;td&gt;Item B2&lt;/td&gt;
+      &lt;td&gt;(this is B3)&lt;/td&gt;
+   &lt;/tr&gt;
+   &lt;tr&gt;
+      &lt;td&gt;Item C1&lt;/td&gt;
+      &lt;th <b>colspan=2</b>&gt;Items C2 and C3&lt;/th&gt;
+   &lt;/tr&gt;
+   &lt;tr&gt;
+      &lt;td <b>colspan=3</b>&gt;The items labelled
+		D1, D2, and D3&lt;/td&gt;
+   &lt;/tr&gt;
+&lt;/table&gt;
+</pre></TD></TABLE><P><HR><P>
+
+
+
+
+
+
+
+
+
+<a name="ExSrc9"></a>
+<TABLE cellpadding=10><TR><TH>
+<a href="#Ex9">
+	Example 9: rowspan
+	</a><p>
+<table border=3 cellpadding=5>
+   <tr>
+      <td>Item A1</td>
+      <td>Item A2</td>
+      <th rowspan=3>Items A3,
+		<br>B3,<br>C3 </th>
+   </tr>
+   <tr>
+      <td>Item B1</td>
+      <td>Item B2</td>
+   </tr>
+   <tr>
+      <td rowspan=2>Items C1 and D1</td>
+      <td>-C2-</td>
+   </tr>
+   <tr>
+      <td>Item D2</td>
+      <td>Item D3</td>
+   </tr>
+</table>
+   <P><TABLE><TR><TD ALIGN=CENTER>
+   Using the option <b><tt>rowspan=2</tt></b><br>
+   inside a <tt>&lt;td&gt;</tt> or
+   <tt>&lt;th&gt;</tt> tag<br>
+   makes the cell as tall as 2<br>
+   ``normal'' cells.  The value of
+   <br><b><tt>rowspan</tt></b>
+   can be any number<br>
+   up to the full number of<br>
+   rows in the table.
+   </TD></TR></TABLE>
+</TH><TH>
+|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>
+</TH><TD><pre>
+&lt;table border=3 cellpadding=5&gt;
+   &lt;tr&gt;
+      &lt;td&gt;Item A1&lt;/td&gt;
+      &lt;td&gt;Item A2&lt;/td&gt;
+      &lt;th <b>rowspan=3</b>&gt;Items A3, &lt;br&gt;
+               B3, &lt;br&gt; C3 &lt;/th&gt;
+   &lt;/tr&gt;
+   &lt;tr&gt;
+      &lt;td&gt;Item B1&lt;/td&gt;
+      &lt;td&gt;Item B2&lt;/td&gt;
+   &lt;/tr&gt;
+   &lt;tr&gt;
+      &lt;td <b>rowspan=2</b>&gt;Items C1 and D1&lt;/td&gt;
+      &lt;td&gt;-C2-&lt;/td&gt;
+   &lt;/tr&gt;
+   &lt;tr&gt;
+      &lt;td&gt;Item D2&lt;/td&gt;
+      &lt;td&gt;Item D3&lt;/td&gt;
+   &lt;/tr&gt;
+&lt;/table&gt;
+</pre></TD></TABLE><P><HR><P>
+
+
+
+
+
+
+
+
+
+<a name="ExSrc10"></a>
+<TABLE cellpadding=10><TR><TH>
+<a href="#Ex10">
+	Example 10: colspan <i>and</i> rowspan
+	</a><p>
+<table border=3 cellpadding=5>
+   <tr>
+      <td rowspan=2>Items A1,<br>B1</td>
+      <td colspan=2>Items A2, A3</td>
+   </tr>
+   <tr>
+      <th colspan=2>Items B2, B3</th>
+   </tr>
+   <tr>
+      <th>Item C1</th>
+      <td rowspan=2> C2,D2 </td>
+      <td>*C3*</td>
+   </tr>
+   <tr>
+      <td>Item number D1</td>
+      <td>Item D3</td>
+   </tr>
+</table>
+   <P><TABLE><TR><TD ALIGN=CENTER>
+   You can mix 
+   <b><tt>colspan</tt></b> and
+   <b><tt>rowspan</tt></b>
+   <br>in the same table,
+   but be careful to<br>
+   eliminate ``redundant'' cells.
+   </TD></TR></TABLE>
+</TH><TH>
+|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>
+</TH><TD><pre>
+&lt;table border=3 cellpadding=5&gt;
+   &lt;tr&gt;
+      &lt;td <b>rowspan=2</b>&gt;Items A1,&lt;br&gt;B1&lt;/td&gt;
+      &lt;td <b>colspan=2</b>&gt;Items A2, A3&lt;/td&gt;
+   &lt;/tr&gt;
+   &lt;tr&gt;
+      &lt;th <b>colspan=2</b>&gt;Items B2, B3&lt;/th&gt;
+   &lt;/tr&gt;
+   &lt;tr&gt;
+      &lt;th&gt;Item C1&lt;/th&gt;
+      &lt;td <b>rowspan=2</b>&gt; C2,D2 &lt;/td&gt;
+      &lt;td&gt;*C3*&lt;/td&gt;
+   &lt;/tr&gt;
+   &lt;tr&gt;
+      &lt;td&gt;Item number D1&lt;/td&gt;
+      &lt;td&gt;Item D3&lt;/td&gt;
+   &lt;/tr&gt;
+&lt;/table&gt;
+</pre></TD></TABLE><P><HR><P>
+
+
+
+
+
+
+
+
+
+<a name="ExSrc11"></a>
+<TABLE cellpadding=10><TR><TH>
+<a href="#Ex11">
+	Example 11: tables within a table
+	</a><p>
+<table border=3 cellpadding=5>
+   <tr>
+      <td><table border>
+        <tr> <td>A1a1</td>
+        <td>A1a2</td> </tr>
+        <tr> <td>A1b1</td>
+        <td>A1b2</td> </tr>
+        </table></td>
+      <td>A2</td>
+      <td>A3</td>
+   </tr>
+   <tr>
+      <td>B1</td>
+      <td>B2</td>
+      <td>B3</td>
+   </tr>
+   <tr>
+      <td>C1</td>
+      <td><table cellpadding=4>
+        <tr> <td>A1a1</td>
+        <td>A1a2</td> </tr>
+        <tr> <td>A1b1</td>
+        <td>A1b2</td> </tr>
+        </table></td>
+      <td>C3</td>
+   </tr>
+</table><p>&nbsp;
+   <P><TABLE><TR><TD ALIGN=CENTER>
+   The contents of a cell<br>
+   may be another table.
+   </TD></TR></TABLE>
+</TH><TH>
+|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>
+</TH><TD><pre>
+&lt;table border=3 cellpadding=5&gt;
+   &lt;tr&gt;
+      &lt;td&gt;<b>&lt;table border&gt;
+        &lt;tr&gt; &lt;td&gt;A1a1&lt;/td&gt;
+        &lt;td&gt;A1a2&lt;/td&gt; &lt;/tr&gt;
+        &lt;tr&gt; &lt;td&gt;A1b1&lt;/td&gt;
+        &lt;td&gt;A1b2&lt;/td&gt; &lt;/tr&gt;
+        &lt;/table&gt;</b>&lt;/td&gt;
+      &lt;td&gt;A2&lt;/td&gt;
+      &lt;td&gt;A3&lt;/td&gt;
+   &lt;/tr&gt;
+   &lt;tr&gt;
+      &lt;td&gt;B1&lt;/td&gt;
+      &lt;td&gt;B2&lt;/td&gt;
+      &lt;td&gt;B3&lt;/td&gt;
+   &lt;/tr&gt;
+   &lt;tr&gt;
+      &lt;td&gt;C1&lt;/td&gt;
+      &lt;td&gt;<b>&lt;table cellpadding=4&gt;
+        &lt;tr&gt; &lt;td&gt;A1a1&lt;/td&gt;
+        &lt;td&gt;A1a2&lt;/td&gt; &lt;/tr&gt;
+        &lt;tr&gt; &lt;td&gt;A1b1&lt;/td&gt;
+        &lt;td&gt;A1b2&lt;/td&gt; &lt;/tr&gt;
+        &lt;/table&gt;</b>&lt;/td&gt;
+      &lt;td&gt;C3&lt;/td&gt;
+   &lt;/tr&gt;
+&lt;/table&gt;
+</pre></TD></TABLE><P><HR><P>
+
+
+
+
+
+
+
+
+
+<a name="ExSrc12"></a>
+<TABLE cellpadding=10><TR><TH>
+<a href="#Ex12">
+	Example 12: <tt>&lt;pre&gt;preformatting&lt;/pre&gt;</tt>
+	</a><p>
+<p><table><tr><td><pre>
+
+ $ 10.98  $305.20  $ 29.95  $ 3.16
+   11.05   291.80    39.95    0.87
+   12.77   290.10    19.95    0.23
+   23.51   301.40     9.95    0.79
+    7.39   306.90    99.95    1.50
+   20.16   295.30    79.95    0.90
+</pre></td></tr></table>
+   <P><TABLE><TR><TD ALIGN=CENTER>
+   Of course, one need not use the
+   <tt>&lt;table&gt;</tt> tag<br>
+   at all if the the plain text is already<br>
+   properly aligned, using a fixed-width font;<br>
+   enclose the preformatted text in<br>
+   <tt>&lt;pre&gt;</tt>
+   and <tt>&lt;/pre&gt;</tt>
+   tags.
+   </TD></TR></TABLE>
+</TH><TH>
+|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>
+</TH><TD><pre>
+<b>&lt;pre&gt;</b>
+ $ 10.98  $305.20  $ 29.95  $ 3.16
+   11.05   291.80    39.95    0.87
+   12.77   290.10    19.95    0.23
+   23.51   301.40     9.95    0.79
+    7.39   306.90    99.95    1.50
+   20.16   295.30    79.95    0.90
+<b>&lt;/pre&gt;</b>
+</pre></TD></TABLE>
+
+<P><HR><P>
+
+
+<a name="ExSrc13"></a>
+<TABLE width=100% cellpadding=10><TR>
+<TH WIDTH=75%>
+<a href="#Ex13">
+	Example 13: the WIDTH attribute
+	</a><p>
+
+<table width=100% border=3 cellpadding=2>
+<tr>
+  <th width=50%>50%</th>
+  <th width=35%>35%</th>
+  <th> XXX </th>
+</tr>
+<tr>
+  <td>A</td>
+  <td>B</td>
+  <td>C</td>
+</tr>
+<tr>
+  <td>D</td>
+  <th><i>E</i></th>
+  <td>F</td>
+</tr>
+</table>
+
+<p> &nbsp;
+<p><tt>&lt;Table Width=75%&gt;</tt> specifies a table 75% of the
+	full width of the Netscape window.
+<p><tt>&lt;TH Width=50%&gt;</tt> (or <tt>TD</tt>) specifies that
+	the cell be 50% of the full table width.
+</TH>
+
+<TH>
+|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>|<br>
+</TH>
+
+<TD><pre>
+&lt;table <b>width=75%</b>
+  border=3
+  cellpadding=2&gt;
+&lt;tr&gt;
+ &lt;TH <b>WIDTH=50%</b>&gt;
+	50%&lt;/TH&gt;
+ &lt;TH <b>WIDTH=35%</b>&gt;
+	35%&lt;/TH&gt;
+ &lt;TH&gt; XXX &lt;/TH&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+  &lt;td&gt;A&lt;/td&gt;
+  &lt;td&gt;B&lt;/td&gt;
+  &lt;td&gt;C&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+  &lt;td&gt;D&lt;/td&gt;
+  &lt;th&gt;&lt;i&gt;E&lt;/i&gt;&lt;/th&gt;
+  &lt;td&gt;F&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+</pre>
+</TD></TR></TABLE>
+
+<P>
+<hr size=9 noshade>
+<P>
+
+<h4>prepared by Bruce.Fast@Colorado.EDU</h4>

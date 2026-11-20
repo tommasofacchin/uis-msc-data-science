@@ -1,0 +1,113 @@
+\newpage
+\section{Exam tricks and last-minute checklist}\label{sec:tricks}
+
+\subsection{Patterns in the answer keys}
+These counts come from 23H (answer key), 25H (solutions), and 22H resit plus the 2022 sample (where the answer can be worked out from the code).
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.27\linewidth}>{\raggedright\arraybackslash}p{0.3\linewidth}>{\raggedright\arraybackslash}p{0.36\linewidth}}
+\toprule
+Option & How often it was correct & What to do \\ \midrule
+\textbf{``All of the options''} & very often: about 9 of the 11 times it appeared & If two snippets are clearly correct, choose ``All''. \textbf{Exception:} if the question asks which one is \textbf{NOT} valid, ``All'' is a trap. \\
+\textbf{Combinations} (``1\&3'', ``A and B'') & very often (25H Q4, Q9, Q16, Q34) & Test \textbf{each} snippet on its own, then pick the matching combination. \\
+\textbf{``None of the options''} & rarely: 0 times in 23H, about 3 times in 22H & Usually correct only when the code is \textbf{broken}: a typo in a column name, a non-existent function, or a wrong call like \code{np.array([..],[..],[..])}. \\
+\textbf{``Error'' / ``Raises\dots''} & when there is a real bug & Missing dict key $\to$ KeyError; \code{tuple[0]=x} $\to$ TypeError; local variable used outside its function $\to$ NameError; \code{int(\textquotesingle{}12.e2\textquotesingle{})} $\to$ ValueError. \\ \bottomrule
+\end{longtable}
+
+\subsection{Distractors that are almost right}
+\begin{itemize}
+  \item \textbf{Brackets and dimensions:} \code{[20, 90]} vs \code{[[20, 90]]}, and \code{[67 58]} vs \code{[[67 58]]}. Two index lists give a 1D result; boolean row selection keeps 2D.
+  \item \textbf{Small details in the output:} two \code{DatetimeIndex} options may differ only by \code{freq=\textquotesingle{}D\textquotesingle{}}. The correct one has it.
+  \item \textbf{Fake methods:}
+  \begin{itemize}
+    \item lists: \code{list.push()};
+    \item DataFrames: \code{df.sort()}, \code{df.top()}, \code{df.read()}, \code{df.save\_pickle()}, \code{df.to\_binary()};
+    \item pandas functions: \code{pd.load\_json()}, \code{pd.json\_to\_df()};
+    \item invalid calls: \code{shift(window=3)}, \code{resample(\textquotesingle{}monthly\textquotesingle{}).average()}, \code{open(...,\textquotesingle{}rw\textquotesingle{})}, \code{arr.transform(...)}, \code{s.applymap}.
+  \end{itemize}
+  \item \textbf{Same function, different parameter:}
+  \begin{itemize}
+    \item \code{sort\_index()} vs \code{sort\_index(axis=1)};
+    \item \code{shift(-{}2)} vs \code{shift(-{}2, freq=\textquotesingle{}H\textquotesingle{})};
+    \item \code{groupby([\textquotesingle{}A\textquotesingle{},\textquotesingle{}B\textquotesingle{}])} vs \code{groupby([\textquotesingle{}B\textquotesingle{},\textquotesingle{}A\textquotesingle{}])};
+    \item \code{cut} vs \code{qcut};
+    \item \code{keep=\textquotesingle{}first\textquotesingle{}} vs \code{keep=\textquotesingle{}last\textquotesingle{}};
+    \item \code{how=\textquotesingle{}left\textquotesingle{}} vs \code{\textquotesingle{}outer\textquotesingle{}};
+    \item \code{axis=0} vs \code{axis=1};
+    \item \code{.sum()} vs \code{.mean()}.
+  \end{itemize}
+  \item \textbf{Counting characters:} upper and lower case are different keys, and spaces count too.
+  \item \textbf{Not reassigned:} \code{arr.reshape(...)}, \code{np.sort(arr)}, \code{df.drop(...)} and \code{s.str.upper()} leave the original unchanged unless you reassign the result (or use \code{inplace=True} / the in-place method).
+\end{itemize}
+
+\subsection{When two answers both seem right, pick the ``standard'' one}
+\begin{itemize}
+  \item Monthly mean $\to$ \code{df.resample(\textquotesingle{}M\textquotesingle{}).mean()}.
+  \item Binary output layer $\to$ 1 neuron with sigmoid. Input neurons = number of numeric features.
+  \item Reading a file $\to$ \code{with open(\textquotedbl{}f\textquotedbl{}, \textquotedbl{}r\textquotedbl{}) as f: content = f.read()}.
+  \item Palindrome $\to$ \code{s == s[::-{}1]}.
+  \item Loading only a few rows $\to$ \code{pd.read\_csv(..., nrows=5)}.
+\end{itemize}
+
+\subsection{Method for code questions}
+\begin{enumerate}
+  \item Write down each variable's value \textbf{line by line}. Never guess the output.
+  \item \textbf{NumPy:} sketch the matrix. \code{axis=0} gives one result per column, \code{axis=1} one result per row. Read shapes from the brackets.
+  \item \textbf{try/except:} with no exception, \code{else} runs. \code{finally} \textbf{always} runs.
+  \item \textbf{Scope:} \code{global} means the module-level variable. A tuple reassigned inside a function does not change outside it; a list or dict modified inside does.
+  \item \textbf{Slicing:} apply chained \code{[ ][ ][::2]} one at a time, left to right. The stop index is excluded (except in \code{loc}).
+  \item \textbf{Merge:} write down the keys of each table, then keep the keys that \code{how=} says to keep.
+\end{enumerate}
+
+\subsection{Time management}
+\begin{itemize}
+  \item 3 hours for 40 questions is about \textbf{4 minutes per question}.
+  \item First do all the theory questions, which take about 30 seconds each. Then do the code-tracing questions.
+  \item A blank answer scores 0, the same as a wrong one, so \textbf{never leave an answer blank}.
+\end{itemize}
+
+\subsection{One-page quick reference}
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.47\linewidth}>{\raggedright\arraybackslash}p{0.47\linewidth}}
+\toprule
+Question & Answer \\ \midrule
+Immutable data structure & tuple \\
+\code{set(\textquotedbl{}zzyxx\textquotedbl{})} & \code{\{\textquotesingle{}x\textquotesingle{},\textquotesingle{}y\textquotesingle{},\textquotesingle{}z\textquotesingle{}\}} \\
+\code{d[\textquotesingle{}missing\textquotesingle{}]} & KeyError \\
+\code{zip} with lists of different lengths & stops at the shortest \\
+\code{list1.extend(list2)} vs \code{append} & extend adds the elements one by one; append adds one nested list \\
+\code{list(range(5,-{}1))} & \code{[]} \\
+Round to 3 decimals & \code{f\textquotedbl{}\{x:.3f\}\textquotedbl{}} and \code{\textquotedbl{}\{:.3f\}\textquotedbl{}.format(x)} \\
+\code{np.identity(n)} & ones on the diagonal, zeros elsewhere \\
+\code{A.size} of a 2$\times$3 array & 6 \\
+\code{arr[[0,2],[1,2]]} & elements (0,1) and (2,2), 1D \\
+\code{arr[[True,False,True]]} & rows 0 and 2 \\
+\code{arr.sum(axis=1)} & sum of each row \\
+(2,3) + (3,) & added to every row \\
+\code{transpose(2,0,1)} on (5,2,4) & (4,5,2) \\
+Dot product & \code{a.dot(b)}, \code{a@b}, \code{np.dot(a,b)}: all \\
+Sort rows by index labels & \code{df.sort\_index()} \\
+All rows of the left df, NaN if no match & \code{how=\textquotesingle{}left\textquotesingle{}} \\
+\code{df.mean()} equivalent & \code{df.apply(np.mean)} \\
+Two-level group result & \code{groupby([\textquotesingle{}Region\textquotesingle{},\textquotesingle{}Team\textquotesingle{}]).sum()} \\
+\code{groupby(lambda x: ...)} & groups by the index \\
+\code{header=None} & the file has no header row \\
+\code{drop\_duplicates(keep=\textquotesingle{}first\textquotesingle{})} & keeps the first occurrence \\
+Map categories to numbers & map / replace / apply: all \\
+Equal-count bins / equal-width bins & \code{qcut} / \code{cut} \\
+\code{get\_dummies} & one-hot encoding \\
+JSON $\to$ pandas / save as pickle & \code{pd.read\_json} / \code{df.to\_pickle} \\
+\code{date\_range(..., periods=5, freq=\textquotesingle{}D\textquotesingle{})} & 5 consecutive days, with \code{freq=\textquotesingle{}D\textquotesingle{}} in the output \\
+Values backward / forward by 2 & \code{shift(-{}2)} / \code{shift(2)} \\
+\code{rolling(3).mean()} & moving average that smooths fluctuations \\
+Convert between time zones & \code{tz\_convert()} \\
+\code{add\_subplot(2,2,i)} & 2$\times$2 grid \\
+Distribution of one variable & histogram \\
+Spread of a value per category & boxplot \\
+\code{add\_patch} & shapes (rectangle, circle) \\
+Unsupervised example & clustering customers \\
+Overfitting & low training error, high test error \\
+High bias & poor on train and test; low variance \\
+L2 / Ridge & penalizes large weights \\
+Hidden-layer activations & Sigmoid, ReLU, tanh \\
+Backpropagation & gradient of the loss, then update the weights \\
+\code{.fit()} & trains the model \\
+Train-test split & separates the data for training and testing \\ \bottomrule
+\end{longtable}
